@@ -72,83 +72,45 @@ public class CheckViolations {
         boolean neueHeuristic = true;
         this.chopper = chopper2;
         LinkedList<SecurityNode> list = vp.getPathList();
-        /**
-         * source node of the alarm
-         */
         SDGNode source = list.get(0);
-        /**
-         * sink node of the alarm
-         */
         SDGNode sink = list.get(1);
-        System.out.println("Checking violation");
-        System.out.println("Source: " + source);
-        System.out.println("Sink: " + sink);
-        /**
-         * get collection of nodes involved in illegal flow
-         */
+        //get collection of nodes involved in illegal flow
         Collection<SDGNode> c = chopper.chop(source, sink);
         if (c.isEmpty()) {
             return true;
         }
-        /**
-         * get edges involved in flow
-         */
-        // TODO
+        //get edges involved in the flow
         SDG flowSDG = sdg.subgraph(c);
-
         SDGSerializer
                 .toPDGFormat(flowSDG, new FileOutputStream("subgraph.pdg"));
-
         List<EdgeMetric> summaryEdges;
         List<SDGEdge> checkedEdges = new ArrayList<SDGEdge>();
-
         boolean change = true;
         while (change) {
             change = false;
-            /**
-             * get summary edges including metric for method selection strategy
-             */
-            // Heuristik
             summaryEdges = getSummaryEdges(flowSDG, source, sink, checkedEdges,
                     sdg, neueHeuristic);
-            System.out.println("Summary Edges ready");
-
             for (EdgeMetric em : summaryEdges) {
-                /**
-                 * checking of a summary edge with the help of KeY begins here
-                 */
                 SDGEdge e = em.e;
-                System.out.println("SummaryEdge: " + e.getSource() + ", "
-                        + e.getTarget());
                 SDGNode v = e.getSource();
                 SDGNode w = e.getTarget();
                 boolean removable = true;
-                /**
-                 * check all possible method invocations; needed in case of
-                 * dynamic dispatch
-                 */
+
+//              check all possible method invocations; needed in case of
+//              dynamic dispatch
                 Collection<SDGNodeTuple> callPairs = sdg
                         .getAllFormalPairs(v, w);
                 for (SDGNodeTuple t : callPairs) {
-                    /**
-                     * get source and sink node in the callee that induce the
-                     * summary edge
-                     */
+                    //get source and sink node in the callee that induce the
+                    //summary edge
                     SDGNode p = t.getFirstNode();
                     SDGNode r = t.getSecondNode();
-                    System.out.println("Summary edge from: "
-                            + p.getBytecodeName() + " to "
-                            + r.getBytecodeName());
-                    /**
-                     * skip methods that are already secure
-                     */
+                    // skip methods that are already secure
                     if (chopper.chop(p, r).isEmpty()) {
                         continue;
                     }
                     SDGNode callee = sdg.getEntry(p);
-                    /**
-                     * generate spec for KeY
-                     */
+                    //generate spec for KeY
                     String descSink = descSink(r, sdg);
                     String descOtherParams = descOtherParams(p, sdg);
                     String a1 = callee.getBytecodeMethod();
@@ -637,7 +599,7 @@ public class CheckViolations {
             /**
              * get the high and low variables, should normally be done by graph
              * analysis
-			 *
+             *
              */
             boolean all = true;
             if (all) {
