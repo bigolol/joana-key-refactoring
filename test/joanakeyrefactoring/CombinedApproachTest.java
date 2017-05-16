@@ -8,8 +8,10 @@ package joanakeyrefactoring;
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.api.sdg.SDGProgram;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
+import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,18 +45,17 @@ public class CombinedApproachTest {
      * Test of main method, of class CombinedApproach.
      */
     @Test
-    public void testWithParsedGraph() throws Exception {
-        String pathKeY = "dep/KeY.jar";
-        String javaClass = "";
-        String pathToJavaFile = "JZipWithException/jzip";
-        JavaMethodSignature entryMethod = JavaMethodSignature.mainMethodOfClass("jzip/JZip");
-        StateSaver state = new StateSaver();
-
-        IFCAnalysis analysis = new IFCAnalysis(SDGProgram.loadSDG("testdata/JZip.pdg"));
-        CombinedApproach.addJzip2Annotations(analysis);
+    public void testJzipFromFile() throws Exception {
         
-        
+    }
+    
+    @Test
+    public void testParseFile() throws IOException {
+        JoanaAndKeyCheckData parsedData = CombinedApproach.parseInputFile("testdata/jzip.joak");
+        Assert.assertEquals("programPart, jzip.JZip.CONFIGURATION, high", parsedData.getAnnotationsSource().get(0));
+        Assert.assertEquals("programPart, jzip.MyFileOutputStream.content, low", parsedData.getAnnotationsSink().get(0));
 
+        CombinedApproach.parseSecLevel(parsedData.getAnnotationsSource().get(0));
     }
 
 }

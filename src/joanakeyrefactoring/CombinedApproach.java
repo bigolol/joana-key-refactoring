@@ -56,11 +56,17 @@ public class CombinedApproach {
      * compiled with sufficient debug information.
      */
     public static void main(String[] args) {
+        try {
+            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/jzip.joak");
+            CombinedApproach.runTestFromCheckData(parsedCheckData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void runTestFromCheckData(JoanaAndKeyCheckData checkData)
             throws ClassHierarchyException, IOException, UnsoundGraphException,
-            CancelException, CouldntAddAnnoException {
+            CancelException, CouldntAddAnnoException, CancelException {
         String classpathJavaM = null;
         StateSaver stateSaver = new StateSaver();
         AutomationHelper automationHelper = new AutomationHelper(checkData.getPathToJavaFile());
@@ -72,7 +78,10 @@ public class CombinedApproach {
                 = new ViolationsViaKeyChecker(
                         automationHelper, checkData, stateSaver, javaForKeyListener);
 
-        IFCAnalysis analysis = runJoanaCreateSDGAndIFCAnalyis(classpathJavaM, checkData.getEntryMethod(), stateSaver);
+        IFCAnalysis analysis = runJoanaCreateSDGAndIFCAnalyis(
+                checkData.getPathToJar(),
+                checkData.getEntryMethod(),
+                stateSaver);
         checkData.addAnnotations(analysis);
         checkAnnotatedPDGWithJoanaAndKey(analysis, violationsViaKeyChecker);
     }
@@ -136,12 +145,12 @@ public class CombinedApproach {
 
         if (annotationsSink.size() > 0) {
             for (int i = 0; i < annotationsSink.size(); i++) {
-                parseSinkAnnotation(annotationsSink[i], ana, program);
+                parseSinkAnnotation(annotationsSink.get(i), ana, program);
             }
         }
         if (annotationsSource.size() > 0) {
             for (int i = 0; i < annotationsSource.size(); i++) {
-                parseSourceAnnotation(annotationsSource[i], ana, program);
+                parseSourceAnnotation(annotationsSource.get(i), ana, program);
             }
         } else {
             FileInputStream annotationSourceStream = new FileInputStream(annotationPath);
@@ -185,7 +194,7 @@ public class CombinedApproach {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
         String line = br.readLine();
         String pathKeY = null;
-        String classPath = null;
+        String pathToJar = null;
         String pathToJavaFile = null;
         String entryMethodString = null;
         String annotationPath = null;
@@ -200,9 +209,8 @@ public class CombinedApproach {
             if ((line.contains("pathKeY"))) {
                 pathKeY = line.split("=")[1].trim();
             }
-            if ((line.contains("classPath"))) {
-                classPath = line.split("=")[1].trim();
-                System.out.println(classPath);
+            if ((line.contains("pathToJar"))) {
+                pathToJar = line.split("=")[1].trim();
             }
             if ((line.contains("pathToJavaFile"))) {
                 pathToJavaFile = line.split("=")[1].trim();
@@ -231,7 +239,7 @@ public class CombinedApproach {
         br.close();
         return new JoanaAndKeyCheckData(
                 annotationsSink, annotationsSource,
-                pathKeY, classPath,
+                pathKeY, pathToJar,
                 pathToJavaFile, entryMethodString,
                 annotationPath, entryMethod, fullyAutomatic,
                 (analysis, checkData) -> {
@@ -247,10 +255,11 @@ public class CombinedApproach {
                 });
     }
 
-    private static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String classPath,
+    private static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String pathToJar,
             JavaMethodSignature entryMethod, StateSaver stateSaver) throws ClassHierarchyException,
             IOException, UnsoundGraphException, CancelException {
-        SDGConfig config = new SDGConfig(classPath, entryMethod.toBCString(),
+        SDGConfig config = new SDGConfig(
+                pathToJar, entryMethod.toBCString(),
                 Stubs.JRE_14);
         config.setComputeInterferences(true);
         config.setMhpType(MHPType.PRECISE);
@@ -271,7 +280,7 @@ public class CombinedApproach {
         return ana;
     }
 
-    private static String parseSecLevel(String annotationString) {
+    public static String parseSecLevel(String annotationString) {
         //format: from part, jzip.MyFileOutputStream.content, low
         String secLevelStr = annotationString.split(",")[2].trim();
         if (secLevelStr.equals("high")) {
@@ -280,11 +289,11 @@ public class CombinedApproach {
         return BuiltinLattices.STD_SECLEVEL_LOW;
     }
 
-    private static String parseAnnoKind(String annotationString) {
+    public static String parseAnnoKind(String annotationString) {
         return annotationString.split(",")[0].trim();
     }
 
-    private static String parseAnnoDesc(String annotationString) {
+    public static String parseAnnoDesc(String annotationString) {
         return annotationString.split(",")[1].trim();
     }
 }

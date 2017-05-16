@@ -20,7 +20,7 @@ public class JoanaAndKeyCheckData {
     private List<String> annotationsSink;
     private List<String> annotationsSource;
     private String pathKeY;
-    private String classPath;
+    private String pathToJar;
     private String pathToJavaFile;
     private String entryMethodString;
     private String annotationPath;
@@ -28,11 +28,11 @@ public class JoanaAndKeyCheckData {
     private boolean fullyAutomatic;
     private AnnotationAdder annoAdder;
 
-    public JoanaAndKeyCheckData(List<String> annotationsSink, List<String> annotationsSource, String pathKeY, String classPath, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, AnnotationAdder annoAdder) {
+    public JoanaAndKeyCheckData(List<String> annotationsSink, List<String> annotationsSource, String pathKeY, String pathToJar, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, AnnotationAdder annoAdder) {
         this.annotationsSink = annotationsSink;
         this.annotationsSource = annotationsSource;
         this.pathKeY = pathKeY;
-        this.classPath = classPath;
+        this.pathToJar = pathToJar;
         this.pathToJavaFile = pathToJavaFile;
         this.entryMethodString = entryMethodString;
         this.annotationPath = annotationPath;
@@ -61,8 +61,8 @@ public class JoanaAndKeyCheckData {
         return pathKeY;
     }
 
-    public String getClassPath() {
-        return classPath;
+    public String getPathToJar() {
+        return pathToJar;
     }
 
     public String getPathToJavaFile() {

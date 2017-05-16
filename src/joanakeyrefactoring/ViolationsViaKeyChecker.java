@@ -54,7 +54,7 @@ public class ViolationsViaKeyChecker {
             ParseJavaForKeyListener javaForKeyListener) {
         this.ml = javaForKeyListener;
         this.auto = automationHelper;
-        this.javaClass = checkData.getClassPath();
+        this.javaClass = checkData.getPathToJar();
         this.state = stateSaver;
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathKeY = checkData.getPathKeY();
