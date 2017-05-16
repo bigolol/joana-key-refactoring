@@ -35,6 +35,7 @@ import edu.kit.joana.util.Stubs;
 import edu.kit.joana.wala.core.SDGBuilder.ExceptionAnalysis;
 import edu.kit.joana.wala.core.SDGBuilder.FieldPropagation;
 import edu.kit.joana.wala.core.SDGBuilder.PointsToPrecision;
+import java.io.FileNotFoundException;
 
 public class CombinedApproach {
 
@@ -50,7 +51,7 @@ public class CombinedApproach {
     public static SDG sdg;
     public static String pathKeY;
     public static String classPath;
-    public static String classpathJava;
+    public static String pathToJavaFile;
     public static JavaMethodSignature entryMethod;
     public static String entryMethodString;
     public static ArrayList<String> annotationsSink;
@@ -70,20 +71,25 @@ public class CombinedApproach {
      */
     public static void main(String[] args) throws ClassHierarchyException,
             IOException, UnsoundGraphException, CancelException {
+        checkJZip();
+    }
+
+    public static void checkJZip() throws ClassHierarchyException, IOException, UnsoundGraphException, CancelException {
         boolean fullyAutomatic = true;
         boolean filebased = false;
         pathKeY = "dep/KeY.jar";
+
         javaClass = "";
         classPath = "JZipWithException.jar";
-        classpathJava = "JZipWithException/jzip";
+        pathToJavaFile = "JZipWithException/jzip";
         entryMethod = JavaMethodSignature.mainMethodOfClass("jzip/JZip");
-        
+
         System.out.println("path " + System.getProperty("user.dir"));
-        
+
         annotationsSink = new ArrayList<String>();
         annotationsSource = new ArrayList<String>();
 
-        Automation auto = new Automation(classpathJava);
+        Automation auto = new Automation(pathToJavaFile);
         String allClasses = auto.summarizeSourceFiles();
         MyListener ml = new MyListener(allClasses);
         CheckViolations cV = new CheckViolations(auto, javaClass, state, fullyAutomatic, pathKeY, ml);
@@ -94,15 +100,16 @@ public class CombinedApproach {
 
         SDG sdg = ana.getProgram().getSDG();
         InputStream source = null;
-        if (filebased) {
-            addAnnotationsFileBased(ana, exAnn, sdg);
-        } else {
-            addJzip2Annotations(ana);
-        }
 
-        chopper = new RepsRosayChopper(ana.getProgram().getSDG());
-        Collection<? extends IViolation<SecurityNode>> violations = ana.doIFC();
+        addJzip2Annotations(ana);
         
+        checkAnnotatedPDGWithJoanaAndKey(ana, cV);
+    }
+
+    public static void checkAnnotatedPDGWithJoanaAndKey(IFCAnalysis annotatedAnalysis, CheckViolations cV) throws FileNotFoundException {
+        chopper = new RepsRosayChopper(annotatedAnalysis.getProgram().getSDG());
+        Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
+
         int numberOfViolations = violations.size();
         int disprovedViolations = 0;
 
@@ -110,7 +117,7 @@ public class CombinedApproach {
             ViolationPath vp = cV.getVP(v);
 
             boolean disproved = cV.checkViolation(vp,
-                    ana.getProgram().getSDG(), chopper);
+                    annotatedAnalysis.getProgram().getSDG(), chopper);
 
             if (disproved) {
                 disprovedViolations++;
@@ -209,7 +216,7 @@ public class CombinedApproach {
                     System.out.println(classPath);
                 }
                 if ((line.contains("classpathJava"))) {
-                    classpathJava = line.split("=")[1].trim();
+                    pathToJavaFile = line.split("=")[1].trim();
                 }
                 if ((line.contains("entryMethod"))) {
                     entryMethodString = line.split("=")[1].trim();
