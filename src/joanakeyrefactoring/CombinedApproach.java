@@ -42,7 +42,6 @@ public class CombinedApproach {
     public static String field = "L\\w*\\.\\w*";
     public static RepsRosayChopper chopper;
     public static I2PBackward slicer;
-    public static StateSaver state = new StateSaver();
     public static SDGProgram program;
     final static String lineSeparator = System.getProperty("line.separator");
     public static String classpathJavaM;
@@ -77,6 +76,7 @@ public class CombinedApproach {
     public static void checkJZip() throws ClassHierarchyException, IOException, UnsoundGraphException, CancelException {
         boolean fullyAutomatic = true;
         boolean filebased = false;
+        StateSaver stateSaver = new StateSaver();
         pathKeY = "dep/KeY.jar";
 
         javaClass = "";
@@ -92,14 +92,10 @@ public class CombinedApproach {
         Automation auto = new Automation(pathToJavaFile);
         String allClasses = auto.summarizeSourceFiles();
         MyListener ml = new MyListener(allClasses);
-        CheckViolations cV = new CheckViolations(auto, javaClass, state, fullyAutomatic, pathKeY, ml);
+        CheckViolations cV = new CheckViolations(auto, javaClass, stateSaver, fullyAutomatic, pathKeY, ml);
         auto.setMyListener(ml);
-        ExtractAnnotations exAnn = new ExtractAnnotations();
 
-        IFCAnalysis ana = runJoanaCreateSDGAndIFCana(classPath, entryMethod);
-
-        SDG sdg = ana.getProgram().getSDG();
-        InputStream source = null;
+        IFCAnalysis ana = runJoanaCreateSDGAndIFCana(classPath, entryMethod, stateSaver);
 
         addJzip2Annotations(ana);
         
@@ -134,7 +130,7 @@ public class CombinedApproach {
         }
     }
 
-    private static void addJzip2Annotations(IFCAnalysis ana) {
+    public static void addJzip2Annotations(IFCAnalysis ana) {
         for (SDGCall call : program
                 .getCallsToMethod(JavaMethodSignature
                         .fromString("java.util.Properties.getProperty(Ljava/lang/String;)Ljava/lang/String;"))) {
@@ -241,7 +237,7 @@ public class CombinedApproach {
     }
 
     private static IFCAnalysis runJoanaCreateSDGAndIFCana(String classPath,
-            JavaMethodSignature entryMethod) throws ClassHierarchyException,
+            JavaMethodSignature entryMethod, StateSaver stateSaver) throws ClassHierarchyException,
             IOException, UnsoundGraphException, CancelException {
         /**
          * some settings
@@ -258,7 +254,7 @@ public class CombinedApproach {
          * save intermediate results of SDG generation (i.e. points-to, call
          * graph)
          */
-        config.setCGConsumer(state);
+        config.setCGConsumer(stateSaver);
         /**
          * Schneidet beim SDG application edges raus, so besser sichtbar mit dem
          * graphviewer
