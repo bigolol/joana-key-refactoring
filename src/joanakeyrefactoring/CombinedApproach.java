@@ -72,11 +72,13 @@ public class CombinedApproach {
             IOException, UnsoundGraphException, CancelException {
         boolean fullyAutomatic = true;
         boolean filebased = false;
-        pathKeY = "/home/holger/Code/hiwi/prototypes/joana-api-prototype-2/keyKeY.jar";
-        javaClass = "";
-        classPath = "/home/holger/Code/hiwi/repo_2/Combined-Approach/JavaZip/JZipWithException.jar";
-        classpathJava = "/home/holger/Code/hiwi/repo_2/Combined-Approach/JavaZip/src/jzip/";
+        pathKeY = "";
+        javaClass = "JZipWithException/jzip";
+        classPath = "JZipWithException.jar";
+        classpathJava = "";
         entryMethod = JavaMethodSignature.mainMethodOfClass("jzip/JZip");
+        
+        System.out.println("path " + System.getProperty("user.dir"));
         
         annotationsSink = new ArrayList<String>();
         annotationsSource = new ArrayList<String>();
