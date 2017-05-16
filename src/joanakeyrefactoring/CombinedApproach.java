@@ -59,7 +59,8 @@ public class CombinedApproach {
     }
 
     public static void runTestFromCheckData(JoanaAndKeyCheckData checkData)
-            throws ClassHierarchyException, IOException, UnsoundGraphException, CancelException {
+            throws ClassHierarchyException, IOException, UnsoundGraphException,
+            CancelException, CouldntAddAnnoException {
         String classpathJavaM = null;
         StateSaver stateSaver = new StateSaver();
         AutomationHelper automationHelper = new AutomationHelper(checkData.getPathToJavaFile());
@@ -229,7 +230,18 @@ public class CombinedApproach {
         br.close();
         return new JoanaAndKeyCheckData(
                 pathKeY, classPath, pathToJavaFile, entryMethodString,
-                annotationPath, entryMethod, true, fullyAutomatic);
+                annotationPath, entryMethod, fullyAutomatic,
+                (analysis, checkData) -> {
+                    try {
+                        addAnnotationsFileBased(
+                                analysis, 
+                                checkData.getAnnotationsSink(),
+                                checkData.getAnnotationsSink(), 
+                                checkData.getAnnotationPath());
+                    } catch (IOException e) {
+                        throw new CouldntAddAnnoException();
+                    }
+                });
     }
 
     private static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String classPath,

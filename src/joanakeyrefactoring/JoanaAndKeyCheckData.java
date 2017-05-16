@@ -24,25 +24,26 @@ public class JoanaAndKeyCheckData {
     private String entryMethodString;
     private String annotationPath;
     private JavaMethodSignature entryMethod;
-    private boolean fileBased;
     private boolean fullyAutomatic;
+    private AnnotationAdder annoAdder;
 
-    public JoanaAndKeyCheckData(String pathKeY, String classPath, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fileBased, boolean fullyAutomatic) {
+    public JoanaAndKeyCheckData(
+            String pathKeY, String classPath, String pathToJavaFile, String entryMethodString,
+            String annotationPath, JavaMethodSignature entryMethod,
+            boolean fullyAutomatic, AnnotationAdder annoAdder) {
         this.pathKeY = pathKeY;
         this.classPath = classPath;
         this.pathToJavaFile = pathToJavaFile;
         this.entryMethodString = entryMethodString;
         this.annotationPath = annotationPath;
         this.entryMethod = entryMethod;
-        this.fileBased = fileBased;
+        this.annoAdder = annoAdder;
         this.fullyAutomatic = fullyAutomatic;
     }
 
     public boolean isFullyAutomatic() {
         return fullyAutomatic;
     }
-
-   
 
     public JavaMethodSignature getEntryMethod() {
         return entryMethod;
@@ -76,15 +77,7 @@ public class JoanaAndKeyCheckData {
         return annotationPath;
     }
 
-    public void addAnnotations(IFCAnalysis analysis) throws IOException {
-        if (fileBased) {
-            CombinedApproach.addAnnotationsFileBased(
-                    analysis,
-                    annotationsSink,
-                    annotationsSource,
-                    annotationPath);
-        } else {
-            
-        }
+    public void addAnnotations(IFCAnalysis analysis) throws CouldntAddAnnoException {
+        this.annoAdder.addAnnotations(analysis, this);
     }
 }
