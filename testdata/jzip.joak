@@ -1,6 +1,7 @@
 //this is the joak script for testing Jzip 
 pathKeY = dep/KeY.jar
 javaClass =
+pathToJar = JZipWithException.jar
 pathToJavaFile = JZipWithException/jzip
 entryMethod = jzip/JZip
 annotationPath = 
