@@ -129,7 +129,6 @@ public class CombinedApproach {
             String annotationPath) throws IOException {
 
         String lineSeparator = System.getProperty("line.separator");
-        InputStream source;
         String an = "";
 
         SDGProgram program = ana.getProgram();
@@ -137,39 +136,41 @@ public class CombinedApproach {
 
         if (annotationsSink.size() > 0) {
             for (int i = 0; i < annotationsSink.size(); i++) {
-                an = annotationsSink.get(0);
-                if (an.split(",")[1].trim().equals("low")) {
-                    ana.addSinkAnnotation(
-                            program.getPart(an.split(",")[0].trim()),
-                            BuiltinLattices.STD_SECLEVEL_LOW);
-                } else {
-                    ana.addSinkAnnotation(
-                            program.getPart(an.split(",")[0].trim()),
-                            BuiltinLattices.STD_SECLEVEL_HIGH);
-                }
+                parseSinkAnnotation(annotationsSink[i], ana, program);
             }
         }
         if (annotationsSource.size() > 0) {
             for (int i = 0; i < annotationsSource.size(); i++) {
-                an = annotationsSource.get(0);
-                if (an.split(",")[1].trim().equals("low")) {
-                    ana.addSourceAnnotation(
-                            program.getPart(an.split(",")[0].trim()),
-                            BuiltinLattices.STD_SECLEVEL_LOW);
-                } else {
-                    ana.addSourceAnnotation(
-                            program.getPart(an.split(",")[0].trim()),
-                            BuiltinLattices.STD_SECLEVEL_HIGH);
-                }
-
+                parseSourceAnnotation(annotationsSource[i], ana, program);
             }
         } else {
-            source = new FileInputStream(annotationPath);
-            Collection<IFCAnnotation> coll = ExtractAnnotations.loadAnnotations(source, sdg);
+            FileInputStream annotationSourceStream = new FileInputStream(annotationPath);
+            Collection<IFCAnnotation> coll
+                    = ExtractAnnotations.loadAnnotations(annotationSourceStream, sdg);
             Iterator<IFCAnnotation> itr = coll.iterator();
             while (itr.hasNext()) {
                 ana.addAnnotation(itr.next());
             }
+        }
+    }
+
+    private static void parseSourceAnnotation(String sourceString, IFCAnalysis ana, SDGProgram program) {
+        String programPart = "programPart";
+        String secLevel = parseSecLevel(sourceString);
+        String kind = parseAnnoKind(sourceString);
+        String desc = parseAnnoDesc(sourceString);
+        if (desc.equals(programPart)) {
+            ana.addSourceAnnotation(program.getPart(desc), secLevel);
+        }
+    }
+
+    private static void parseSinkAnnotation(String sinkString, IFCAnalysis ana, SDGProgram program) {
+        String programPart = "programPart";
+        String secLevel = parseSecLevel(sinkString);
+        String kind = parseAnnoKind(sinkString);
+        String desc = parseAnnoDesc(sinkString);
+        if (desc.equals(programPart)) {
+            ana.addSinkAnnotation(program.getPart(desc), secLevel);
         }
     }
 
@@ -193,7 +194,7 @@ public class CombinedApproach {
         List<String> annotationsSource = new ArrayList<>();
         List<String> annotationsSink = new ArrayList<>();
         while (line != null) {
-            if (line.contains("%") || line.isEmpty()) {
+            if (line.trim().startsWith("//") || line.isEmpty()) {
                 line = br.readLine();
             }
             if ((line.contains("pathKeY"))) {
@@ -203,7 +204,7 @@ public class CombinedApproach {
                 classPath = line.split("=")[1].trim();
                 System.out.println(classPath);
             }
-            if ((line.contains("classpathJava"))) {
+            if ((line.contains("pathToJavaFile"))) {
                 pathToJavaFile = line.split("=")[1].trim();
             }
             if ((line.contains("entryMethod"))) {
@@ -212,10 +213,10 @@ public class CombinedApproach {
                         .mainMethodOfClass(entryMethodString);
             }
             if ((line.contains("Add Sink"))) {
-                annotationsSink.add(line.split("\\:")[1].trim());
+                annotationsSink.add(line.split(":")[1].trim());
             }
             if ((line.contains("Add Source"))) {
-                annotationsSource.add(line.split("\\:")[1].trim());
+                annotationsSource.add(line.split(":")[1].trim());
             }
             if ((line.contains("annotationPath"))) {
                 annotationPath = line.split("=")[1].trim();
@@ -229,14 +230,16 @@ public class CombinedApproach {
         }
         br.close();
         return new JoanaAndKeyCheckData(
-                pathKeY, classPath, pathToJavaFile, entryMethodString,
+                annotationsSink, annotationsSource,
+                pathKeY, classPath,
+                pathToJavaFile, entryMethodString,
                 annotationPath, entryMethod, fullyAutomatic,
                 (analysis, checkData) -> {
                     try {
                         addAnnotationsFileBased(
-                                analysis, 
+                                analysis,
                                 checkData.getAnnotationsSink(),
-                                checkData.getAnnotationsSink(), 
+                                checkData.getAnnotationsSink(),
                                 checkData.getAnnotationPath());
                     } catch (IOException e) {
                         throw new CouldntAddAnnoException();
@@ -266,5 +269,22 @@ public class CombinedApproach {
         sdg = program.getSDG();
         IFCAnalysis ana = new IFCAnalysis(program);
         return ana;
+    }
+
+    private static String parseSecLevel(String annotationString) {
+        //format: from part, jzip.MyFileOutputStream.content, low
+        String secLevelStr = annotationString.split(",")[2].trim();
+        if (secLevelStr.equals("high")) {
+            return BuiltinLattices.STD_SECLEVEL_HIGH;
+        }
+        return BuiltinLattices.STD_SECLEVEL_LOW;
+    }
+
+    private static String parseAnnoKind(String annotationString) {
+        return annotationString.split(",")[0].trim();
+    }
+
+    private static String parseAnnoDesc(String annotationString) {
+        return annotationString.split(",")[1].trim();
     }
 }

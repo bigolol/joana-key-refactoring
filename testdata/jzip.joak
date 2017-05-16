@@ -1,0 +1,9 @@
+//this is the joak script for testing Jzip 
+pathKeY = dep/KeY.jar
+javaClass =
+pathToJavaFile = JZipWithException/jzip
+entryMethod = jzip/JZip
+annotationPath = 
+fullyAutomatic = true
+Add Source : programPart, jzip.JZip.CONFIGURATION, high 
+Add Sink : programPart, jzip.MyFileOutputStream.content, low

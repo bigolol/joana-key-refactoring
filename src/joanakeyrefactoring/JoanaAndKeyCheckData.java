@@ -9,6 +9,7 @@ import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -16,8 +17,8 @@ import java.util.ArrayList;
  */
 public class JoanaAndKeyCheckData {
 
-    private ArrayList<String> annotationsSink = new ArrayList<>();
-    private ArrayList<String> annotationsSource = new ArrayList<>();
+    private List<String> annotationsSink;
+    private List<String> annotationsSource;
     private String pathKeY;
     private String classPath;
     private String pathToJavaFile;
@@ -27,18 +28,17 @@ public class JoanaAndKeyCheckData {
     private boolean fullyAutomatic;
     private AnnotationAdder annoAdder;
 
-    public JoanaAndKeyCheckData(
-            String pathKeY, String classPath, String pathToJavaFile, String entryMethodString,
-            String annotationPath, JavaMethodSignature entryMethod,
-            boolean fullyAutomatic, AnnotationAdder annoAdder) {
+    public JoanaAndKeyCheckData(List<String> annotationsSink, List<String> annotationsSource, String pathKeY, String classPath, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, AnnotationAdder annoAdder) {
+        this.annotationsSink = annotationsSink;
+        this.annotationsSource = annotationsSource;
         this.pathKeY = pathKeY;
         this.classPath = classPath;
         this.pathToJavaFile = pathToJavaFile;
         this.entryMethodString = entryMethodString;
         this.annotationPath = annotationPath;
         this.entryMethod = entryMethod;
-        this.annoAdder = annoAdder;
         this.fullyAutomatic = fullyAutomatic;
+        this.annoAdder = annoAdder;
     }
 
     public boolean isFullyAutomatic() {
@@ -49,11 +49,11 @@ public class JoanaAndKeyCheckData {
         return entryMethod;
     }
 
-    public ArrayList<String> getAnnotationsSink() {
+    public List<String> getAnnotationsSink() {
         return annotationsSink;
     }
 
-    public ArrayList<String> getAnnotationsSource() {
+    public List<String> getAnnotationsSource() {
         return annotationsSource;
     }
 
