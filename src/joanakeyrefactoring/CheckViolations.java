@@ -537,7 +537,7 @@ public class CheckViolations {
         // load List
         try {
             BufferedReader br = new BufferedReader(new FileReader(
-                    "/home/holger/Code/hiwi/joana-api-refactoring/src/JAVALANG.TXT"));
+                    "dep/JAVALANG.txt"));
             String line = br.readLine();
             String[] entrys;
             String entry;

@@ -72,10 +72,10 @@ public class CombinedApproach {
             IOException, UnsoundGraphException, CancelException {
         boolean fullyAutomatic = true;
         boolean filebased = false;
-        pathKeY = "";
-        javaClass = "JZipWithException/jzip";
+        pathKeY = "dep/KeY.jar";
+        javaClass = "";
         classPath = "JZipWithException.jar";
-        classpathJava = "";
+        classpathJava = "JZipWithException/jzip";
         entryMethod = JavaMethodSignature.mainMethodOfClass("jzip/JZip");
         
         System.out.println("path " + System.getProperty("user.dir"));
