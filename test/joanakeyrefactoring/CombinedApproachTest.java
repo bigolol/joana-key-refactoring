@@ -52,14 +52,8 @@ public class CombinedApproachTest {
 
         IFCAnalysis analysis = new IFCAnalysis(SDGProgram.loadSDG("testdata/JZip.pdg"));
         CombinedApproach.addJzip2Annotations(analysis);
-
-        AutomationHelper auto = new AutomationHelper(pathToJavaFile);
-        String allClasses = auto.summarizeSourceFiles();
-        MyListener ml = new MyListener(allClasses);
-        ViolationsViaKeyChecker cV = new ViolationsViaKeyChecker(auto, javaClass, state, true, pathKeY, ml);
-        auto.setMyListener(ml);
-
-        CombinedApproach.checkAnnotatedPDGWithJoanaAndKey(analysis, cV);
+        
+        
 
     }
 

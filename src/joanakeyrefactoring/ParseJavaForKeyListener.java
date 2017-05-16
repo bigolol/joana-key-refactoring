@@ -17,7 +17,7 @@ import org.antlr.v4.runtime.tree.*;
  *
  *
  */
-public class MyListener extends JavaBaseListener {
+public class ParseJavaForKeyListener extends JavaBaseListener {
 
     private static ArrayList<String[]> fields = new ArrayList<String[]>();
     private static HashMap<String, String> methods = new HashMap<String, String>();
@@ -36,11 +36,11 @@ public class MyListener extends JavaBaseListener {
     private static ArrayList<String> fieldsCorrect = new ArrayList<String>();
     private static ArrayList<String> classList = new ArrayList<String>();
 
-    public MyListener() {
+    public ParseJavaForKeyListener() {
 
     }
 
-    public MyListener(String allClasses) {
+    public ParseJavaForKeyListener(String allClasses) {
         fields = new ArrayList<String[]>();
         ANTLRInputStream input = new ANTLRInputStream(allClasses);
         saveAllRequirements(input);
@@ -262,7 +262,7 @@ public class MyListener extends JavaBaseListener {
 
         // Walk it and attach our listener
         ParseTreeWalker walker = new ParseTreeWalker();
-        MyListener listener = new MyListener();
+        ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
         walker.walk(listener, compilationUnitContext);
     }
 
@@ -282,7 +282,7 @@ public class MyListener extends JavaBaseListener {
 
         // Walk it and attach our listener
         ParseTreeWalker walker = new ParseTreeWalker();
-        MyListener listener = new MyListener();
+        ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
         walker.walk(listener, compilationUnitContext);
     }
 }

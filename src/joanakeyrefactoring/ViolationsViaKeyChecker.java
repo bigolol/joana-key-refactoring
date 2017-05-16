@@ -45,17 +45,19 @@ public class ViolationsViaKeyChecker {
     private boolean fullyAutomatic;
     private String pathKeY;
     private ArrayList<String> keyFeatures = new ArrayList<String>();
-    private MyListener ml;
+    private ParseJavaForKeyListener ml;
 
-    public ViolationsViaKeyChecker(AutomationHelper auto2, String javaClass,
-            StateSaver state, boolean fullyAutomatic, String pathKeY,
-            MyListener ml) {
-        this.ml = ml;
-        this.auto = auto2;
-        this.javaClass = javaClass;
-        this.state = state;
-        this.fullyAutomatic = fullyAutomatic;
-        this.pathKeY = pathKeY;
+    public ViolationsViaKeyChecker(
+            AutomationHelper automationHelper, 
+            JoanaAndKeyCheckData checkData,
+            StateSaver stateSaver,
+            ParseJavaForKeyListener javaForKeyListener) {
+        this.ml = javaForKeyListener;
+        this.auto = automationHelper;
+        this.javaClass = checkData.getClassPath();
+        this.state = stateSaver;
+        this.fullyAutomatic = checkData.isFullyAutomatic();
+        this.pathKeY = checkData.getPathKeY();
         loadAndAddList();
     }
 

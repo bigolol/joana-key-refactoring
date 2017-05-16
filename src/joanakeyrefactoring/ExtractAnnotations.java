@@ -19,7 +19,7 @@ import edu.kit.joana.ifc.sdg.graph.SDG;
 
 public class ExtractAnnotations {
 
-    public Collection<IFCAnnotation> loadAnnotations(InputStream source, SDG sdg) throws IOException {
+    public static Collection<IFCAnnotation> loadAnnotations(InputStream source, SDG sdg) throws IOException {
         Set<IFCAnnotation> toAnnotate = new LinkedHashSet<IFCAnnotation>();
         SDGProgram program = new SDGProgram(sdg);
         BufferedReader in = new BufferedReader(new InputStreamReader(source));

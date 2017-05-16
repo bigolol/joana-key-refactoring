@@ -2,7 +2,6 @@ package joanakeyrefactoring;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +25,6 @@ import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
 import edu.kit.joana.ifc.sdg.core.violations.paths.ViolationPath;
 import edu.kit.joana.ifc.sdg.graph.SDG;
-import edu.kit.joana.ifc.sdg.graph.SDGSerializer;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
 import edu.kit.joana.ifc.sdg.graph.slicer.conc.I2PBackward;
 import edu.kit.joana.ifc.sdg.mhpoptimization.MHPType;
@@ -43,8 +41,6 @@ public class CombinedApproach {
     public static String field = "L\\w*\\.\\w*";
     public static RepsRosayChopper chopper;
     public static I2PBackward slicer;
-    final static String lineSeparator = System.getProperty("line.separator");
-    public static String classpathJavaM;
     public static String[] paramInClass;
     public static SDG sdg;
     public static boolean debugOutput;
@@ -59,34 +55,25 @@ public class CombinedApproach {
      * Note that the jar must contain parameter names, therefore it has to be
      * compiled with sufficient debug information.
      */
-    public static void main(String[] args) throws ClassHierarchyException,
-            IOException, UnsoundGraphException, CancelException {
-        checkJZip();
+    public static void main(String[] args) {
     }
 
-    public static void checkJZip() throws ClassHierarchyException, IOException, UnsoundGraphException, CancelException {
-        boolean fullyAutomatic = true;
-        boolean filebased = false;
+    public static void runTestFromCheckData(JoanaAndKeyCheckData checkData)
+            throws ClassHierarchyException, IOException, UnsoundGraphException, CancelException {
+        String classpathJavaM = null;
         StateSaver stateSaver = new StateSaver();
-        String pathKeY = "dep/KeY.jar";
+        AutomationHelper automationHelper = new AutomationHelper(checkData.getPathToJavaFile());
+        String allClasses = automationHelper.summarizeSourceFiles();
+        ParseJavaForKeyListener javaForKeyListener = new ParseJavaForKeyListener(allClasses);
+        automationHelper.setJavaForKeyListener(javaForKeyListener);
 
-        String javaClass = "";
-        String classPath = "JZipWithException.jar";
-        String pathToJavaFile = "JZipWithException/jzip";
-        JavaMethodSignature entryMethod = JavaMethodSignature.mainMethodOfClass("jzip/JZip");
-
-        AutomationHelper auto = new AutomationHelper(pathToJavaFile);
-        String allClasses = auto.summarizeSourceFiles();
-        MyListener ml = new MyListener(allClasses);
         ViolationsViaKeyChecker violationsViaKeyChecker
-                = new ViolationsViaKeyChecker(auto, javaClass, stateSaver, fullyAutomatic, pathKeY, ml);
-        auto.setMyListener(ml);
+                = new ViolationsViaKeyChecker(
+                        automationHelper, checkData, stateSaver, javaForKeyListener);
 
-        IFCAnalysis ana = runJoanaCreateSDGAndIFCAnalyis(classPath, entryMethod, stateSaver);
-
-        addJzip2Annotations(ana);
-
-        checkAnnotatedPDGWithJoanaAndKey(ana, violationsViaKeyChecker);
+        IFCAnalysis analysis = runJoanaCreateSDGAndIFCAnalyis(classpathJavaM, checkData.getEntryMethod(), stateSaver);
+        checkData.addAnnotations(analysis);
+        checkAnnotatedPDGWithJoanaAndKey(analysis, violationsViaKeyChecker);
     }
 
     public static void checkAnnotatedPDGWithJoanaAndKey(
@@ -134,9 +121,13 @@ public class CombinedApproach {
                 BuiltinLattices.STD_SECLEVEL_LOW);
     }
 
-    private static void addAnnotationsFileBased(
-            IFCAnalysis ana, ExtractAnnotations exAnn, List<String> annotationsSink,
-            List<String> annotationsSource, String annotationPath) throws IOException {
+    public static void addAnnotationsFileBased(
+            IFCAnalysis ana,
+            List<String> annotationsSink,
+            List<String> annotationsSource,
+            String annotationPath) throws IOException {
+
+        String lineSeparator = System.getProperty("line.separator");
         InputStream source;
         String an = "";
 
@@ -173,7 +164,7 @@ public class CombinedApproach {
             }
         } else {
             source = new FileInputStream(annotationPath);
-            Collection<IFCAnnotation> coll = exAnn.loadAnnotations(source, sdg);
+            Collection<IFCAnnotation> coll = ExtractAnnotations.loadAnnotations(source, sdg);
             Iterator<IFCAnnotation> itr = coll.iterator();
             while (itr.hasNext()) {
                 ana.addAnnotation(itr.next());
@@ -197,6 +188,7 @@ public class CombinedApproach {
         String entryMethodString = null;
         String annotationPath = null;
         JavaMethodSignature entryMethod = null;
+        boolean fullyAutomatic = true;
         List<String> annotationsSource = new ArrayList<>();
         List<String> annotationsSink = new ArrayList<>();
         while (line != null) {
@@ -227,11 +219,17 @@ public class CombinedApproach {
             if ((line.contains("annotationPath"))) {
                 annotationPath = line.split("=")[1].trim();
             }
+            if ((line.contains("fullyAutomatic"))) {
+                String fullyAutoStr = line.split("=")[1].trim();
+                fullyAutomatic = Boolean.valueOf(fullyAutoStr);
+            }
+
             line = br.readLine();
         }
         br.close();
         return new JoanaAndKeyCheckData(
-                pathKeY, classPath, pathToJavaFile, entryMethodString, annotationPath, entryMethod);
+                pathKeY, classPath, pathToJavaFile, entryMethodString,
+                annotationPath, entryMethod, true, fullyAutomatic);
     }
 
     private static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String classPath,

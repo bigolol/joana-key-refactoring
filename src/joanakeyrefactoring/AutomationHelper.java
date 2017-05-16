@@ -27,7 +27,7 @@ public class AutomationHelper {
     public String[] paramInClass;
     private ArrayList<String> classNames = new ArrayList<String>();
     final static String lineSeparator = System.getProperty("line.separator");
-    private MyListener ml;
+    private ParseJavaForKeyListener javaForKeyListener;
     private HashMap<String, String> classes = new HashMap<String, String>();
 
     public AutomationHelper(String classpathJava) {
@@ -147,17 +147,17 @@ public class AutomationHelper {
         // TODO: use Parser change classpathJava to classpathPackage
         // Global Variables with Parser:
         String globalVariables = "";
-        globalVariables = ml.getFieldsCorrectAsString();
+        globalVariables = javaForKeyListener.getFieldsCorrectAsString();
         // System.out.println("global variables: " + globalVariables);
 
         // complete method with Java
         String completeMethod = "";
         if (methodName.contains("<init>")) {
             methodName = methodName.split("\\.")[1];
-            completeMethod = ml.getConstructorOfMethod(methodName);
+            completeMethod = javaForKeyListener.getConstructorOfMethod(methodName);
         } else {
-            completeMethod = ml.getCompleteMethod(methodName);
-            String firstLine = ml.getParamsWithNullable(methodName);
+            completeMethod = javaForKeyListener.getCompleteMethod(methodName);
+            String firstLine = javaForKeyListener.getParamsWithNullable(methodName);
             String[] array = completeMethod.split(System.lineSeparator());
             StringBuilder sb = new StringBuilder();
             sb.append(array[0].split("\\(")[0]);
@@ -185,9 +185,9 @@ public class AutomationHelper {
 
         String otherClasses = "";
         StringBuilder sbClasses = new StringBuilder();
-        String classOfMethod = ml.getClass(methodName);
+        String classOfMethod = javaForKeyListener.getClass(methodName);
         // System.out.println("classOfMethod " + classOfMethod);
-        ArrayList<String> classList = ml.getClassList();
+        ArrayList<String> classList = javaForKeyListener.getClassList();
         for (int i = 0; i < classList.size(); i++) {
             if (!classList.get(i).equals(classOfMethod)) {
                 sbClasses.append(classes.get(classList.get(i)));
@@ -198,7 +198,7 @@ public class AutomationHelper {
         // System.out.println("otherClasses: " + otherClasses);
 
         // get Params String[]
-        paramInClass = ml.getParamsOfMethod(methodName);
+        paramInClass = javaForKeyListener.getParamsOfMethod(methodName);
         System.out.println("Params: " + paramInClass);
 
         // all methods that are needed to run the complete method
@@ -221,8 +221,8 @@ public class AutomationHelper {
                 lineOc = lineOc.split("\\(")[0];
                 if (!allMethodNames.contains(lineOc.trim())) {
                     allMethodNames.add(lineOc.trim());
-                    if (ml.getCompleteMethod(lineOc.trim()) != null) {
-                        sbOM.append(ml.getCompleteMethod(lineOc.trim()));
+                    if (javaForKeyListener.getCompleteMethod(lineOc.trim()) != null) {
+                        sbOM.append(javaForKeyListener.getCompleteMethod(lineOc.trim()));
                         sbOM.append(System.lineSeparator());
                     }
                 }
@@ -532,8 +532,8 @@ public class AutomationHelper {
         return settings;
     }
 
-    public void setMyListener(MyListener ml2) {
-        this.ml = ml2;
+    public void setJavaForKeyListener(ParseJavaForKeyListener javaForKeyListener) {
+        this.javaForKeyListener = javaForKeyListener;
     }
 
     /**
