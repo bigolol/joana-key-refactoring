@@ -36,6 +36,7 @@ import edu.kit.joana.wala.core.SDGBuilder.ExceptionAnalysis;
 import edu.kit.joana.wala.core.SDGBuilder.FieldPropagation;
 import edu.kit.joana.wala.core.SDGBuilder.PointsToPrecision;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 public class CombinedApproach {
 
@@ -44,17 +45,8 @@ public class CombinedApproach {
     public static I2PBackward slicer;
     final static String lineSeparator = System.getProperty("line.separator");
     public static String classpathJavaM;
-    public static String javaClass;
     public static String[] paramInClass;
     public static SDG sdg;
-    public static String pathKeY;
-    public static String classPath;
-    public static String pathToJavaFile;
-    public static JavaMethodSignature entryMethod;
-    public static String entryMethodString;
-    public static ArrayList<String> annotationsSink;
-    public static ArrayList<String> annotationsSource;
-    public static String annotationPath;
     public static boolean debugOutput;
 
     /**
@@ -76,17 +68,12 @@ public class CombinedApproach {
         boolean fullyAutomatic = true;
         boolean filebased = false;
         StateSaver stateSaver = new StateSaver();
-        pathKeY = "dep/KeY.jar";
+        String pathKeY = "dep/KeY.jar";
 
-        javaClass = "";
-        classPath = "JZipWithException.jar";
-        pathToJavaFile = "JZipWithException/jzip";
-        entryMethod = JavaMethodSignature.mainMethodOfClass("jzip/JZip");
-
-        System.out.println("path " + System.getProperty("user.dir"));
-
-        annotationsSink = new ArrayList<String>();
-        annotationsSource = new ArrayList<String>();
+        String javaClass = "";
+        String classPath = "JZipWithException.jar";
+        String pathToJavaFile = "JZipWithException/jzip";
+        JavaMethodSignature entryMethod = JavaMethodSignature.mainMethodOfClass("jzip/JZip");
 
         AutomationHelper auto = new AutomationHelper(pathToJavaFile);
         String allClasses = auto.summarizeSourceFiles();
@@ -148,7 +135,8 @@ public class CombinedApproach {
     }
 
     private static void addAnnotationsFileBased(
-            IFCAnalysis ana, ExtractAnnotations exAnn) throws IOException {
+            IFCAnalysis ana, ExtractAnnotations exAnn, List<String> annotationsSink,
+            List<String> annotationsSource, String annotationPath) throws IOException {
         InputStream source;
         String an = "";
 
@@ -158,7 +146,6 @@ public class CombinedApproach {
         if (annotationsSink.size() > 0) {
             for (int i = 0; i < annotationsSink.size(); i++) {
                 an = annotationsSink.get(0);
-                // System.out.println(an.split(",")[0].trim());
                 if (an.split(",")[1].trim().equals("low")) {
                     ana.addSinkAnnotation(
                             program.getPart(an.split(",")[0].trim()),
@@ -201,44 +188,50 @@ public class CombinedApproach {
      *
      * @param filePath
      */
-    private static void readInputFile(String filePath) {
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(filePath));
-            String line = br.readLine();
-            while (line != null) {
-                if (line.contains("%") || line.isEmpty()) {
-                    line = br.readLine();
-                }
-                if ((line.contains("pathKeY"))) {
-                    pathKeY = line.split("=")[1].trim();
-                }
-                if ((line.contains("classPath"))) {
-                    classPath = line.split("=")[1].trim();
-                    System.out.println(classPath);
-                }
-                if ((line.contains("classpathJava"))) {
-                    pathToJavaFile = line.split("=")[1].trim();
-                }
-                if ((line.contains("entryMethod"))) {
-                    entryMethodString = line.split("=")[1].trim();
-                    entryMethod = JavaMethodSignature
-                            .mainMethodOfClass(entryMethodString);
-                }
-                if ((line.contains("Add Sink"))) {
-                    annotationsSink.add(line.split("\\:")[1].trim());
-                }
-                if ((line.contains("Add Source"))) {
-                    annotationsSource.add(line.split("\\:")[1].trim());
-                }
-                if ((line.contains("annotationPath"))) {
-                    annotationPath = line.split("=")[1].trim();
-                }
+    public static JoanaAndKeyCheckData parseInputFile(String filePath) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(filePath));
+        String line = br.readLine();
+        String pathKeY = null;
+        String classPath = null;
+        String pathToJavaFile = null;
+        String entryMethodString = null;
+        String annotationPath = null;
+        JavaMethodSignature entryMethod = null;
+        List<String> annotationsSource = new ArrayList<>();
+        List<String> annotationsSink = new ArrayList<>();
+        while (line != null) {
+            if (line.contains("%") || line.isEmpty()) {
                 line = br.readLine();
             }
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            if ((line.contains("pathKeY"))) {
+                pathKeY = line.split("=")[1].trim();
+            }
+            if ((line.contains("classPath"))) {
+                classPath = line.split("=")[1].trim();
+                System.out.println(classPath);
+            }
+            if ((line.contains("classpathJava"))) {
+                pathToJavaFile = line.split("=")[1].trim();
+            }
+            if ((line.contains("entryMethod"))) {
+                entryMethodString = line.split("=")[1].trim();
+                entryMethod = JavaMethodSignature
+                        .mainMethodOfClass(entryMethodString);
+            }
+            if ((line.contains("Add Sink"))) {
+                annotationsSink.add(line.split("\\:")[1].trim());
+            }
+            if ((line.contains("Add Source"))) {
+                annotationsSource.add(line.split("\\:")[1].trim());
+            }
+            if ((line.contains("annotationPath"))) {
+                annotationPath = line.split("=")[1].trim();
+            }
+            line = br.readLine();
         }
+        br.close();
+        return new JoanaAndKeyCheckData(
+                pathKeY, classPath, pathToJavaFile, entryMethodString, annotationPath, entryMethod);
     }
 
     private static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String classPath,
