@@ -42,7 +42,6 @@ public class CombinedApproach {
     public static String field = "L\\w*\\.\\w*";
     public static RepsRosayChopper chopper;
     public static I2PBackward slicer;
-    public static SDGProgram program;
     final static String lineSeparator = System.getProperty("line.separator");
     public static String classpathJavaM;
     public static String javaClass;
@@ -89,20 +88,22 @@ public class CombinedApproach {
         annotationsSink = new ArrayList<String>();
         annotationsSource = new ArrayList<String>();
 
-        Automation auto = new Automation(pathToJavaFile);
+        AutomationHelper auto = new AutomationHelper(pathToJavaFile);
         String allClasses = auto.summarizeSourceFiles();
         MyListener ml = new MyListener(allClasses);
-        CheckViolations cV = new CheckViolations(auto, javaClass, stateSaver, fullyAutomatic, pathKeY, ml);
+        ViolationsViaKeyChecker violationsViaKeyChecker
+                = new ViolationsViaKeyChecker(auto, javaClass, stateSaver, fullyAutomatic, pathKeY, ml);
         auto.setMyListener(ml);
 
-        IFCAnalysis ana = runJoanaCreateSDGAndIFCana(classPath, entryMethod, stateSaver);
+        IFCAnalysis ana = runJoanaCreateSDGAndIFCAnalyis(classPath, entryMethod, stateSaver);
 
         addJzip2Annotations(ana);
-        
-        checkAnnotatedPDGWithJoanaAndKey(ana, cV);
+
+        checkAnnotatedPDGWithJoanaAndKey(ana, violationsViaKeyChecker);
     }
 
-    public static void checkAnnotatedPDGWithJoanaAndKey(IFCAnalysis annotatedAnalysis, CheckViolations cV) throws FileNotFoundException {
+    public static void checkAnnotatedPDGWithJoanaAndKey(
+            IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker cV) throws FileNotFoundException {
         chopper = new RepsRosayChopper(annotatedAnalysis.getProgram().getSDG());
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
 
@@ -131,6 +132,7 @@ public class CombinedApproach {
     }
 
     public static void addJzip2Annotations(IFCAnalysis ana) {
+        SDGProgram program = ana.getProgram();
         for (SDGCall call : program
                 .getCallsToMethod(JavaMethodSignature
                         .fromString("java.util.Properties.getProperty(Ljava/lang/String;)Ljava/lang/String;"))) {
@@ -145,11 +147,14 @@ public class CombinedApproach {
                 BuiltinLattices.STD_SECLEVEL_LOW);
     }
 
-    private static void addAnnotationsFileBased(IFCAnalysis ana, ExtractAnnotations exAnn, SDG sdg1) throws IOException {
+    private static void addAnnotationsFileBased(
+            IFCAnalysis ana, ExtractAnnotations exAnn) throws IOException {
         InputStream source;
-        // System.out.println(exampleName + ":" + annotationsSink.size() +
-        // ":" + annotationsSource.size());
         String an = "";
+
+        SDGProgram program = ana.getProgram();
+        SDG sdg = program.getSDG();
+
         if (annotationsSink.size() > 0) {
             for (int i = 0; i < annotationsSink.size(); i++) {
                 an = annotationsSink.get(0);
@@ -181,7 +186,7 @@ public class CombinedApproach {
             }
         } else {
             source = new FileInputStream(annotationPath);
-            Collection<IFCAnnotation> coll = exAnn.loadAnnotations(source, sdg1);
+            Collection<IFCAnnotation> coll = exAnn.loadAnnotations(source, sdg);
             Iterator<IFCAnnotation> itr = coll.iterator();
             while (itr.hasNext()) {
                 ana.addAnnotation(itr.next());
@@ -236,12 +241,9 @@ public class CombinedApproach {
         }
     }
 
-    private static IFCAnalysis runJoanaCreateSDGAndIFCana(String classPath,
+    private static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String classPath,
             JavaMethodSignature entryMethod, StateSaver stateSaver) throws ClassHierarchyException,
             IOException, UnsoundGraphException, CancelException {
-        /**
-         * some settings
-         */
         SDGConfig config = new SDGConfig(classPath, entryMethod.toBCString(),
                 Stubs.JRE_14);
         config.setComputeInterferences(true);
@@ -250,34 +252,15 @@ public class CombinedApproach {
         config.setExceptionAnalysis(ExceptionAnalysis.INTERPROC);
         config.setFieldPropagation(FieldPropagation.OBJ_GRAPH_NO_MERGE_AT_ALL);
 
-        /**
-         * save intermediate results of SDG generation (i.e. points-to, call
-         * graph)
-         */
+        // save intermediate results of SDG generation points to call graph
         config.setCGConsumer(stateSaver);
-        /**
-         * Schneidet beim SDG application edges raus, so besser sichtbar mit dem
-         * graphviewer
-         *
-         */
+        // Schneidet beim SDG application edges raus, so besser sichtbar mit dem graphviewer
+
         config.setPruningPolicy(ApplicationLoaderPolicy.INSTANCE);
 
-        /**
-         * build the PDG etc.
-         */
-        program = SDGProgram.createSDGProgram(config, System.out,
+        SDGProgram program = SDGProgram.createSDGProgram(config, System.out,
                 new NullProgressMonitor());
         sdg = program.getSDG();
-
-        // Immutable
-        // Analysis Scope
-        // SDGBuilder.build(scfg);
-        /**
-         * save PDG
-         */
-        SDGSerializer.toPDGFormat(program.getSDG(), new FileOutputStream(
-                "SDG.pdg"));
-
         IFCAnalysis ana = new IFCAnalysis(program);
         return ana;
     }
