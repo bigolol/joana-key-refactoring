@@ -5,8 +5,12 @@
  */
 package joanakeyrefactoring;
 
+import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.graph.GraphIntegrity;
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.api.sdg.SDGProgram;
+import edu.kit.joana.api.sdg.SDGProgramPart;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
 import java.io.IOException;
 import org.junit.After;
@@ -41,21 +45,27 @@ public class CombinedApproachTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of main method, of class CombinedApproach.
-     */
     @Test
-    public void testJzipFromFile() throws Exception {
-        
-    }
-    
-    @Test
-    public void testParseFile() throws IOException {
-        JoanaAndKeyCheckData parsedData = CombinedApproach.parseInputFile("testdata/jzip.joak");
-        Assert.assertEquals("programPart, jzip.JZip.CONFIGURATION, high", parsedData.getAnnotationsSource().get(0));
-        Assert.assertEquals("programPart, jzip.MyFileOutputStream.content, low", parsedData.getAnnotationsSink().get(0));
+    public void testParseFile() throws IOException, ClassHierarchyException, GraphIntegrity.UnsoundGraphException, CancelException {
+        JoanaAndKeyCheckData parsedData
+                = CombinedApproach.parseInputFile("testdata/jzip.joak");
+        Assert.assertEquals("programPart, jzip.JZip.CONFIGURATION, high",
+                parsedData.getAnnotationsSource().get(0));
+        Assert.assertEquals("programPart, jzip.MyFileOutputStream.content, low",
+                parsedData.getAnnotationsSink().get(0));
+        String secLevel = CombinedApproach.parseSecLevel(parsedData.getAnnotationsSource().get(0));
+        Assert.assertEquals("high", secLevel);
+        secLevel = CombinedApproach.parseSecLevel(parsedData.getAnnotationsSink().get(0));
+        Assert.assertEquals("low", secLevel);
+        IFCAnalysis ifcAnalysis = new IFCAnalysis(SDGProgram.loadSDG("testdata/JZip.pdg"));
+        String sinkPartString = CombinedApproach.parseAnnoDesc(parsedData.getAnnotationsSink().get(0));
+        SDGProgramPart sinkPart = ifcAnalysis.getProgram().getPart(sinkPartString);
+        Assert.assertNotNull(sinkPart);
 
-        CombinedApproach.parseSecLevel(parsedData.getAnnotationsSource().get(0));
+        String sourcePartString = CombinedApproach.parseAnnoDesc(parsedData.getAnnotationsSource().get(0));
+        SDGProgramPart sourcePart = ifcAnalysis.getProgram().getPart(sinkPartString);
+        Assert.assertNotNull(sourcePart);
+
     }
 
 }

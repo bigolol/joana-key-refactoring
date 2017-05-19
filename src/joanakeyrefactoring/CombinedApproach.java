@@ -87,7 +87,7 @@ public class CombinedApproach {
     }
 
     public static void checkAnnotatedPDGWithJoanaAndKey(
-            IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker cV) throws FileNotFoundException {
+            IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker violationChecker) throws FileNotFoundException {
         chopper = new RepsRosayChopper(annotatedAnalysis.getProgram().getSDG());
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
 
@@ -95,9 +95,9 @@ public class CombinedApproach {
         int disprovedViolations = 0;
 
         for (IViolation<SecurityNode> v : violations) {
-            ViolationPath vp = cV.getVP(v);
+            ViolationPath vp = violationChecker.getVP(v);
 
-            boolean disproved = cV.checkViolation(vp,
+            boolean disproved = violationChecker.checkViolation(vp,
                     annotatedAnalysis.getProgram().getSDG(), chopper);
 
             if (disproved) {
@@ -255,7 +255,7 @@ public class CombinedApproach {
                 });
     }
 
-    private static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String pathToJar,
+    public static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String pathToJar,
             JavaMethodSignature entryMethod, StateSaver stateSaver) throws ClassHierarchyException,
             IOException, UnsoundGraphException, CancelException {
         SDGConfig config = new SDGConfig(
@@ -270,7 +270,6 @@ public class CombinedApproach {
         // save intermediate results of SDG generation points to call graph
         config.setCGConsumer(stateSaver);
         // Schneidet beim SDG application edges raus, so besser sichtbar mit dem graphviewer
-
         config.setPruningPolicy(ApplicationLoaderPolicy.INSTANCE);
 
         SDGProgram program = SDGProgram.createSDGProgram(config, System.out,

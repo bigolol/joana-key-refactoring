@@ -180,7 +180,6 @@ public class AutomationHelper {
             completeMethod = sb.toString();
         }
 
-        // TODO: l�schen!
         System.out.println("complete Method: " + completeMethod);
 
         String otherClasses = "";
@@ -195,7 +194,6 @@ public class AutomationHelper {
             sbClasses.append(System.lineSeparator());
         }
         otherClasses = sbClasses.toString();
-        // System.out.println("otherClasses: " + otherClasses);
 
         // get Params String[]
         paramInClass = javaForKeyListener.getParamsOfMethod(methodName);
