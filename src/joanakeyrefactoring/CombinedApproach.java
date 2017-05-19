@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,13 +36,6 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 public class CombinedApproach {
-
-    public static String field = "L\\w*\\.\\w*";
-    public static RepsRosayChopper chopper;
-    public static I2PBackward slicer;
-    public static String[] paramInClass;
-    public static SDG sdg;
-    public static boolean debugOutput;
 
     /**
      * checks a annotated method with JOANA. If alarms are found, they are
@@ -88,7 +80,7 @@ public class CombinedApproach {
 
     public static void checkAnnotatedPDGWithJoanaAndKey(
             IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker violationChecker) throws FileNotFoundException {
-        chopper = new RepsRosayChopper(annotatedAnalysis.getProgram().getSDG());
+        RepsRosayChopper chopper = new RepsRosayChopper(annotatedAnalysis.getProgram().getSDG());
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
 
         int numberOfViolations = violations.size();
@@ -274,7 +266,6 @@ public class CombinedApproach {
 
         SDGProgram program = SDGProgram.createSDGProgram(config, System.out,
                 new NullProgressMonitor());
-        sdg = program.getSDG();
         IFCAnalysis ana = new IFCAnalysis(program);
         return ana;
     }
