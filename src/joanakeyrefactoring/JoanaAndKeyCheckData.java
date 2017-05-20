@@ -7,8 +7,6 @@ package joanakeyrefactoring;
 
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,6 +14,7 @@ import java.util.List;
  * @author holger
  */
 public class JoanaAndKeyCheckData {
+
     private String pathKeY;
     private String pathToJar;
     private String pathToJavaFile;
@@ -25,8 +24,9 @@ public class JoanaAndKeyCheckData {
     private boolean fullyAutomatic;
     private IFCAnalysis analysis;
     private List<SingleAnnotationAdder> singleAnnotationAdders;
+    private StateSaver stateSaver;
 
-    public JoanaAndKeyCheckData(String pathKeY, String pathToJar, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, IFCAnalysis analysis, List<SingleAnnotationAdder> singleAnnotationAdders) {
+    public JoanaAndKeyCheckData(String pathKeY, String pathToJar, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, IFCAnalysis analysis, List<SingleAnnotationAdder> singleAnnotationAdders, StateSaver stateSaver) {
         this.pathKeY = pathKeY;
         this.pathToJar = pathToJar;
         this.pathToJavaFile = pathToJavaFile;
@@ -36,15 +36,20 @@ public class JoanaAndKeyCheckData {
         this.fullyAutomatic = fullyAutomatic;
         this.analysis = analysis;
         this.singleAnnotationAdders = singleAnnotationAdders;
+        this.stateSaver = stateSaver;
     }
-    
+
+    public StateSaver getStateSaver() {
+        return stateSaver;
+    }
+
     public boolean isFullyAutomatic() {
         return fullyAutomatic;
     }
 
     public JavaMethodSignature getEntryMethod() {
         return entryMethod;
-    }  
+    }
 
     public String getPathKeY() {
         return pathKeY;
@@ -69,10 +74,10 @@ public class JoanaAndKeyCheckData {
     public IFCAnalysis getAnalysis() {
         return analysis;
     }
-    
+
     public void addAnnotations() {
         singleAnnotationAdders.forEach((adder) -> {
             adder.addYourselfToAnalysis();
-        });        
+        });
     }
 }

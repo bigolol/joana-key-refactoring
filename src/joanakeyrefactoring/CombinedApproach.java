@@ -6,13 +6,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import com.ibm.wala.ipa.callgraph.pruned.ApplicationLoaderPolicy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.NullProgressMonitor;
-import com.ibm.wala.util.collections.ArraySet;
 import com.ibm.wala.util.graph.GraphIntegrity.UnsoundGraphException;
 
 import edu.kit.joana.api.IFCAnalysis;
@@ -24,9 +22,6 @@ import edu.kit.joana.api.sdg.SDGProgram;
 import edu.kit.joana.api.sdg.SDGProgramPart;
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
-import edu.kit.joana.ifc.sdg.core.violations.paths.ViolationPath;
-import edu.kit.joana.ifc.sdg.graph.SDG;
-import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
 import edu.kit.joana.ifc.sdg.mhpoptimization.MHPType;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
 import edu.kit.joana.util.Stubs;
@@ -66,7 +61,6 @@ public class CombinedApproach {
             throws ClassHierarchyException, IOException, UnsoundGraphException,
             CancelException, CouldntAddAnnoException, CancelException {
         String classpathJavaM = null;
-        StateSaver stateSaver = new StateSaver();
         AutomationHelper automationHelper = new AutomationHelper(checkData.getPathToJavaFile());
         String allClasses = automationHelper.summarizeSourceFiles();
         ParseJavaForKeyListener javaForKeyListener = new ParseJavaForKeyListener(allClasses);
@@ -74,7 +68,7 @@ public class CombinedApproach {
 
         ViolationsViaKeyChecker violationsViaKeyChecker
                 = new ViolationsViaKeyChecker(
-                        automationHelper, checkData, stateSaver, javaForKeyListener);
+                        automationHelper, checkData, javaForKeyListener);
 
         checkData.addAnnotations();
         checkAnnotatedPDGWithJoanaAndKey(checkData.getAnalysis(), violationsViaKeyChecker);
@@ -194,8 +188,8 @@ public class CombinedApproach {
         });
 
         return new JoanaAndKeyCheckData(
-                pathKeY, pathToJar, pathToJavaFile, entryMethodString,
-                annotationPath, entryMethod, fullyAutomatic, analysis, singleAnnotationAdders);
+                pathKeY, pathToJar, pathToJavaFile, entryMethodString, annotationPath,
+                entryMethod, fullyAutomatic, analysis, singleAnnotationAdders, stateSaver);
     }
 
     public static SingleAnnotationAdder createAnnotationAdder(JSONObject jsonObj, BiConsumer<SDGProgramPart, String> annoAddMethod, IFCAnalysis analysis) {

@@ -49,12 +49,11 @@ public class ViolationsViaKeyChecker {
     public ViolationsViaKeyChecker(
             AutomationHelper automationHelper,
             JoanaAndKeyCheckData checkData,
-            StateSaver stateSaver,
             ParseJavaForKeyListener javaForKeyListener) {
         this.javaForKeyListener = javaForKeyListener;
         this.automationHelper = automationHelper;
         this.pathToJar = checkData.getPathToJar();
-        this.stateSaver = stateSaver;
+        this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
         loadAndAddList();
@@ -95,12 +94,10 @@ public class ViolationsViaKeyChecker {
                 SDGNode targetNode = currentEdge.getTarget();
                 boolean removable = true;
 
-//              check all possible method invocations; needed in case of
-//              dynamic dispatch
+//              check all possible method invocations; needed in case of dynamic dispatch
                 Collection<SDGNodeTuple> allMethodInvocationPairs = sdg.getAllFormalPairs(sourceNode, targetNode);
                 for (SDGNodeTuple callTuple : allMethodInvocationPairs) {
-                    //get source and sink node in the callee that induce the
-                    //summary edge
+                    //get source and sink node in the callee that induce the summary edge
                     SDGNode callTupleSource = callTuple.getFirstNode();
                     SDGNode callTupleSink = callTuple.getSecondNode();
                     // skip methods that are already secure
@@ -125,27 +122,11 @@ public class ViolationsViaKeyChecker {
                         break;
                     }
                     if (descSink == null || descOtherParams == null) {
-                        /**
-                         * How to check such a method with KeY?
-                         */
+                        //how to check this?
                         removable = false;
-                        System.out
-                                .print("!DescSink or DescOtherParams = null. For nodes:"
-                                        + callTupleSource + ", " + callTupleSink + "/");
-                        System.out.print("descSink:" + descSink
-                                + ", descOtherParams" + descOtherParams + "/");
-                        System.out.println("/ in method "
-                                + callTupleSource.getBytecodeMethod() + "and: "
-                                + callTupleSink.getBytecodeMethod());
                         break;
                     }
-                    System.out.println("test method\n\t"
-                            + calleNode.getBytecodeMethod() + "\nwith spec:");
-                    System.out.println("\t/*@ requires "
-                            + pointsTo(sdg, calleNode) + ";\n\t  @ determines "
-                            + descSink + " \\by " + descOtherParams + "; */");
-
-                    // wirte method to same file below
+                    // write method to same file below
                     paramInClass = automationHelper.exportJava(b, methodName, descSink,
                             descOtherParams);
                     // create .key file
@@ -162,21 +143,11 @@ public class ViolationsViaKeyChecker {
                     String methodNameKeY = methodName + "(" + params + ")";
                     String newJavaFile = "proofs.sourceFile";
                     automationHelper.createKeYFile(newJavaFile, methodNameKeY);
-                    // executeKeY with parameter
-                    // read result
-                    long timeStartKeY = System.currentTimeMillis();
+                    // executeKeY with parameter, read result
                     boolean result = automationHelper.runKeY(pathToKeyJar, "information flow");
                     boolean resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
-                    System.out.println("Information Flow Result: " + result);
-                    System.out.println("Functional Result: " + resultFunc);
-
-                    long timeEndKeY = System.currentTimeMillis();
-                    System.out.println("Runtime KeYProof: "
-                            + (timeEndKeY - timeStartKeY) / 1000 + " Sec.");
 
                     if (!result || !resultFunc) {
-                        System.out
-                                .println("Could not proof method automatically.");
                         if (!fullyAutomatic) {
                             System.out.println("From node: " + callTupleSource + " to node: "
                                     + callTupleSink);
@@ -207,22 +178,9 @@ public class ViolationsViaKeyChecker {
                         break;
                     }
 
-                    /**
-                     * System.out.println("type y if KeY could prove"); Scanner
-                     * scanInput = new Scanner(System.in); String keyAnswer =
-                     * scanInput.nextLine();
-                     *
-                     * if only one invocation is not found secure, we cannot
-                     * delete that summary edge
-                     *
-                     * if (!keyAnswer.equals("y")) { removable = false; break; }
-                     */
                 }
                 if (removable) {
-                    /**
-                     * remove the summary edge
-                     */
-                    sdg.removeEdge(currentEdge);
+                     sdg.removeEdge(currentEdge);
                     flowSDG.removeEdge(currentEdge);
                     /**
                      * recalculating of the chop after deleting the summary
@@ -237,9 +195,6 @@ public class ViolationsViaKeyChecker {
                     change = true;
                     break;
                 } else {
-                    /**
-                     * we already checked this edge, no need to check again
-                     */
                     checkedEdges.add(currentEdge);
                 }
             }
