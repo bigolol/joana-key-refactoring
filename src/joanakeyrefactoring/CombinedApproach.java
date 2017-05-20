@@ -38,16 +38,6 @@ import org.json.JSONObject;
 
 public class CombinedApproach {
 
-    /**
-     * checks a annotated method with JOANA. If alarms are found, they are
-     * checked with KeY. Jar files used for this must contain sufficient debug
-     * information (parameter names).
-     *
-     * set jar and class here use appropriate path here
-     *
-     * Note that the jar must contain parameter names, therefore it has to be
-     * compiled with sufficient debug information.
-     */
     public static void main(String[] args) {
         try {
             JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/plusminusfalsepos.joak");
@@ -101,7 +91,7 @@ public class CombinedApproach {
             System.out.println("Program proven secure!");
         }
     }
-    
+
     public static void addAnnotationsFileBased(
             IFCAnalysis ana,
             List<String> annotationsSink,
@@ -117,14 +107,7 @@ public class CombinedApproach {
         });
 
     }
-
-    /**
-     * Reads an input file and extract the path to KeY, classpath to the .jar
-     * file, the classpath to the .java file, the entry method and the
-     * annotations
-     *
-     * @param filePath
-     */
+    
     public static JoanaAndKeyCheckData parseInputFile(String filePath)
             throws IOException, ClassHierarchyException, UnsoundGraphException, CancelException {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
@@ -227,22 +210,5 @@ public class CombinedApproach {
                 new NullProgressMonitor());
         IFCAnalysis ana = new IFCAnalysis(program);
         return ana;
-    }
-
-    public static String parseSecLevel(String annotationString) {
-        //format: from part, jzip.MyFileOutputStream.content, low
-        String secLevelStr = annotationString.split(",")[2].trim();
-        if (secLevelStr.equals("high")) {
-            return BuiltinLattices.STD_SECLEVEL_HIGH;
-        }
-        return BuiltinLattices.STD_SECLEVEL_LOW;
-    }
-
-    public static String parseAnnoKind(String annotationString) {
-        return annotationString.split(",")[0].trim();
-    }
-
-    public static String parseAnnoDesc(String annotationString) {
-        return annotationString.split(",")[1].trim();
     }
 }
