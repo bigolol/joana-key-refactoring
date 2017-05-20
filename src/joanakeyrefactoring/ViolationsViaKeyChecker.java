@@ -79,55 +79,54 @@ public class ViolationsViaKeyChecker {
             return true;
         }
         //get edges involved in the flow
-        SDG flowSDG = sdg.subgraph(violationChop);
-        SDGSerializer.toPDGFormat(flowSDG, new FileOutputStream("subgraph.pdg"));
-        List<EdgeMetric> summaryEdges;
+        SDG violationChopInducedSubgraph = sdg.subgraph(violationChop);
         List<SDGEdge> checkedEdges = new ArrayList<SDGEdge>();
         boolean change = true;
         while (change) {
             change = false;
-            summaryEdges = getSummaryEdges(flowSDG, violationSource, violationSink, checkedEdges,
+            List<EdgeMetric> summaryEdges = getSummaryEdges(violationChopInducedSubgraph, violationSource, violationSink, checkedEdges,
                     sdg, neueHeuristic);
             for (EdgeMetric em : summaryEdges) {
-                SDGEdge currentEdge = em.e;
-                SDGNode sourceNode = currentEdge.getSource();
-                SDGNode targetNode = currentEdge.getTarget();
+                //name in the paper: se(a_i, a_o)
+                SDGEdge summaryEdgeToBeChecked = em.e;
+                SDGNode actualInNode = summaryEdgeToBeChecked.getSource();
+                SDGNode actualOutNode = summaryEdgeToBeChecked.getTarget();
                 boolean removable = true;
-
-//              check all possible method invocations; needed in case of dynamic dispatch
-                Collection<SDGNodeTuple> allMethodInvocationPairs = sdg.getAllFormalPairs(sourceNode, targetNode);
-                for (SDGNodeTuple callTuple : allMethodInvocationPairs) {
+                //check all possible method invocations; needed in case of dynamic dispatch
+                //name of this collection in the paper: L_i
+                Collection<SDGNodeTuple> allFormalNodePairsForActualNodes = sdg.getAllFormalPairs(actualInNode, actualOutNode);
+                for (SDGNodeTuple formalNodeTuple : allFormalNodePairsForActualNodes) {
                     //get source and sink node in the callee that induce the summary edge
-                    SDGNode callTupleSource = callTuple.getFirstNode();
-                    SDGNode callTupleSink = callTuple.getSecondNode();
-                    // skip methods that are already secure
-                    if (chopper.chop(callTupleSource, callTupleSink).isEmpty()) {
+                    //name of the nodes in the paper: f_i and f_o
+                    SDGNode formalInNode = formalNodeTuple.getFirstNode();
+                    SDGNode formalOutNode = formalNodeTuple.getSecondNode();
+                    if (chopper.chop(formalInNode, formalOutNode).isEmpty()) {
                         continue;
                     }
-                    SDGNode calleNode = sdg.getEntry(callTupleSource);
+                    SDGNode calledMethodNode = sdg.getEntry(formalInNode);
                     //generate spec for KeY
-                    String descSink = descSink(callTupleSink, sdg);
-                    String descOtherParams = descOtherParams(callTupleSource, sdg);
-                    String calleeByteCodeMethod = calleNode.getBytecodeMethod();
+                    String descOfFormalOutNode = descSink(formalOutNode, sdg);
+                    String descOfFormalInNode = descOtherParams(formalInNode, sdg);
+                    String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
                     Boolean javaLibary = false;
-                    if (calleeByteCodeMethod.contains("java.") || calleeByteCodeMethod.contains("lang")) {
+                    if (calledMethodByteCode.contains("java.") || calledMethodByteCode.contains("lang")) {
                         javaLibary = true;
                     }
-                    String descriptionStringForKey = "\t/*@ requires " + pointsTo(sdg, calleNode)
-                            + ";\n\t  @ determines " + descSink + " \\by "
-                            + descOtherParams + "; */";
-                    String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
+                    String descriptionStringForKey = "\t/*@ requires " + pointsTo(sdg, calledMethodNode)
+                            + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
+                            + descOfFormalInNode + "; */";
+                    String methodName = getMethodNameFromBytecode(calledMethodByteCode);
                     if (!isKeyCompatible(methodName, javaLibary)) {
                         removable = false;
                         break;
                     }
-                    if (descSink == null || descOtherParams == null) {
+                    if (descOfFormalOutNode == null || descOfFormalInNode == null) {
                         //how to check this?
                         removable = false;
                         break;
                     }
                     // write method to same file below
-                    paramInClass = automationHelper.exportJava(descriptionStringForKey, methodName, descSink, descOtherParams);
+                    paramInClass = automationHelper.exportJava(descriptionStringForKey, methodName, descOfFormalOutNode, descOfFormalInNode);
                     // create .key file
                     String params = "";
                     if (paramInClass != null) {
@@ -148,8 +147,8 @@ public class ViolationsViaKeyChecker {
 
                     if (!result || !resultFunc) {
                         if (!fullyAutomatic) {
-                            System.out.println("From node: " + callTupleSource + " to node: "
-                                    + callTupleSink);
+                            System.out.println("From node: " + formalInNode + " to node: "
+                                    + formalOutNode);
                             System.out
                                     .println("type \"y\" to verify method manually or \"n\" to go on automatically ");
                             Scanner scanInput = new Scanner(System.in);
@@ -179,8 +178,8 @@ public class ViolationsViaKeyChecker {
 
                 }
                 if (removable) {
-                     sdg.removeEdge(currentEdge);
-                    flowSDG.removeEdge(currentEdge);
+                    sdg.removeEdge(summaryEdgeToBeChecked);
+                    violationChopInducedSubgraph.removeEdge(summaryEdgeToBeChecked);
                     /**
                      * recalculating of the chop after deleting the summary
                      * edge; if the new chop is empty, our alarm is found to be
@@ -190,11 +189,11 @@ public class ViolationsViaKeyChecker {
                     if (violationChop.isEmpty()) {
                         return true;
                     }
-                    flowSDG = flowSDG.subgraph(violationChop);
+                    violationChopInducedSubgraph = violationChopInducedSubgraph.subgraph(violationChop);
                     change = true;
                     break;
                 } else {
-                    checkedEdges.add(currentEdge);
+                    checkedEdges.add(summaryEdgeToBeChecked);
                 }
             }
         }
