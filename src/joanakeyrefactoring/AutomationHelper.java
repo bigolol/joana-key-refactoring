@@ -23,15 +23,15 @@ import java.util.regex.Pattern;
  */
 public class AutomationHelper {
 
-    public String classpathJava;
-    public String[] paramInClass;
+    private final String pathToJavaFile;
+    private String[] paramInClass;
     private ArrayList<String> classNames = new ArrayList<>();
     final static String lineSeparator = System.getProperty("line.separator");
     private ParseJavaForKeyListener javaForKeyListener;
     private HashMap<String, String> classes = new HashMap<>();
 
     public AutomationHelper(String classpathJava) {
-        this.classpathJava = classpathJava;
+        this.pathToJavaFile = classpathJava;
     }
 
     /**
@@ -83,7 +83,7 @@ public class AutomationHelper {
      * @return a String summarizing all .java files
      */
     public String summarizeSourceFiles() {
-        String packagePath = classpathJava;
+        String packagePath = pathToJavaFile;
         StringBuilder sb = new StringBuilder();
         final File folder = new File(packagePath);
         ArrayList<File> fileNames = listFilesForFolder(folder);
@@ -544,7 +544,7 @@ public class AutomationHelper {
         // read method
         try {
             BufferedReader br = new BufferedReader(
-                    new FileReader(classpathJava));
+                    new FileReader(pathToJavaFile));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
             int counter = -1;
@@ -599,7 +599,7 @@ public class AutomationHelper {
         // read global variables
         try {
             BufferedReader br = new BufferedReader(
-                    new FileReader(classpathJava));
+                    new FileReader(pathToJavaFile));
             StringBuilder sbGV = new StringBuilder();
             String line = br.readLine();
 
@@ -630,7 +630,7 @@ public class AutomationHelper {
         ArrayList<String> allMethodNames2 = new ArrayList<String>();
         try {
             BufferedReader br = new BufferedReader(
-                    new FileReader(classpathJava));
+                    new FileReader(pathToJavaFile));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
             int counter = -1;
@@ -741,7 +741,7 @@ public class AutomationHelper {
             methodName = allMethodNames.get(i);
             try {
                 BufferedReader br = new BufferedReader(new FileReader(
-                        classpathJava));
+                        pathToJavaFile));
                 StringBuilder sbOtherMethod = new StringBuilder();
                 String line = br.readLine();
                 int counter = -1;

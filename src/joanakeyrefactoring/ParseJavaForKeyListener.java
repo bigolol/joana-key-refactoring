@@ -2,6 +2,8 @@ package joanakeyrefactoring;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import joanakeyrefactoring.antlr.JavaBaseListener;
 import joanakeyrefactoring.antlr.JavaLexer;
@@ -19,34 +21,33 @@ import org.antlr.v4.runtime.tree.*;
  */
 public class ParseJavaForKeyListener extends JavaBaseListener {
 
-    private static ArrayList<String[]> fields = new ArrayList<String[]>();
-    private static HashMap<String, String> methods = new HashMap<String, String>();
-    private static HashMap<String, String> methodsAndClasses = new HashMap<String, String>();
-    private static HashMap<String, String> constructors = new HashMap<String, String>();
-    private static HashMap<String, String[]> params = new HashMap<String, String[]>();
-    private static HashMap<String, ArrayList<String>> creators = new HashMap<String, ArrayList<String>>();
-    private static ArrayList<String> createdName = new ArrayList<String>();
+    private static List<String[]> fields = new ArrayList<>();
+    private static Map<String, String> methods = new HashMap<>();
+    private static Map<String, String> methodsAndClasses = new HashMap<>();
+    private static Map<String, String> constructors = new HashMap<>();
+    private static Map<String, String[]> params = new HashMap<>();
+    private static Map<String, List<String>> creators = new HashMap<>();
+    private static List<String> createdName = new ArrayList<>();
     private static String methodName = "";
     private static String holeMethod = "";
     private boolean inConstructor = false;
     private String constructorName;
     private String className = "";
     private String holeMethodMinus1;
-    private static HashMap<String, String> paramsWithNullable = new HashMap<String, String>();
-    private static ArrayList<String> fieldsCorrect = new ArrayList<String>();
-    private static ArrayList<String> classList = new ArrayList<String>();
+    private static Map<String, String> paramsWithNullable = new HashMap<>();
+    private static List<String> fieldsCorrect = new ArrayList<>();
+    private static List<String> classList = new ArrayList<>();
 
     public ParseJavaForKeyListener() {
 
     }
 
     public ParseJavaForKeyListener(String allClasses) {
-        fields = new ArrayList<String[]>();
         ANTLRInputStream input = new ANTLRInputStream(allClasses);
         saveAllRequirements(input);
     }
 
-    public ArrayList<String[]> getFields() {
+    public List<String[]> getFields() {
         return fields;
     }
 
@@ -80,7 +81,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return paramsWithNullable.get(methodName);
     }
 
-    public ArrayList<String> getClassList() {
+    public List<String> getClassList() {
         return classList;
     }
 
@@ -98,7 +99,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return params.get(methodName);
     }
 
-    public ArrayList<String> getCreatedNames(String methodName) {
+    public List<String> getCreatedNames(String methodName) {
         return creators.get(methodName);
     }
 
@@ -183,15 +184,12 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     @Override
     public void enterMyMethodName(JavaParser.MyMethodNameContext ctx) {
         createdName = new ArrayList<String>();
-        // System.out.println("----------------------------------------");
-        // System.out.println("methodName: " + ctx.getText());
         methodName = ctx.getText();
         methods.put(methodName, holeMethod);
         methodsAndClasses.put(methodName, className);
         if (holeMethod.contains(".substring")
                 || holeMethod.contains(".getByte")) {
             createdName.add("String.methods");
-            //System.out.println("String.methods");
         }
         creators.put(methodName, createdName);
     }
@@ -247,40 +245,20 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     }
 
     private static void printCompilationUnit(ANTLRInputStream input) {
-        // Get our lexer
         JavaLexer lexer = new JavaLexer(input);
-
-        // Get a list of matched tokens
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        // Pass the tokens to the parser
         JavaParser parser = new JavaParser(tokens);
-
-        // Specify our entry point
-        JavaParser.CompilationUnitContext compilationUnitContext = parser
-                .compilationUnit();
-
-        // Walk it and attach our listener
+        JavaParser.CompilationUnitContext compilationUnitContext = parser.compilationUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
         ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
         walker.walk(listener, compilationUnitContext);
     }
 
     private void saveAllRequirements(ANTLRInputStream input) {
-        // Get our lexer
         JavaLexer lexer = new JavaLexer(input);
-
-        // Get a list of matched tokens
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        // Pass the tokens to the parser
         JavaParser parser = new JavaParser(tokens);
-
-        // Specify our entry point
-        JavaParser.CompilationUnitContext compilationUnitContext = parser
-                .compilationUnit();
-
-        // Walk it and attach our listener
+        JavaParser.CompilationUnitContext compilationUnitContext = parser.compilationUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
         ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
         walker.walk(listener, compilationUnitContext);
