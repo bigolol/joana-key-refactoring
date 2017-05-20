@@ -316,9 +316,7 @@ public class ViolationsViaKeyChecker {
         String b = "\t/*@ requires " + pointsTo(sdg, m)
                 + ";\n\t  @ determines " + descSink(sink, sdg) + " \\by "
                 + descOtherParams(source, sdg) + "; */";
-        String[] a2 = a1.split("\\.");
-        String[] a3 = a2[a2.length - 1].split("\\(");
-        String methodName = a3[0];
+        String methodName = getMethodNameFromBytecode(a1);
         // wirte method to same file below
         paramInClass = automationHelper.exportJava(b, methodName, descSink(sink, sdg),
                 descOtherParams(source, sdg));
@@ -401,32 +399,26 @@ public class ViolationsViaKeyChecker {
             SDGNode sink, List<SDGEdge> checkedEdges, SDG sdg,
             boolean neueHeuristic) {
         List<EdgeMetric> summaryEdges = new ArrayList<EdgeMetric>();
-
-        /**
-         * clone() is needed because removing/adding edges to check for bridges
-         * throws the iterator off
-         */
+        //clone() is needed because removing/adding edges to check for bridges throws the iterator off
         Collection<SDGEdge> clonedEdgesFromflowSDG = flowSDG.clone().edgeSet();
         for (SDGEdge currentEdge : clonedEdgesFromflowSDG) {
             if (currentEdge.getKind() == SDGEdge.Kind.SUMMARY
                     && !checkedEdges.contains(currentEdge)) {
                 SDGNode callee = sdg.getEntry(currentEdge.getSource());
-                String a1 = callee.getBytecodeMethod();
-                Boolean javaLibary = false;
-                if (a1.contains("java.") || a1.contains(".lang.")) {
-                    javaLibary = true;
+                String calleeByteCodeMethod = callee.getBytecodeMethod();
+                Boolean isPartOfJavaLibrary = false;
+                if (calleeByteCodeMethod.contains("java.") || calleeByteCodeMethod.contains(".lang.")) {
+                    isPartOfJavaLibrary = true;
                 }
-                String[] a2 = a1.split("\\.");
-                String[] a3 = a2[a2.length - 1].split("\\(");
-                String methodName = a3[0];
+                String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
                 boolean isKeYCompatible = isKeyCompatible(methodName,
-                        javaLibary);
+                        isPartOfJavaLibrary);
                 /**
                  * check whether method matches a pattern
                  */
                 boolean machtesPattern = isKeYCompatible;
                 if (machtesPattern) {
-                    System.out.println("True: " + methodName + " " + javaLibary
+                    System.out.println("True: " + methodName + " " + isPartOfJavaLibrary
                             + " " + currentEdge.getSource() + ", " + currentEdge.getTarget());
                 }
 
@@ -446,6 +438,13 @@ public class ViolationsViaKeyChecker {
          */
         Collections.sort(summaryEdges);
         return summaryEdges;
+    }
+
+    private String getMethodNameFromBytecode(String byteCodeMethod) {
+        String[] a2 = byteCodeMethod.split("\\.");
+        String[] a3 = a2[a2.length - 1].split("\\(");
+        String methodName = a3[0];
+        return methodName;
     }
 
     private boolean isKeyCompatible(String methodName, Boolean javaLibary) {
