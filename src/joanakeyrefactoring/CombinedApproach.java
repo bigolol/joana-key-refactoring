@@ -107,7 +107,7 @@ public class CombinedApproach {
         });
 
     }
-    
+
     public static JoanaAndKeyCheckData parseInputFile(String filePath)
             throws IOException, ClassHierarchyException, UnsoundGraphException, CancelException {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
@@ -162,7 +162,14 @@ public class CombinedApproach {
     }
 
     public static SingleAnnotationAdder createAnnotationAdder(JSONObject jsonObj, BiConsumer<SDGProgramPart, String> annoAddMethod, IFCAnalysis analysis) {
-        String securityLevel = jsonObj.getString("securityLevel");
+        String securityLevelString = jsonObj.getString("securityLevel");
+        String securityLevelLattice = "";
+        if (securityLevelString.equals("high")) {
+            securityLevelLattice = BuiltinLattices.STD_SECLEVEL_HIGH;
+        } else if(securityLevelString.equals("low")) {
+            securityLevelLattice = BuiltinLattices.STD_SECLEVEL_LOW;
+        }
+
         JSONObject description = jsonObj.getJSONObject("description");
         String from = description.getString("from");
         Supplier<Collection<SDGProgramPart>> partSupplier = null;
@@ -185,7 +192,7 @@ public class CombinedApproach {
                     };
         }
 
-        return new SingleAnnotationAdder(partSupplier, annoAddMethod, securityLevel);
+        return new SingleAnnotationAdder(partSupplier, annoAddMethod, securityLevelLattice);
 
     }
 

@@ -71,10 +71,10 @@ public class ViolationsViaKeyChecker {
         File file = new File("proofs\\sourceFile.java");
         boolean neueHeuristic = true;
         this.chopper = new RepsRosayChopper(sdg);
-        LinkedList<SecurityNode> list = violationPath.getPathList();
-        SDGNode source = list.get(0);
-        SDGNode sink = list.get(1);
-        Collection<SDGNode> nodesInvolvedInIllegalFlow = chopper.chop(source, sink);
+        LinkedList<SecurityNode> violationPathList = violationPath.getPathList();
+        SDGNode violationSource = violationPathList.get(0);
+        SDGNode violationSink = violationPathList.get(1);
+        Collection<SDGNode> nodesInvolvedInIllegalFlow = chopper.chop(violationSource, violationSink);
         if (nodesInvolvedInIllegalFlow.isEmpty()) {
             return true;
         }
@@ -86,7 +86,7 @@ public class ViolationsViaKeyChecker {
         boolean change = true;
         while (change) {
             change = false;
-            summaryEdges = getSummaryEdges(flowSDG, source, sink, checkedEdges,
+            summaryEdges = getSummaryEdges(flowSDG, violationSource, violationSink, checkedEdges,
                     sdg, neueHeuristic);
             for (EdgeMetric em : summaryEdges) {
                 SDGEdge currentEdge = em.e;
@@ -113,7 +113,7 @@ public class ViolationsViaKeyChecker {
                     if (calleeByteCodeMethod.contains("java.") || calleeByteCodeMethod.contains("lang")) {
                         javaLibary = true;
                     }
-                    String b = "\t/*@ requires " + pointsTo(sdg, calleNode)
+                    String descriptionStringForKey = "\t/*@ requires " + pointsTo(sdg, calleNode)
                             + ";\n\t  @ determines " + descSink + " \\by "
                             + descOtherParams + "; */";
                     String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
@@ -127,7 +127,7 @@ public class ViolationsViaKeyChecker {
                         break;
                     }
                     // write method to same file below
-                    paramInClass = automationHelper.exportJava(b, methodName, descSink,
+                    paramInClass = automationHelper.exportJava(descriptionStringForKey, methodName, descSink,
                             descOtherParams);
                     // create .key file
                     String params = "";
@@ -187,7 +187,7 @@ public class ViolationsViaKeyChecker {
                      * edge; if the new chop is empty, our alarm is found to be
                      * a false alarm
                      */
-                    nodesInvolvedInIllegalFlow = chopper.chop(source, sink);
+                    nodesInvolvedInIllegalFlow = chopper.chop(violationSource, violationSink);
                     if (nodesInvolvedInIllegalFlow.isEmpty()) {
                         return true;
                     }
@@ -204,11 +204,11 @@ public class ViolationsViaKeyChecker {
          * all summary edges are checked but the program is not found secure, so
          * we have to check the top level: the annotated method itself
          */
-        boolean result = checkTopLevelComplete(sdg, source, source, sink, file);
+        boolean result = checkTopLevelComplete(sdg, violationSource, violationSource, violationSink, file);
         if (!result) {
-            result = checkTopLevelComplete(sdg, sink, source, sink, file);
+            result = checkTopLevelComplete(sdg, violationSink, violationSource, violationSink, file);
             if (!result) {
-                result = checkTopLevelComplete(sdg, sink, source, sink, file);
+                result = checkTopLevelComplete(sdg, violationSink, violationSource, violationSink, file);
             }
         }
         if (result) {

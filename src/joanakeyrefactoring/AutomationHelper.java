@@ -25,10 +25,10 @@ public class AutomationHelper {
 
     public String classpathJava;
     public String[] paramInClass;
-    private ArrayList<String> classNames = new ArrayList<String>();
+    private ArrayList<String> classNames = new ArrayList<>();
     final static String lineSeparator = System.getProperty("line.separator");
     private ParseJavaForKeyListener javaForKeyListener;
-    private HashMap<String, String> classes = new HashMap<String, String>();
+    private HashMap<String, String> classes = new HashMap<>();
 
     public AutomationHelper(String classpathJava) {
         this.classpathJava = classpathJava;
@@ -80,7 +80,6 @@ public class AutomationHelper {
     }
 
     /**
-     *
      * @return a String summarizing all .java files
      */
     public String summarizeSourceFiles() {
@@ -108,7 +107,6 @@ public class AutomationHelper {
             sb.append(System.lineSeparator());
         }
         return sb.toString();
-
     }
 
     /**
@@ -134,15 +132,15 @@ public class AutomationHelper {
     /**
      * Exports all necessary code into one file.
      *
-     * @param b
+     * @param descriptionForKey
      * @param methodName
      * @param descSink
      * @param descOtherParams
      * @return the parameter of the method that is to be proven
      */
-    public String[] exportJava(String b, String methodName, String descSink,
+    public String[] exportJava(String descriptionForKey, String methodName, String descSink,
             String descOtherParams) {
-        ArrayList<String> allMethodNames = new ArrayList<String>();
+        ArrayList<String> allMethodNames = new ArrayList<>();
 
         // TODO: use Parser change classpathJava to classpathPackage
         // Global Variables with Parser:
@@ -235,7 +233,7 @@ public class AutomationHelper {
             writer.println("package proofs;");
             writer.println("public class sourceFile{");
             writer.println(globalVariables);
-            writer.println(b);
+            writer.println(descriptionForKey);
             writer.println(completeMethod);
             writer.println(allOtherMethods);
             writer.println(System.lineSeparator() + "}");
