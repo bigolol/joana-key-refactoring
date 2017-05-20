@@ -14,10 +14,7 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.*;
 
 /**
- *
  * @author Marko Kleine B�ning
- *
- *
  */
 public class ParseJavaForKeyListener extends JavaBaseListener {
 
@@ -39,7 +36,6 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     private static List<String> classList = new ArrayList<>();
 
     public ParseJavaForKeyListener() {
-
     }
 
     public ParseJavaForKeyListener(String allClasses) {
@@ -126,8 +122,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     }
 
     @Override
-    public void enterConstructorDeclaration(
-            JavaParser.ConstructorDeclarationContext ctx) {
+    public void enterConstructorDeclaration(JavaParser.ConstructorDeclarationContext ctx) {
         inConstructor = true;
         constructors.put(ctx.getChild(0).getText(), ctx.getText());
         constructorName = ctx.getChild(0).getText();
@@ -210,8 +205,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     }
 
     @Override
-    public void enterFormalParameterList(
-            JavaParser.FormalParameterListContext ctx) {
+    public void enterFormalParameterList(JavaParser.FormalParameterListContext ctx) {
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a, b);

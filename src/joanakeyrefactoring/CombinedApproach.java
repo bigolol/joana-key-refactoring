@@ -50,9 +50,8 @@ public class CombinedApproach {
     public static void runTestFromCheckData(JoanaAndKeyCheckData checkData)
             throws ClassHierarchyException, IOException, UnsoundGraphException,
             CancelException, CouldntAddAnnoException, CancelException {
-        String classpathJavaM = null;
         AutomationHelper automationHelper = new AutomationHelper(checkData.getPathToJavaFile());
-        String allClasses = automationHelper.summarizeSourceFiles();
+        String allClasses = automationHelper.readAllSourceFilesIntoOneStringAndFillClassMap();
         ParseJavaForKeyListener javaForKeyListener = new ParseJavaForKeyListener(allClasses);
         automationHelper.setJavaForKeyListener(javaForKeyListener);
 

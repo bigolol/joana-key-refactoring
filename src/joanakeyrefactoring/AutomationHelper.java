@@ -10,8 +10,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,8 +34,8 @@ public class AutomationHelper {
     private ParseJavaForKeyListener javaForKeyListener;
     private HashMap<String, String> classes = new HashMap<>();
 
-    public AutomationHelper(String classpathJava) {
-        this.pathToJavaFile = classpathJava;
+    public AutomationHelper(String pathToJavaFile) {
+        this.pathToJavaFile = pathToJavaFile;
     }
 
     /**
@@ -83,31 +86,39 @@ public class AutomationHelper {
     /**
      * @return a String summarizing all .java files
      */
-    public String summarizeSourceFiles() {
-        String packagePath = pathToJavaFile;
-        StringBuilder sb = new StringBuilder();
-        final File folder = new File(packagePath);
-        ArrayList<File> fileNames = listFilesForFolder(folder);
-        for (File file : fileNames) {
-            StringBuilder sbFile = new StringBuilder();
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String line = br.readLine();
-                while (line != null) {
-                    if (!line.contains("package")) {
-                        sbFile.append(line);
-                        sbFile.append(System.lineSeparator());
-                    }
-                    line = br.readLine();
+    public String readAllSourceFilesIntoOneStringAndFillClassMap() {
+        StringBuilder stringBuilder = new StringBuilder();
+        final File folder = new File(pathToJavaFile);
+        Collection<File> javaFiles = listAllJavaFilesInFolder(folder);
+        javaFiles.forEach((file) -> {
+            String fileContent = putFileContentsIntoStringAndIntoClassMap(file);
+            stringBuilder.append(fileContent);
+            stringBuilder.append(System.lineSeparator());
+        });
+        return stringBuilder.toString();
+    }
+
+    public String putFileContentsIntoStringAndIntoClassMap(File file) {
+        StringBuilder stringBuilderForFile = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                if (!lineIsntPackageDecl(line)) {
+                    stringBuilderForFile.append(line);
+                    stringBuilderForFile.append(System.lineSeparator());
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            sb.append(sbFile);
-            classes.put(file.getName().split("\\.")[0], sbFile.toString());
-            sb.append(System.lineSeparator());
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(AutomationHelper.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(AutomationHelper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return sb.toString();
+        classes.put(file.getName().split("\\.")[0], stringBuilderForFile.toString());
+        return stringBuilderForFile.toString();
+    }
+
+    private static boolean lineIsntPackageDecl(String line) {
+        return line.contains("package");
     }
 
     /**
@@ -117,14 +128,16 @@ public class AutomationHelper {
      * @param folder becomes a folder of .java files
      * @return ArrayList of all files in the folder
      */
-    public ArrayList<File> listFilesForFolder(final File folder) {
-        ArrayList<File> fileNames = new ArrayList<File>();
+    public Collection<File> listAllJavaFilesInFolder(final File folder) {
+        List<File> fileNames = new ArrayList<File>();
         for (final File fileEntry : folder.listFiles()) {
             if (fileEntry.isDirectory()) {
-                listFilesForFolder(fileEntry);
+                listAllJavaFilesInFolder(fileEntry);
             } else {
-                classNames.add(fileEntry.getName().split("\\.")[0]);
-                fileNames.add(fileEntry);
+                if (fileEntry.getName().trim().endsWith(".java")) {
+                    classNames.add(fileEntry.getName().split("\\.")[0]);
+                    fileNames.add(fileEntry);
+                }
             }
         }
         return fileNames;
