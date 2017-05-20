@@ -25,7 +25,6 @@ import com.ibm.wala.util.intset.OrdinalSet;
 
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation;
-import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation.Chop;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
 import edu.kit.joana.ifc.sdg.core.violations.paths.ViolationPath;
 import edu.kit.joana.ifc.sdg.graph.SDG;
@@ -48,7 +47,7 @@ public class ViolationsViaKeyChecker {
     private ParseJavaForKeyListener javaForKeyListener;
 
     public ViolationsViaKeyChecker(
-            AutomationHelper automationHelper, 
+            AutomationHelper automationHelper,
             JoanaAndKeyCheckData checkData,
             StateSaver stateSaver,
             ParseJavaForKeyListener javaForKeyListener) {
@@ -69,20 +68,19 @@ public class ViolationsViaKeyChecker {
      * @throws FileNotFoundException
      */
     public boolean checkViolation(IViolation<SecurityNode> violationNode, SDG sdg) throws FileNotFoundException {
-        ViolationPath violationPath = getVP(violationNode);
+        ViolationPath violationPath = getViolationPath(violationNode);
         File file = new File("proofs\\sourceFile.java");
         boolean neueHeuristic = true;
         this.chopper = new RepsRosayChopper(sdg);
         LinkedList<SecurityNode> list = violationPath.getPathList();
         SDGNode source = list.get(0);
         SDGNode sink = list.get(1);
-        //get collection of nodes involved in illegal flow
-        Collection<SDGNode> c = chopper.chop(source, sink);
-        if (c.isEmpty()) {
+        Collection<SDGNode> nodesInvolvedInIllegalFlow = chopper.chop(source, sink);
+        if (nodesInvolvedInIllegalFlow.isEmpty()) {
             return true;
         }
         //get edges involved in the flow
-        SDG flowSDG = sdg.subgraph(c);
+        SDG flowSDG = sdg.subgraph(nodesInvolvedInIllegalFlow);
         SDGSerializer
                 .toPDGFormat(flowSDG, new FileOutputStream("subgraph.pdg"));
         List<EdgeMetric> summaryEdges;
@@ -243,11 +241,11 @@ public class ViolationsViaKeyChecker {
                      * edge; if the new chop is empty, our alarm is found to be
                      * a false alarm
                      */
-                    c = chopper.chop(source, sink);
-                    if (c.isEmpty()) {
+                    nodesInvolvedInIllegalFlow = chopper.chop(source, sink);
+                    if (nodesInvolvedInIllegalFlow.isEmpty()) {
                         return true;
                     }
-                    flowSDG = flowSDG.subgraph(c);
+                    flowSDG = flowSDG.subgraph(nodesInvolvedInIllegalFlow);
                     change = true;
                     break;
                 } else {
@@ -408,104 +406,45 @@ public class ViolationsViaKeyChecker {
          * clone() is needed because removing/adding edges to check for bridges
          * throws the iterator off
          */
-        System.out.print("Starting...");
-        Collection<SDGEdge> edges = flowSDG.clone().edgeSet();
-        System.out.println("Ended cloning");
-        System.out.println("Number of edeges: " + edges.size());
-        for (SDGEdge e : edges) {
-            if (e.getKind() == SDGEdge.Kind.SUMMARY
-                    && !checkedEdges.contains(e)) {
-                // System.out.println("Enter Summary Edge...");
-                SDGNode callee = sdg.getEntry(e.getSource());
+        Collection<SDGEdge> clonedEdgesFromflowSDG = flowSDG.clone().edgeSet();
+        for (SDGEdge currentEdge : clonedEdgesFromflowSDG) {
+            if (currentEdge.getKind() == SDGEdge.Kind.SUMMARY
+                    && !checkedEdges.contains(currentEdge)) {
+                SDGNode callee = sdg.getEntry(currentEdge.getSource());
                 String a1 = callee.getBytecodeMethod();
                 Boolean javaLibary = false;
                 if (a1.contains("java.") || a1.contains(".lang.")) {
                     javaLibary = true;
                 }
-                // if (a1.contains("unZipItByte")) {
-                // System.out.println("javaLibary: " + javaLibary);
-                // }
-                // if (a1.contains("unZipItExtract")) {
-                // System.out.println("unZipItExtract: " + "javaLibary: "
-                // + javaLibary);
-                // }
-                // System.out.print("  Bytecodename: " + a1);
                 String[] a2 = a1.split("\\.");
                 String[] a3 = a2[a2.length - 1].split("\\(");
                 String methodName = a3[0];
-                // System.out.print("Summary Edge: ");
-                // System.out.print("Soruce: " + e.getSource());
-                // System.out.print("Target: " + e.getTarget());
-
                 boolean isKeYCompatible = isKeyCompatible(methodName,
                         javaLibary);
-                // if (a1.contains("unZipItByte")) {
-                // System.out.println("isKeYC: " + isKeYCompatible);
-                // }
-                // if (a1.contains("unZipItExtract")) {
-                // System.out.println("unZipItExtract: " + "isKeYC: "
-                // + isKeYCompatible);
-                // }
                 /**
                  * check whether method matches a pattern
                  */
                 boolean machtesPattern = isKeYCompatible;
                 if (machtesPattern) {
                     System.out.println("True: " + methodName + " " + javaLibary
-                            + " " + e.getSource() + ", " + e.getTarget());
+                            + " " + currentEdge.getSource() + ", " + currentEdge.getTarget());
                 }
-                // System.out.println(" compatible:" + isKeYCompatible);
-                // machtesPattern = checkPattern(e, sdg);
 
                 boolean isBridge = false;
-                // if (e.getSource().getBytecodeMethod().contains("unzip")
-                // || e.getTarget().getBytecodeMethod().contains("unzip")) {
-                // isBridge = true;
-                // }
-                // System.out.print("(se)");
-                /**
-                 * check whether e is a bridge
-                 */
-                // flowSDG.removeEdge(e);
-                // System.out.print("Starting chopping ");
-
-                // chopper.chop(source, sink).isEmpty();
-                // System.out.println("Ended chopping ");
-                // flowSDG.addEdge(e);
-                /**
-                 * check whether a low parameter is regarded *
-                 */
-                // boolean regardsLow = regardsLowPattern(e, sdg);
-                /**
-                 * get the number of summary edges contained by the flow
-                 * summarized by e
-                 */
-                // SDGNode v = e.getSource();
-                // SDGNode w = e.getTarget();
-                // SDG containedSDG = flowSDG.subgraph(chopper.chop(v, w));
                 int containedSummary = 0;
-                // for (SDGEdge e2 : containedSDG.edgeSet()) {
-                // if (e2.getKind() == SDGEdge.Kind.SUMMARY) {
-                // containedSummary++;
-                // }
-                // }
                 if (neueHeuristic) {
-                    summaryEdges.add(new EdgeMetric(e, machtesPattern,
+                    summaryEdges.add(new EdgeMetric(currentEdge, machtesPattern,
                             isBridge, containedSummary));
                 } else {
-                    summaryEdges.add(new EdgeMetric(e, isBridge,
+                    summaryEdges.add(new EdgeMetric(currentEdge, isBridge,
                             containedSummary));
                 }
             }
         }
-        System.out.print("Sorting: ");
         /**
          * sort according to edge metric
          */
         Collections.sort(summaryEdges);
-        System.out.println("finished.");
-        System.out.println("Number of summary edges: " + summaryEdges.size());
-
         return summaryEdges;
     }
 
@@ -980,15 +919,7 @@ public class ViolationsViaKeyChecker {
     /**
      * get violation path
      */
-    public ViolationPath getVP(IViolation<SecurityNode> v) {
-        return getVP(getChop(v));
-    }
-
-    private ViolationPath getVP(Chop c) {
-        return c.getViolationPathes().getPathesList().get(0);
-    }
-
-    private Chop getChop(IViolation<SecurityNode> v) {
-        return ((ClassifiedViolation) v).getChops().iterator().next();
+    public ViolationPath getViolationPath(IViolation<SecurityNode> v) {
+        return ((ClassifiedViolation) v).getChops().iterator().next().getViolationPathes().getPathesList().get(0);
     }
 }
