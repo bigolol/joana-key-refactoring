@@ -58,6 +58,27 @@ public class ViolationsViaKeyChecker {
         this.pathToKeyJar = checkData.getPathKeY();
         loadAndAddList();
     }
+    private class ViolationPathSourceAndSink {
+        public final SDGNode violationSource;
+        public final SDGNode violationSink;
+        public final Collection<SDGNode> violationChop;
+
+        public ViolationPathSourceAndSink(SDGNode violationSource, SDGNode violationSink, Collection<SDGNode> violationChop) {
+            this.violationSource = violationSource;
+            this.violationSink = violationSink;
+            this.violationChop = violationChop;
+        }
+    }
+
+    private ViolationPathSourceAndSink getViolationChopForSecNodeViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
+        ViolationPath violationPath = getViolationPath(violationNode);
+        this.chopper = new RepsRosayChopper(sdg);
+        LinkedList<SecurityNode> violationPathList = violationPath.getPathList();
+        SDGNode violationSource = violationPathList.get(0);
+        SDGNode violationSink = violationPathList.get(1);
+        Collection<SDGNode> violationChop = chopper.chop(violationSource, violationSink);
+        return new ViolationPathSourceAndSink(violationSource, violationSink, violationChop);
+    }
 
     /**
      * checks a violation (information about one supposed illegal flow) uses KeY
@@ -67,28 +88,22 @@ public class ViolationsViaKeyChecker {
      * @throws FileNotFoundException
      */
     public boolean checkViolation(IViolation<SecurityNode> violationNode, SDG sdg) throws FileNotFoundException {
-        ViolationPath violationPath = getViolationPath(violationNode);
         File file = new File("proofs\\sourceFile.java");
         boolean neueHeuristic = true;
-        this.chopper = new RepsRosayChopper(sdg);
-        LinkedList<SecurityNode> violationPathList = violationPath.getPathList();
-        SDGNode violationSource = violationPathList.get(0);
-        SDGNode violationSink = violationPathList.get(1);
-        Collection<SDGNode> violationChop = chopper.chop(violationSource, violationSink);
-        if (violationChop.isEmpty()) {
+        ViolationPathSourceAndSink violationPathSourceAndSink = getViolationChopForSecNodeViolation(violationNode, sdg);
+        if (violationPathSourceAndSink.violationChop.isEmpty()) {
             return true;
         }
         //get edges involved in the flow
-        SDG violationChopInducedSubgraph = sdg.subgraph(violationChop);
+        SDG violationChopInducedSubgraph = sdg.subgraph(violationPathSourceAndSink.violationChop);
         List<SDGEdge> checkedEdges = new ArrayList<SDGEdge>();
         boolean change = true;
         while (change) {
             change = false;
-            List<EdgeMetric> summaryEdges = getSummaryEdges(violationChopInducedSubgraph, violationSource, violationSink, checkedEdges,
-                    sdg, neueHeuristic);
-            for (EdgeMetric em : summaryEdges) {
+            List<EdgeMetric> summaryEdges = getSummaryEdges(violationChopInducedSubgraph, checkedEdges, sdg, neueHeuristic);
+            for (EdgeMetric edgeMetric : summaryEdges) {
                 //name in the paper: se(a_i, a_o)
-                SDGEdge summaryEdgeToBeChecked = em.e;
+                SDGEdge summaryEdgeToBeChecked = edgeMetric.edge;
                 SDGNode actualInNode = summaryEdgeToBeChecked.getSource();
                 SDGNode actualOutNode = summaryEdgeToBeChecked.getTarget();
                 boolean removable = true;
@@ -112,7 +127,7 @@ public class ViolationsViaKeyChecker {
                     if (calledMethodByteCode.contains("java.") || calledMethodByteCode.contains("lang")) {
                         javaLibary = true;
                     }
-                    String descriptionStringForKey = "\t/*@ requires " + pointsTo(sdg, calledMethodNode)
+                    String descriptionStringForKey = "\t/*@ requires " + generatePreconditionFromPointsToSet(sdg, calledMethodNode)
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
                             + descOfFormalInNode + "; */";
                     String methodName = getMethodNameFromBytecode(calledMethodByteCode);
@@ -185,11 +200,11 @@ public class ViolationsViaKeyChecker {
                      * edge; if the new chop is empty, our alarm is found to be
                      * a false alarm
                      */
-                    violationChop = chopper.chop(violationSource, violationSink);
-                    if (violationChop.isEmpty()) {
+                    Collection<SDGNode> recalcViolationChop = chopper.chop(violationPathSourceAndSink.violationSource, violationPathSourceAndSink.violationSink);
+                    if (recalcViolationChop.isEmpty()) {
                         return true;
                     }
-                    violationChopInducedSubgraph = violationChopInducedSubgraph.subgraph(violationChop);
+                    violationChopInducedSubgraph = violationChopInducedSubgraph.subgraph(recalcViolationChop);
                     change = true;
                     break;
                 } else {
@@ -246,11 +261,11 @@ public class ViolationsViaKeyChecker {
         System.out.println("Summary edge from: " + source.getBytecodeName()
                 + " to " + sink.getBytecodeName());
         System.out.println("\t\ttop level call in " + m.getBytecodeMethod());
-        System.out.println("\t\t /*@ requires " + pointsTo(sdg, m)
+        System.out.println("\t\t /*@ requires " + generatePreconditionFromPointsToSet(sdg, m)
                 + ";\n\t\t  @ determines " + descSink(sink, sdg) + " \\by "
                 + descOtherParams(source, sdg) + "; */");
         String a1 = m.getBytecodeMethod();
-        String b = "\t/*@ requires " + pointsTo(sdg, m)
+        String b = "\t/*@ requires " + generatePreconditionFromPointsToSet(sdg, m)
                 + ";\n\t  @ determines " + descSink(sink, sdg) + " \\by "
                 + descOtherParams(source, sdg) + "; */";
         String methodName = getMethodNameFromBytecode(a1);
@@ -332,8 +347,7 @@ public class ViolationsViaKeyChecker {
      * @return summary edges of the given flow sorted according to the selection
      * strategy
      */
-    private List<EdgeMetric> getSummaryEdges(SDG flowSDG, SDGNode source,
-            SDGNode sink, List<SDGEdge> checkedEdges, SDG sdg,
+    private List<EdgeMetric> getSummaryEdges(SDG flowSDG, List<SDGEdge> checkedEdges, SDG sdg,
             boolean neueHeuristic) {
         List<EdgeMetric> summaryEdges = new ArrayList<EdgeMetric>();
         //clone() is needed because removing/adding edges to check for bridges throws the iterator off
@@ -737,43 +751,40 @@ public class ViolationsViaKeyChecker {
     }
 
     /**
-     * Calculates non-aliasing information for parameters of a method node m,
-     * using JOANA's points-to information.
+     * Calculates non-aliasing information for parameters of a method node using JOANA's points-to information.
+     * From the paper: 
+     * Definition 9 (Generation of preconditions). Let o be a reference and P_o
+     * its points-to set. We generate the following precondition: 
+     * for all o' in P_o: o = o' 
      *
      * @param sdg our SDG
-     * @param m method node to check
+     * @param methodNode method node to check
      * @return non-aliasing information as a string that can be used as
      * precondition
      */
-    private String pointsTo(SDG sdg, SDGNode m) {
+    private String generatePreconditionFromPointsToSet(SDG sdg, SDGNode methodNode) {
         PointerAnalysis<? extends InstanceKey> pts = stateSaver.pts;
         CallGraph cg = stateSaver.cg;
-        /**
-         * get the call graph node corresponding to the SDG method node
-         */
-        CGNode method = cg.getNode(sdg.getCGNodeId(m));
-        /**
-         * get IR for parameter names
-         */
+        //get the call graph node corresponding to the SDG method node
+        CGNode method = cg.getNode(sdg.getCGNodeId(methodNode));
+        // get IR for parameter names
         IR ir = method.getIR();
-        Iterable<PointerKey> pKeys = pts.getPointerKeys();
-        ArrayList<LocalPointerKey> lKeys = new ArrayList<LocalPointerKey>();
-        for (PointerKey pKey : pKeys) {
-            /**
-             * save all LocalPointerKeys that are params of our method
-             */
+        Iterable<PointerKey> pointerKeys = pts.getPointerKeys();
+        ArrayList<LocalPointerKey> localPointerKeys = new ArrayList<LocalPointerKey>();
+        for (PointerKey pKey : pointerKeys) {
+            // save all LocalPointerKeys that are params of our method
             if (!(pKey instanceof LocalPointerKey)) {
                 continue;
             }
             LocalPointerKey lpk = (LocalPointerKey) pKey;
             if (lpk.getNode() == method && lpk.isParameter()) {
-                lKeys.add(lpk);
+                localPointerKeys.add(lpk);
             }
         }
         /**
          * calculate individual non-alias clauses
          */
-        ArrayList<String> pointsToResult = calculateNonAliases(lKeys, pts, ir);
+        ArrayList<String> pointsToResult = calculateNonAliases(localPointerKeys, pts, ir);
         StringBuilder sb = new StringBuilder();
         String delim = "";
         /**

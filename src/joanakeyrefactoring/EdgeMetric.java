@@ -15,7 +15,7 @@ public class EdgeMetric implements Comparable<EdgeMetric> {
     /**
      * SDGEdge encapsulated in this EDGEMetric instance
      */
-    public SDGEdge e;
+    public SDGEdge edge;
     private boolean machtesPattern = false;
     private boolean regardsLow = false;
     private boolean isBridge = false;
@@ -23,14 +23,14 @@ public class EdgeMetric implements Comparable<EdgeMetric> {
 
     public EdgeMetric(SDGEdge e, boolean isBridge, int containedEdges) {
         super();
-        this.e = e;
+        this.edge = e;
         this.isBridge = isBridge;
         this.containedEdges = containedEdges;
     }
 
     public EdgeMetric(SDGEdge e, boolean machtesPattern, boolean isBridge, int containedEdges) {
         super();
-        this.e = e;
+        this.edge = e;
         this.machtesPattern = machtesPattern;
         this.isBridge = isBridge;
         this.containedEdges = containedEdges;
