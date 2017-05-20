@@ -81,8 +81,7 @@ public class ViolationsViaKeyChecker {
         }
         //get edges involved in the flow
         SDG flowSDG = sdg.subgraph(nodesInvolvedInIllegalFlow);
-        SDGSerializer
-                .toPDGFormat(flowSDG, new FileOutputStream("subgraph.pdg"));
+        SDGSerializer.toPDGFormat(flowSDG, new FileOutputStream("subgraph.pdg"));
         List<EdgeMetric> summaryEdges;
         List<SDGEdge> checkedEdges = new ArrayList<SDGEdge>();
         boolean change = true;
@@ -91,51 +90,40 @@ public class ViolationsViaKeyChecker {
             summaryEdges = getSummaryEdges(flowSDG, source, sink, checkedEdges,
                     sdg, neueHeuristic);
             for (EdgeMetric em : summaryEdges) {
-                SDGEdge e = em.e;
-                SDGNode v = e.getSource();
-                SDGNode w = e.getTarget();
+                SDGEdge currentEdge = em.e;
+                SDGNode sourceNode = currentEdge.getSource();
+                SDGNode targetNode = currentEdge.getTarget();
                 boolean removable = true;
 
 //              check all possible method invocations; needed in case of
 //              dynamic dispatch
-                Collection<SDGNodeTuple> callPairs = sdg
-                        .getAllFormalPairs(v, w);
-                for (SDGNodeTuple t : callPairs) {
+                Collection<SDGNodeTuple> allMethodInvocationPairs = sdg.getAllFormalPairs(sourceNode, targetNode);
+                for (SDGNodeTuple callTuple : allMethodInvocationPairs) {
                     //get source and sink node in the callee that induce the
                     //summary edge
-                    SDGNode p = t.getFirstNode();
-                    SDGNode r = t.getSecondNode();
+                    SDGNode callTupleSource = callTuple.getFirstNode();
+                    SDGNode callTupleSink = callTuple.getSecondNode();
                     // skip methods that are already secure
-                    if (chopper.chop(p, r).isEmpty()) {
+                    if (chopper.chop(callTupleSource, callTupleSink).isEmpty()) {
                         continue;
                     }
-                    SDGNode callee = sdg.getEntry(p);
+                    SDGNode calleNode = sdg.getEntry(callTupleSource);
                     //generate spec for KeY
-                    String descSink = descSink(r, sdg);
-                    String descOtherParams = descOtherParams(p, sdg);
-                    String a1 = callee.getBytecodeMethod();
+                    String descSink = descSink(callTupleSink, sdg);
+                    String descOtherParams = descOtherParams(callTupleSource, sdg);
+                    String calleeByteCodeMethod = calleNode.getBytecodeMethod();
                     Boolean javaLibary = false;
-                    if (a1.contains("java.") || a1.contains("lang")) {
+                    if (calleeByteCodeMethod.contains("java.") || calleeByteCodeMethod.contains("lang")) {
                         javaLibary = true;
                     }
-                    System.out.println("Bytecodename: " + a1);
-                    String b = "\t/*@ requires " + pointsTo(sdg, callee)
+                    String b = "\t/*@ requires " + pointsTo(sdg, calleNode)
                             + ";\n\t  @ determines " + descSink + " \\by "
                             + descOtherParams + "; */";
-                    String[] a2 = a1.split("\\.");
-                    String[] a3 = a2[a2.length - 1].split("\\(");
-                    String methodName = a3[0];
-                    if (a1.contains("<init>")) {
-                        methodName += "." + a2[a2.length - 2].split("\\(")[0];
-                    }
+                    String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
                     if (!isKeyCompatible(methodName, javaLibary)) {
-                        System.out.println("Break, class is not compatible");
                         removable = false;
                         break;
                     }
-                    // System.out.println("descSink: " + descSink);
-                    // System.out.println("descOtherParams: " +
-                    // descOtherParams);
                     if (descSink == null || descOtherParams == null) {
                         /**
                          * How to check such a method with KeY?
@@ -143,18 +131,18 @@ public class ViolationsViaKeyChecker {
                         removable = false;
                         System.out
                                 .print("!DescSink or DescOtherParams = null. For nodes:"
-                                        + p + ", " + r + "/");
+                                        + callTupleSource + ", " + callTupleSink + "/");
                         System.out.print("descSink:" + descSink
                                 + ", descOtherParams" + descOtherParams + "/");
                         System.out.println("/ in method "
-                                + p.getBytecodeMethod() + "and: "
-                                + r.getBytecodeMethod());
+                                + callTupleSource.getBytecodeMethod() + "and: "
+                                + callTupleSink.getBytecodeMethod());
                         break;
                     }
                     System.out.println("test method\n\t"
-                            + callee.getBytecodeMethod() + "\nwith spec:");
+                            + calleNode.getBytecodeMethod() + "\nwith spec:");
                     System.out.println("\t/*@ requires "
-                            + pointsTo(sdg, callee) + ";\n\t  @ determines "
+                            + pointsTo(sdg, calleNode) + ";\n\t  @ determines "
                             + descSink + " \\by " + descOtherParams + "; */");
 
                     // wirte method to same file below
@@ -190,8 +178,8 @@ public class ViolationsViaKeyChecker {
                         System.out
                                 .println("Could not proof method automatically.");
                         if (!fullyAutomatic) {
-                            System.out.println("From node: " + p + " to node: "
-                                    + r);
+                            System.out.println("From node: " + callTupleSource + " to node: "
+                                    + callTupleSink);
                             System.out
                                     .println("type \"y\" to verify method manually or \"n\" to go on automatically ");
                             Scanner scanInput = new Scanner(System.in);
@@ -234,8 +222,8 @@ public class ViolationsViaKeyChecker {
                     /**
                      * remove the summary edge
                      */
-                    sdg.removeEdge(e);
-                    flowSDG.removeEdge(e);
+                    sdg.removeEdge(currentEdge);
+                    flowSDG.removeEdge(currentEdge);
                     /**
                      * recalculating of the chop after deleting the summary
                      * edge; if the new chop is empty, our alarm is found to be
@@ -252,7 +240,7 @@ public class ViolationsViaKeyChecker {
                     /**
                      * we already checked this edge, no need to check again
                      */
-                    checkedEdges.add(e);
+                    checkedEdges.add(currentEdge);
                 }
             }
         }
@@ -413,15 +401,8 @@ public class ViolationsViaKeyChecker {
                 String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
                 boolean isKeYCompatible = isKeyCompatible(methodName,
                         isPartOfJavaLibrary);
-                /**
-                 * check whether method matches a pattern
-                 */
-                boolean machtesPattern = isKeYCompatible;
-                if (machtesPattern) {
-                    System.out.println("True: " + methodName + " " + isPartOfJavaLibrary
-                            + " " + currentEdge.getSource() + ", " + currentEdge.getTarget());
-                }
 
+                boolean machtesPattern = isKeYCompatible;
                 boolean isBridge = false;
                 int containedSummary = 0;
                 if (neueHeuristic) {
@@ -433,9 +414,6 @@ public class ViolationsViaKeyChecker {
                 }
             }
         }
-        /**
-         * sort according to edge metric
-         */
         Collections.sort(summaryEdges);
         return summaryEdges;
     }
@@ -444,12 +422,14 @@ public class ViolationsViaKeyChecker {
         String[] a2 = byteCodeMethod.split("\\.");
         String[] a3 = a2[a2.length - 1].split("\\(");
         String methodName = a3[0];
+        if (byteCodeMethod.contains("<init>")) {
+            methodName += "." + a2[a2.length - 2].split("\\(")[0];
+        }
         return methodName;
     }
 
     private boolean isKeyCompatible(String methodName, Boolean javaLibary) {
         if (javaLibary) {
-            // System.out.println(methodName + ": " + javaLibary);
             return false;
         }
         if (methodName.contains("<init>.")) {
@@ -463,10 +443,6 @@ public class ViolationsViaKeyChecker {
             methodFeatures.add(methodName);
         }
         boolean isSubset = keyFeatures.containsAll(methodFeatures);
-//		if (methodName.contains("write")) {
-//			System.out.println(keyFeatures);
-//			System.out.println(methodFeatures);
-//		}
         return isSubset;
     }
 
