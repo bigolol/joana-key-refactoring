@@ -16,9 +16,6 @@ import java.util.List;
  * @author holger
  */
 public class JoanaAndKeyCheckData {
-
-    private List<String> annotationsSink;
-    private List<String> annotationsSource;
     private String pathKeY;
     private String pathToJar;
     private String pathToJavaFile;
@@ -26,11 +23,10 @@ public class JoanaAndKeyCheckData {
     private String annotationPath;
     private JavaMethodSignature entryMethod;
     private boolean fullyAutomatic;
-    private AnnotationAdder annoAdder;
+    private IFCAnalysis analysis;
+    private List<SingleAnnotationAdder> singleAnnotationAdders;
 
-    public JoanaAndKeyCheckData(List<String> annotationsSink, List<String> annotationsSource, String pathKeY, String pathToJar, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, AnnotationAdder annoAdder) {
-        this.annotationsSink = annotationsSink;
-        this.annotationsSource = annotationsSource;
+    public JoanaAndKeyCheckData(String pathKeY, String pathToJar, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, IFCAnalysis analysis, List<SingleAnnotationAdder> singleAnnotationAdders) {
         this.pathKeY = pathKeY;
         this.pathToJar = pathToJar;
         this.pathToJavaFile = pathToJavaFile;
@@ -38,24 +34,17 @@ public class JoanaAndKeyCheckData {
         this.annotationPath = annotationPath;
         this.entryMethod = entryMethod;
         this.fullyAutomatic = fullyAutomatic;
-        this.annoAdder = annoAdder;
+        this.analysis = analysis;
+        this.singleAnnotationAdders = singleAnnotationAdders;
     }
-
+    
     public boolean isFullyAutomatic() {
         return fullyAutomatic;
     }
 
     public JavaMethodSignature getEntryMethod() {
         return entryMethod;
-    }
-
-    public List<String> getAnnotationsSink() {
-        return annotationsSink;
-    }
-
-    public List<String> getAnnotationsSource() {
-        return annotationsSource;
-    }
+    }  
 
     public String getPathKeY() {
         return pathKeY;
@@ -77,7 +66,13 @@ public class JoanaAndKeyCheckData {
         return annotationPath;
     }
 
-    public void addAnnotations(IFCAnalysis analysis) throws CouldntAddAnnoException {
-        this.annoAdder.addAnnotations(analysis, this);
+    public IFCAnalysis getAnalysis() {
+        return analysis;
+    }
+    
+    public void addAnnotations() {
+        singleAnnotationAdders.forEach((adder) -> {
+            adder.addYourselfToAnalysis();
+        });        
     }
 }
