@@ -13,15 +13,12 @@ import edu.kit.joana.wala.core.CGConsumer;
 public class StateSaver implements CGConsumer {
 
     public CallGraph callGraph;
-    public PointerAnalysis<? extends InstanceKey> pts;
+    public PointerAnalysis<? extends InstanceKey> pointerAnalyis;
 
     @Override
-    public void consume(CallGraph cg, PointerAnalysis<? extends InstanceKey> pts) {
-        /**
-         * just save them to retrieve them later
-         */
-        this.callGraph = cg;
-        this.pts = pts;
+    public void consume(CallGraph callGraph, PointerAnalysis<? extends InstanceKey> pointerAnalyis) {
+        this.callGraph = callGraph;
+        this.pointerAnalyis = pointerAnalyis;
     }
 
 }
