@@ -65,6 +65,8 @@ public class CombinedApproachTest {
         String sourcePartString = CombinedApproach.parseAnnoDesc(parsedData.getAnnotationsSource().get(0));
         SDGProgramPart sourcePart = ifcAnalysis.getProgram().getPart(sinkPartString);
         Assert.assertNotNull(sourcePart);
+        
+        
 
     }
 

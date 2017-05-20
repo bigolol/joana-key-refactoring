@@ -3,20 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/antlr/JavaParser.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/ViolationsViaKeyChecker.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/AnnotationAdder.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/antlr/JavaBaseListener.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/test/joanakeyrefactoring/CombinedApproachTest.java</file>
             <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/CombinedApproach.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/StateSaver.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/EdgeMetric.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/antlr/JavaListener.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/ParseJavaForKeyListener.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/ViolationsViaKeyChecker.java</file>
             <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/JoanaAndKeyCheckData.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/antlr/JavaLexer.java</file>
             <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/ExtractAnnotations.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/AutomationHelper.java</file>
         </group>
     </open-files>
 </project-private>

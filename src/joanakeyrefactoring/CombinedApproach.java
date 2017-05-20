@@ -25,7 +25,6 @@ import edu.kit.joana.ifc.sdg.core.violations.IViolation;
 import edu.kit.joana.ifc.sdg.core.violations.paths.ViolationPath;
 import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
-import edu.kit.joana.ifc.sdg.graph.slicer.conc.I2PBackward;
 import edu.kit.joana.ifc.sdg.mhpoptimization.MHPType;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
 import edu.kit.joana.util.Stubs;
@@ -112,8 +111,6 @@ public class CombinedApproach {
         for (SDGCall call : program
                 .getCallsToMethod(JavaMethodSignature
                         .fromString("java.util.Properties.getProperty(Ljava/lang/String;)Ljava/lang/String;"))) {
-            System.out.println("Stream Annotation in:"
-                    + call.getOwningMethod().toString());
             ana.addSourceAnnotation(call.getActualParameter(1),
                     BuiltinLattices.STD_SECLEVEL_HIGH);
         }
@@ -146,22 +143,25 @@ public class CombinedApproach {
             }
         } else {
             FileInputStream annotationSourceStream = new FileInputStream(annotationPath);
-            Collection<IFCAnnotation> coll
+            Collection<IFCAnnotation> annotationCollection
                     = ExtractAnnotations.loadAnnotations(annotationSourceStream, sdg);
-            Iterator<IFCAnnotation> itr = coll.iterator();
-            while (itr.hasNext()) {
-                ana.addAnnotation(itr.next());
-            }
+
+            annotationCollection.forEach((annotation) -> {
+                ana.addAnnotation(annotation);
+            });
         }
     }
 
     private static void parseSourceAnnotation(String sourceString, IFCAnalysis ana, SDGProgram program) {
         String programPart = "programPart";
+        String callsToMethod = "callsToMethod";
         String secLevel = parseSecLevel(sourceString);
         String kind = parseAnnoKind(sourceString);
         String desc = parseAnnoDesc(sourceString);
         if (desc.equals(programPart)) {
             ana.addSourceAnnotation(program.getPart(desc), secLevel);
+        } else if(desc.equals(callsToMethod)) {
+            
         }
     }
 

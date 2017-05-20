@@ -38,26 +38,26 @@ import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
 public class ViolationsViaKeyChecker {
 
     public String[] paramInClass;
-    public String javaClass;
+    public String pathToJar;
     public RepsRosayChopper chopper;
-    public StateSaver state;
-    private AutomationHelper auto;
+    public StateSaver stateSaver;
+    private AutomationHelper automationHelper;
     private boolean fullyAutomatic;
-    private String pathKeY;
+    private String pathToKeyJar;
     private ArrayList<String> keyFeatures = new ArrayList<String>();
-    private ParseJavaForKeyListener ml;
+    private ParseJavaForKeyListener javaForKeyListener;
 
     public ViolationsViaKeyChecker(
             AutomationHelper automationHelper, 
             JoanaAndKeyCheckData checkData,
             StateSaver stateSaver,
             ParseJavaForKeyListener javaForKeyListener) {
-        this.ml = javaForKeyListener;
-        this.auto = automationHelper;
-        this.javaClass = checkData.getPathToJar();
-        this.state = stateSaver;
+        this.javaForKeyListener = javaForKeyListener;
+        this.automationHelper = automationHelper;
+        this.pathToJar = checkData.getPathToJar();
+        this.stateSaver = stateSaver;
         this.fullyAutomatic = checkData.isFullyAutomatic();
-        this.pathKeY = checkData.getPathKeY();
+        this.pathToKeyJar = checkData.getPathKeY();
         loadAndAddList();
     }
 
@@ -160,7 +160,7 @@ public class ViolationsViaKeyChecker {
                             + descSink + " \\by " + descOtherParams + "; */");
 
                     // wirte method to same file below
-                    paramInClass = auto.exportJava(b, methodName, descSink,
+                    paramInClass = automationHelper.exportJava(b, methodName, descSink,
                             descOtherParams);
                     // create .key file
                     String params = "";
@@ -175,12 +175,12 @@ public class ViolationsViaKeyChecker {
                     }
                     String methodNameKeY = methodName + "(" + params + ")";
                     String newJavaFile = "proofs.sourceFile";
-                    auto.createKeYFile(newJavaFile, methodNameKeY);
+                    automationHelper.createKeYFile(newJavaFile, methodNameKeY);
                     // executeKeY with parameter
                     // read result
                     long timeStartKeY = System.currentTimeMillis();
-                    boolean result = auto.runKeY(pathKeY, "information flow");
-                    boolean resultFunc = auto.runKeY(pathKeY, "functional");
+                    boolean result = automationHelper.runKeY(pathToKeyJar, "information flow");
+                    boolean resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
                     System.out.println("Information Flow Result: " + result);
                     System.out.println("Functional Result: " + resultFunc);
 
@@ -200,8 +200,8 @@ public class ViolationsViaKeyChecker {
                             String keyAnswer = scanInput.nextLine();
                             if (keyAnswer.equals("y")) {
                                 // open JAVA and KeY
-                                auto.openJava(file);
-                                auto.openKeY(javaClass, methodNameKeY);
+                                automationHelper.openJava(file);
+                                automationHelper.openKeY(pathToJar, methodNameKeY);
 
                                 System.out.println("type y if KeY could prove");
                                 Scanner scanInput2 = new Scanner(System.in);
@@ -322,7 +322,7 @@ public class ViolationsViaKeyChecker {
         String[] a3 = a2[a2.length - 1].split("\\(");
         String methodName = a3[0];
         // wirte method to same file below
-        paramInClass = auto.exportJava(b, methodName, descSink(sink, sdg),
+        paramInClass = automationHelper.exportJava(b, methodName, descSink(sink, sdg),
                 descOtherParams(source, sdg));
         // create .key file
         String params = "";
@@ -337,17 +337,17 @@ public class ViolationsViaKeyChecker {
         }
         String methodNameKeY = methodName + "(" + params + ")";
         String newJavaFile = "proofs.sourceFile";
-        auto.createKeYFile(newJavaFile, methodNameKeY);
-        auto.createKeYFileFunctional(newJavaFile, methodNameKeY);
+        automationHelper.createKeYFile(newJavaFile, methodNameKeY);
+        automationHelper.createKeYFileFunctional(newJavaFile, methodNameKeY);
 
         long timeStartKeY = System.currentTimeMillis();
         boolean result = false;
 
         // TODO
-        System.out.println("runKeY: Path:" + pathKeY + " javaClass:"
-                + javaClass + " methodName: " + methodNameKeY);
-        result = auto.runKeY(pathKeY, "information flow");
-        boolean resultFunc = auto.runKeY(pathKeY, "functional");
+        System.out.println("runKeY: Path:" + pathToKeyJar + " javaClass:"
+                + pathToJar + " methodName: " + methodNameKeY);
+        result = automationHelper.runKeY(pathToKeyJar, "information flow");
+        boolean resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
         System.out.println("Information Flow Result: " + result);
         System.out.println("Functional Result: " + resultFunc);
         // if(!methodName.contains("secure_voting")){
@@ -367,8 +367,8 @@ public class ViolationsViaKeyChecker {
                 String keyAnswer = scanInput.nextLine();
                 if (keyAnswer.equals("y")) {
                     // open JAVA and KeY
-                    auto.openJava(file);
-                    auto.openKeY(javaClass, methodNameKeY);
+                    automationHelper.openJava(file);
+                    automationHelper.openKeY(pathToJar, methodNameKeY);
 
                     System.out.println("type y if KeY could prove");
                     Scanner scanInput2 = new Scanner(System.in);
@@ -517,7 +517,7 @@ public class ViolationsViaKeyChecker {
         if (methodName.contains("<init>.")) {
             methodName = methodName.split("\\.")[1];
         }
-        ArrayList<String> methodFeatures = ml.getCreatedNames(methodName);
+        ArrayList<String> methodFeatures = javaForKeyListener.getCreatedNames(methodName);
         if (methodFeatures == null) {
             methodFeatures = new ArrayList<String>();
             methodFeatures.add(methodName);
@@ -554,8 +554,8 @@ public class ViolationsViaKeyChecker {
             e.printStackTrace();
         }
         // add List with self created Classes and methods
-        keyFeatures.addAll(auto.getClassNames());
-        Set<String> methods = ml.getMethods();
+        keyFeatures.addAll(automationHelper.getClassNames());
+        Set<String> methods = javaForKeyListener.getMethods();
         keyFeatures.addAll(methods);
     }
 
@@ -592,7 +592,7 @@ public class ViolationsViaKeyChecker {
             String[] a3 = a2[last].split("\\(");
             methodName = a3[0];
             System.out.println("match pattern: " + methodName);
-            ArrayList<String> methodString = auto.getJava(methodName);
+            ArrayList<String> methodString = automationHelper.getJava(methodName);
 
             ArrayList<String> highVar = new ArrayList<String>();
             // ArrayList<String> lowVar = new ArrayList<String>();
@@ -625,7 +625,7 @@ public class ViolationsViaKeyChecker {
                 // all parameter that influence the result as variables
                 // TODO: ausgabe �berpr�fen
                 SDGNode method = sdg.getEntry(r);
-                CGNode methodCG = state.cg.getNode(sdg.getCGNodeId(method));
+                CGNode methodCG = stateSaver.cg.getNode(sdg.getCGNodeId(method));
                 IR ir = methodCG.getIR();
                 for (SDGNode f : sdg.getFormalInsOfProcedure(method)) {
                     int f_number = Integer.parseInt(f.getBytecodeName()
@@ -746,7 +746,7 @@ public class ViolationsViaKeyChecker {
             return null;
         }
         SDGNode method = sdg.getEntry(n);
-        CGNode methodCG = state.cg.getNode(sdg.getCGNodeId(method));
+        CGNode methodCG = stateSaver.cg.getNode(sdg.getCGNodeId(method));
         /**
          * get IR to get names of the parameters. Need to compile classes with
          * sufficient debug information for this.
@@ -825,7 +825,7 @@ public class ViolationsViaKeyChecker {
                 return null;
             }
             SDGNode method = sdg.getEntry(n);
-            CGNode methodCG = state.cg.getNode(sdg.getCGNodeId(method));
+            CGNode methodCG = stateSaver.cg.getNode(sdg.getCGNodeId(method));
             /**
              * get IR to get names of the parameters. Need to compile classes
              * with sufficient debug information for this.
@@ -883,8 +883,8 @@ public class ViolationsViaKeyChecker {
      * precondition
      */
     private String pointsTo(SDG sdg, SDGNode m) {
-        PointerAnalysis<? extends InstanceKey> pts = state.pts;
-        CallGraph cg = state.cg;
+        PointerAnalysis<? extends InstanceKey> pts = stateSaver.pts;
+        CallGraph cg = stateSaver.cg;
         /**
          * get the call graph node corresponding to the SDG method node
          */
