@@ -3,7 +3,6 @@ package joanakeyrefactoring;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -31,7 +29,6 @@ import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
-import edu.kit.joana.ifc.sdg.graph.SDGSerializer;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
 
 public class ViolationsViaKeyChecker {
@@ -48,17 +45,18 @@ public class ViolationsViaKeyChecker {
 
     public ViolationsViaKeyChecker(
             AutomationHelper automationHelper,
-            JoanaAndKeyCheckData checkData,
-            ParseJavaForKeyListener javaForKeyListener) {
-        this.javaForKeyListener = javaForKeyListener;
+            JoanaAndKeyCheckData checkData) {
         this.automationHelper = automationHelper;
+        this.javaForKeyListener = automationHelper.generateParseJavaForKeyListener();
         this.pathToJar = checkData.getPathToJar();
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
         loadAndAddList();
     }
+
     private class ViolationPathSourceAndSink {
+
         public final SDGNode violationSource;
         public final SDGNode violationSink;
         public final Collection<SDGNode> violationChop;
@@ -217,11 +215,11 @@ public class ViolationsViaKeyChecker {
          * all summary edges are checked but the program is not found secure, so
          * we have to check the top level: the annotated method itself
          */
-        boolean result = checkTopLevelComplete(sdg, violationSource, violationSource, violationSink, file);
+        boolean result = checkTopLevelComplete(sdg, violationPathSourceAndSink, file);
         if (!result) {
-            result = checkTopLevelComplete(sdg, violationSink, violationSource, violationSink, file);
+            result = checkTopLevelComplete(sdg, violationPathSourceAndSink, file);
             if (!result) {
-                result = checkTopLevelComplete(sdg, violationSink, violationSource, violationSink, file);
+                result = checkTopLevelComplete(sdg, violationPathSourceAndSink, file);
             }
         }
         if (result) {
@@ -239,11 +237,13 @@ public class ViolationsViaKeyChecker {
      * @param file
      * @return
      */
-    private boolean checkTopLevelComplete(SDG sdg, SDGNode entryNode,
-            SDGNode source, SDGNode sink, File file) {
+    private boolean checkTopLevelComplete(SDG sdg, ViolationPathSourceAndSink violationPathSourceAndSink, File file) {
         // does not work properly
         // checks the top level method of the source annotation (not the one
         // from the sink)
+        SDGNode sink = violationPathSourceAndSink.violationSink;
+        SDGNode entryNode = violationPathSourceAndSink.violationSink;
+        SDGNode source = violationPathSourceAndSink.violationSource;
         if (descSink(sink, sdg) == null || descOtherParams(source, sdg) == null) {
             /**
              * How to check such a method with KeY?
@@ -502,7 +502,7 @@ public class ViolationsViaKeyChecker {
                 // all parameter that influence the result as variables
                 // TODO: ausgabe �berpr�fen
                 SDGNode method = sdg.getEntry(r);
-                CGNode methodCG = stateSaver.cg.getNode(sdg.getCGNodeId(method));
+                CGNode methodCG = stateSaver.callGraph.getNode(sdg.getCGNodeId(method));
                 IR ir = methodCG.getIR();
                 for (SDGNode f : sdg.getFormalInsOfProcedure(method)) {
                     int f_number = Integer.parseInt(f.getBytecodeName()
@@ -623,7 +623,7 @@ public class ViolationsViaKeyChecker {
             return null;
         }
         SDGNode method = sdg.getEntry(n);
-        CGNode methodCG = stateSaver.cg.getNode(sdg.getCGNodeId(method));
+        CGNode methodCG = stateSaver.callGraph.getNode(sdg.getCGNodeId(method));
         /**
          * get IR to get names of the parameters. Need to compile classes with
          * sufficient debug information for this.
@@ -702,7 +702,7 @@ public class ViolationsViaKeyChecker {
                 return null;
             }
             SDGNode method = sdg.getEntry(n);
-            CGNode methodCG = stateSaver.cg.getNode(sdg.getCGNodeId(method));
+            CGNode methodCG = stateSaver.callGraph.getNode(sdg.getCGNodeId(method));
             /**
              * get IR to get names of the parameters. Need to compile classes
              * with sufficient debug information for this.
@@ -751,45 +751,39 @@ public class ViolationsViaKeyChecker {
     }
 
     /**
-     * Calculates non-aliasing information for parameters of a method node using JOANA's points-to information.
-     * From the paper: 
-     * Definition 9 (Generation of preconditions). Let o be a reference and P_o
-     * its points-to set. We generate the following precondition: 
-     * for all o' in P_o: o = o' 
+     * Calculates non-aliasing information for parameters of a method node using
+     * JOANA's points-to information. From the paper: Definition 9 (Generation
+     * of preconditions). Let o be a reference and P_o its points-to set. We
+     * generate the following precondition: for all o' in P_o: o = o'
      *
      * @param sdg our SDG
      * @param methodNode method node to check
      * @return non-aliasing information as a string that can be used as
      * precondition
      */
-    private String generatePreconditionFromPointsToSet(SDG sdg, SDGNode methodNode) {
+    public String generatePreconditionFromPointsToSet(SDG sdg, SDGNode methodNode) {
         PointerAnalysis<? extends InstanceKey> pts = stateSaver.pts;
-        CallGraph cg = stateSaver.cg;
         //get the call graph node corresponding to the SDG method node
-        CGNode method = cg.getNode(sdg.getCGNodeId(methodNode));
+        CGNode method = stateSaver.callGraph.getNode(sdg.getCGNodeId(methodNode));
         // get IR for parameter names
         IR ir = method.getIR();
         Iterable<PointerKey> pointerKeys = pts.getPointerKeys();
         ArrayList<LocalPointerKey> localPointerKeys = new ArrayList<LocalPointerKey>();
-        for (PointerKey pKey : pointerKeys) {
+        for (PointerKey currentPointerKey : pointerKeys) {
             // save all LocalPointerKeys that are params of our method
-            if (!(pKey instanceof LocalPointerKey)) {
+            if (!(currentPointerKey instanceof LocalPointerKey)) {
                 continue;
             }
-            LocalPointerKey lpk = (LocalPointerKey) pKey;
-            if (lpk.getNode() == method && lpk.isParameter()) {
-                localPointerKeys.add(lpk);
+            LocalPointerKey localPointerKey = (LocalPointerKey) currentPointerKey;
+            if (localPointerKey.getNode() == method && localPointerKey.isParameter()) {
+                localPointerKeys.add(localPointerKey);
             }
         }
-        /**
-         * calculate individual non-alias clauses
-         */
+        // calculate individual non-alias clauses
         ArrayList<String> pointsToResult = calculateNonAliases(localPointerKeys, pts, ir);
         StringBuilder sb = new StringBuilder();
         String delim = "";
-        /**
-         * chain clauses together by conjunction
-         */
+        //chain clauses together by conjunction
         for (String nonAliased : pointsToResult) {
             sb.append(delim).append(nonAliased);
             delim = " && ";

@@ -50,16 +50,11 @@ public class CombinedApproach {
     public static void runTestFromCheckData(JoanaAndKeyCheckData checkData)
             throws ClassHierarchyException, IOException, UnsoundGraphException,
             CancelException, CouldntAddAnnoException, CancelException {
+        checkData.addAnnotations();
         AutomationHelper automationHelper = new AutomationHelper(checkData.getPathToJavaFile());
-        String allClasses = automationHelper.readAllSourceFilesIntoOneStringAndFillClassMap();
-        ParseJavaForKeyListener javaForKeyListener = new ParseJavaForKeyListener(allClasses);
-        automationHelper.setJavaForKeyListener(javaForKeyListener);
-
         ViolationsViaKeyChecker violationsViaKeyChecker
                 = new ViolationsViaKeyChecker(
-                        automationHelper, checkData, javaForKeyListener);
-
-        checkData.addAnnotations();
+                        automationHelper, checkData);
         checkAnnotatedPDGWithJoanaAndKey(checkData.getAnalysis(), violationsViaKeyChecker);
     }
 
@@ -165,7 +160,7 @@ public class CombinedApproach {
         String securityLevelLattice = "";
         if (securityLevelString.equals("high")) {
             securityLevelLattice = BuiltinLattices.STD_SECLEVEL_HIGH;
-        } else if(securityLevelString.equals("low")) {
+        } else if (securityLevelString.equals("low")) {
             securityLevelLattice = BuiltinLattices.STD_SECLEVEL_LOW;
         }
 

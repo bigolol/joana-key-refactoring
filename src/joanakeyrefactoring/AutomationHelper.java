@@ -44,6 +44,11 @@ public class AutomationHelper {
     public ArrayList<String> getClassNames() {
         return classNames;
     }
+    
+    public ParseJavaForKeyListener generateParseJavaForKeyListener() {
+        this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());;
+        return this.javaForKeyListener;
+    }
 
     /**
      * Creates loop invariants. Is not complete and only fills the determines

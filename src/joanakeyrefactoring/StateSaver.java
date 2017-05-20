@@ -12,7 +12,7 @@ import edu.kit.joana.wala.core.CGConsumer;
  */
 public class StateSaver implements CGConsumer {
 
-    public CallGraph cg;
+    public CallGraph callGraph;
     public PointerAnalysis<? extends InstanceKey> pts;
 
     @Override
@@ -20,7 +20,7 @@ public class StateSaver implements CGConsumer {
         /**
          * just save them to retrieve them later
          */
-        this.cg = cg;
+        this.callGraph = cg;
         this.pts = pts;
     }
 
