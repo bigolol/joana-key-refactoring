@@ -74,12 +74,12 @@ public class ViolationsViaKeyChecker {
         LinkedList<SecurityNode> violationPathList = violationPath.getPathList();
         SDGNode violationSource = violationPathList.get(0);
         SDGNode violationSink = violationPathList.get(1);
-        Collection<SDGNode> nodesInvolvedInIllegalFlow = chopper.chop(violationSource, violationSink);
-        if (nodesInvolvedInIllegalFlow.isEmpty()) {
+        Collection<SDGNode> violationChop = chopper.chop(violationSource, violationSink);
+        if (violationChop.isEmpty()) {
             return true;
         }
         //get edges involved in the flow
-        SDG flowSDG = sdg.subgraph(nodesInvolvedInIllegalFlow);
+        SDG flowSDG = sdg.subgraph(violationChop);
         SDGSerializer.toPDGFormat(flowSDG, new FileOutputStream("subgraph.pdg"));
         List<EdgeMetric> summaryEdges;
         List<SDGEdge> checkedEdges = new ArrayList<SDGEdge>();
@@ -127,8 +127,7 @@ public class ViolationsViaKeyChecker {
                         break;
                     }
                     // write method to same file below
-                    paramInClass = automationHelper.exportJava(descriptionStringForKey, methodName, descSink,
-                            descOtherParams);
+                    paramInClass = automationHelper.exportJava(descriptionStringForKey, methodName, descSink, descOtherParams);
                     // create .key file
                     String params = "";
                     if (paramInClass != null) {
@@ -187,11 +186,11 @@ public class ViolationsViaKeyChecker {
                      * edge; if the new chop is empty, our alarm is found to be
                      * a false alarm
                      */
-                    nodesInvolvedInIllegalFlow = chopper.chop(violationSource, violationSink);
-                    if (nodesInvolvedInIllegalFlow.isEmpty()) {
+                    violationChop = chopper.chop(violationSource, violationSink);
+                    if (violationChop.isEmpty()) {
                         return true;
                     }
-                    flowSDG = flowSDG.subgraph(nodesInvolvedInIllegalFlow);
+                    flowSDG = flowSDG.subgraph(violationChop);
                     change = true;
                     break;
                 } else {

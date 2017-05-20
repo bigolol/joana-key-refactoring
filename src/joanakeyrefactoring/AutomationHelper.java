@@ -152,7 +152,8 @@ public class AutomationHelper {
      * @param descOtherParams
      * @return the parameter of the method that is to be proven
      */
-    public String[] exportJava(String descriptionForKey, String methodName, String descSink,
+    public String[] exportJava(
+            String descriptionForKey, String methodName, String descSink,
             String descOtherParams) {
         ArrayList<String> allMethodNames = new ArrayList<>();
 
@@ -262,7 +263,7 @@ public class AutomationHelper {
     }
 
     /**
-     * Creates the IF Proof Obligation for KeY
+     * Creates the Iinformation flow Proof Obligation for KeY
      *
      * @param javaFile
      * @param method
