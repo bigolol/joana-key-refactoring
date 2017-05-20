@@ -228,10 +228,6 @@ public class ViolationsViaKeyChecker {
      */
     private boolean checkTopLevelComplete(SDG sdg, SDGNode entryNode,
             SDGNode source, SDGNode sink, File file) {
-        /**
-         * all summary edges are checked but the program is not found secure, so
-         * we have to check the top level: the annotated method itself
-         */
         // does not work properly
         // checks the top level method of the source annotation (not the one
         // from the sink)

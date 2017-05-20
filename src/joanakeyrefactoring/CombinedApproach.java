@@ -101,21 +101,7 @@ public class CombinedApproach {
             System.out.println("Program proven secure!");
         }
     }
-
-    public static void addJzip2Annotations(IFCAnalysis ana) {
-        SDGProgram program = ana.getProgram();
-        for (SDGCall call : program
-                .getCallsToMethod(JavaMethodSignature
-                        .fromString("java.util.Properties.getProperty(Ljava/lang/String;)Ljava/lang/String;"))) {
-            ana.addSourceAnnotation(call.getActualParameter(1),
-                    BuiltinLattices.STD_SECLEVEL_HIGH);
-        }
-
-        ana.addSinkAnnotation(
-                program.getPart("jzip.MyFileOutputStream.content"),
-                BuiltinLattices.STD_SECLEVEL_LOW);
-    }
-
+    
     public static void addAnnotationsFileBased(
             IFCAnalysis ana,
             List<String> annotationsSink,
