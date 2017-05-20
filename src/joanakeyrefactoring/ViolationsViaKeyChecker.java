@@ -386,7 +386,7 @@ public class ViolationsViaKeyChecker {
         if (methodName.contains("<init>.")) {
             methodName = methodName.split("\\.")[1];
         }
-        ArrayList<String> methodFeatures = javaForKeyListener.getCreatedNames(methodName);
+        List<String> methodFeatures = javaForKeyListener.getCreatedNames(methodName);
         if (methodFeatures == null) {
             methodFeatures = new ArrayList<String>();
             methodFeatures.add(methodName);

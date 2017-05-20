@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,7 +185,7 @@ public class AutomationHelper {
         StringBuilder sbClasses = new StringBuilder();
         String classOfMethod = javaForKeyListener.getClass(methodName);
         // System.out.println("classOfMethod " + classOfMethod);
-        ArrayList<String> classList = javaForKeyListener.getClassList();
+        List<String> classList = javaForKeyListener.getClassList();
         for (int i = 0; i < classList.size(); i++) {
             if (!classList.get(i).equals(classOfMethod)) {
                 sbClasses.append(classes.get(classList.get(i)));
