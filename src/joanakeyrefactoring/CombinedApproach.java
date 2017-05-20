@@ -33,6 +33,7 @@ import edu.kit.joana.wala.core.SDGBuilder.FieldPropagation;
 import edu.kit.joana.wala.core.SDGBuilder.PointsToPrecision;
 import java.io.FileNotFoundException;
 import java.util.List;
+import org.json.JSONObject;
 
 public class CombinedApproach {
 
@@ -54,7 +55,7 @@ public class CombinedApproach {
             e.printStackTrace();
         }
     }
-
+    
     public static void runTestFromCheckData(JoanaAndKeyCheckData checkData)
             throws ClassHierarchyException, IOException, UnsoundGraphException,
             CancelException, CouldntAddAnnoException, CancelException {
@@ -64,11 +65,11 @@ public class CombinedApproach {
         String allClasses = automationHelper.summarizeSourceFiles();
         ParseJavaForKeyListener javaForKeyListener = new ParseJavaForKeyListener(allClasses);
         automationHelper.setJavaForKeyListener(javaForKeyListener);
-
+        
         ViolationsViaKeyChecker violationsViaKeyChecker
                 = new ViolationsViaKeyChecker(
                         automationHelper, checkData, stateSaver, javaForKeyListener);
-
+        
         IFCAnalysis analysis = runJoanaCreateSDGAndIFCAnalyis(
                 checkData.getPathToJar(),
                 checkData.getEntryMethod(),
@@ -76,28 +77,28 @@ public class CombinedApproach {
         checkData.addAnnotations(analysis);
         checkAnnotatedPDGWithJoanaAndKey(analysis, violationsViaKeyChecker);
     }
-
+    
     public static void checkAnnotatedPDGWithJoanaAndKey(
             IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker violationChecker) throws FileNotFoundException {
         RepsRosayChopper chopper = new RepsRosayChopper(annotatedAnalysis.getProgram().getSDG());
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
-
+        
         int numberOfViolations = violations.size();
         int disprovedViolations = 0;
-
+        
         for (IViolation<SecurityNode> v : violations) {
             ViolationPath vp = violationChecker.getVP(v);
-
+            
             boolean disproved = violationChecker.checkViolation(vp,
                     annotatedAnalysis.getProgram().getSDG(), chopper);
-
+            
             if (disproved) {
                 disprovedViolations++;
             }
         }
-
+        
         int remaining = numberOfViolations - disprovedViolations;
-
+        
         System.out.println(String.format(
                 "Found %d violations, disproved %d, remaining %d",
                 numberOfViolations, disprovedViolations, remaining));
@@ -105,7 +106,7 @@ public class CombinedApproach {
             System.out.println("Program proven secure!");
         }
     }
-
+    
     public static void addJzip2Annotations(IFCAnalysis ana) {
         SDGProgram program = ana.getProgram();
         for (SDGCall call : program
@@ -114,24 +115,24 @@ public class CombinedApproach {
             ana.addSourceAnnotation(call.getActualParameter(1),
                     BuiltinLattices.STD_SECLEVEL_HIGH);
         }
-
+        
         ana.addSinkAnnotation(
                 program.getPart("jzip.MyFileOutputStream.content"),
                 BuiltinLattices.STD_SECLEVEL_LOW);
     }
-
+    
     public static void addAnnotationsFileBased(
             IFCAnalysis ana,
             List<String> annotationsSink,
             List<String> annotationsSource,
             String annotationPath) throws IOException {
-
+        
         String lineSeparator = System.getProperty("line.separator");
         String an = "";
-
+        
         SDGProgram program = ana.getProgram();
         SDG sdg = program.getSDG();
-
+        
         if (annotationsSink.size() > 0) {
             for (int i = 0; i < annotationsSink.size(); i++) {
                 parseSinkAnnotation(annotationsSink.get(i), ana, program);
@@ -145,13 +146,13 @@ public class CombinedApproach {
             FileInputStream annotationSourceStream = new FileInputStream(annotationPath);
             Collection<IFCAnnotation> annotationCollection
                     = ExtractAnnotations.loadAnnotations(annotationSourceStream, sdg);
-
+            
             annotationCollection.forEach((annotation) -> {
                 ana.addAnnotation(annotation);
             });
         }
     }
-
+    
     private static void parseSourceAnnotation(String sourceString, IFCAnalysis ana, SDGProgram program) {
         String programPart = "programPart";
         String callsToMethod = "callsToMethod";
@@ -160,11 +161,11 @@ public class CombinedApproach {
         String desc = parseAnnoDesc(sourceString);
         if (desc.equals(programPart)) {
             ana.addSourceAnnotation(program.getPart(desc), secLevel);
-        } else if(desc.equals(callsToMethod)) {
+        } else if (desc.equals(callsToMethod)) {
             
         }
     }
-
+    
     private static void parseSinkAnnotation(String sinkString, IFCAnalysis ana, SDGProgram program) {
         String programPart = "programPart";
         String secLevel = parseSecLevel(sinkString);
@@ -184,51 +185,33 @@ public class CombinedApproach {
      */
     public static JoanaAndKeyCheckData parseInputFile(String filePath) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
-        String line = br.readLine();
-        String pathKeY = null;
-        String pathToJar = null;
-        String pathToJavaFile = null;
-        String entryMethodString = null;
-        String annotationPath = null;
-        JavaMethodSignature entryMethod = null;
-        boolean fullyAutomatic = true;
+        StringBuilder completeString = new StringBuilder();
+        completeString.append("{\n");
+        for (String line = br.readLine(); line != null; line = br.readLine()) {
+            if (line.trim().startsWith("//")) {
+                continue;
+            }
+            completeString.append(line + '\n');
+        }
+        completeString.append("}\n");
+        
+        System.out.println(completeString.toString());
+        
+        JSONObject jsonObj = new JSONObject(completeString.toString());
+        
+        String pathKeY = jsonObj.getString("pathKeY");
+        String pathToJar = jsonObj.getString("pathToJar");
+        String pathToJavaFile = jsonObj.getString("pathToJavaFile");
+        String entryMethodString = jsonObj.getString("entryMethod");
+        JavaMethodSignature entryMethod = JavaMethodSignature.fromString(entryMethodString);
+        String annotationPath = jsonObj.getString("annotationPath");
+        boolean fullyAutomatic = jsonObj.getBoolean("fullyAutomatic");
+        
+        
+        
         List<String> annotationsSource = new ArrayList<>();
         List<String> annotationsSink = new ArrayList<>();
-        while (line != null) {
-            if (line.trim().startsWith("//") || line.isEmpty()) {
-                line = br.readLine();
-            }
-            if ((line.contains("pathKeY"))) {
-                pathKeY = line.split("=")[1].trim();
-            }
-            if ((line.contains("pathToJar"))) {
-                pathToJar = line.split("=")[1].trim();
-            }
-            if ((line.contains("pathToJavaFile"))) {
-                pathToJavaFile = line.split("=")[1].trim();
-            }
-            if ((line.contains("entryMethod"))) {
-                entryMethodString = line.split("=")[1].trim();
-                entryMethod = JavaMethodSignature
-                        .mainMethodOfClass(entryMethodString);
-            }
-            if ((line.contains("Add Sink"))) {
-                annotationsSink.add(line.split(":")[1].trim());
-            }
-            if ((line.contains("Add Source"))) {
-                annotationsSource.add(line.split(":")[1].trim());
-            }
-            if ((line.contains("annotationPath"))) {
-                annotationPath = line.split("=")[1].trim();
-            }
-            if ((line.contains("fullyAutomatic"))) {
-                String fullyAutoStr = line.split("=")[1].trim();
-                fullyAutomatic = Boolean.valueOf(fullyAutoStr);
-            }
-
-            line = br.readLine();
-        }
-        br.close();
+        
         return new JoanaAndKeyCheckData(
                 annotationsSink, annotationsSource,
                 pathKeY, pathToJar,
@@ -246,7 +229,7 @@ public class CombinedApproach {
                     }
                 });
     }
-
+    
     public static IFCAnalysis runJoanaCreateSDGAndIFCAnalyis(String pathToJar,
             JavaMethodSignature entryMethod, StateSaver stateSaver) throws ClassHierarchyException,
             IOException, UnsoundGraphException, CancelException {
@@ -263,13 +246,13 @@ public class CombinedApproach {
         config.setCGConsumer(stateSaver);
         // Schneidet beim SDG application edges raus, so besser sichtbar mit dem graphviewer
         config.setPruningPolicy(ApplicationLoaderPolicy.INSTANCE);
-
+        
         SDGProgram program = SDGProgram.createSDGProgram(config, System.out,
                 new NullProgressMonitor());
         IFCAnalysis ana = new IFCAnalysis(program);
         return ana;
     }
-
+    
     public static String parseSecLevel(String annotationString) {
         //format: from part, jzip.MyFileOutputStream.content, low
         String secLevelStr = annotationString.split(",")[2].trim();
@@ -278,11 +261,11 @@ public class CombinedApproach {
         }
         return BuiltinLattices.STD_SECLEVEL_LOW;
     }
-
+    
     public static String parseAnnoKind(String annotationString) {
         return annotationString.split(",")[0].trim();
     }
-
+    
     public static String parseAnnoDesc(String annotationString) {
         return annotationString.split(",")[1].trim();
     }
