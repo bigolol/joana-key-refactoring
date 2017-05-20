@@ -63,17 +63,17 @@ public class ViolationsViaKeyChecker {
 
     /**
      * checks a violation (information about one supposed illegal flow) uses KeY
-     * to check whether this is a false alarm
+     * to check whether this is a false positive
      *
      * @return true if there is no illegal flow
      * @throws FileNotFoundException
      */
-    public boolean checkViolation(ViolationPath vp, SDG sdg,
-            RepsRosayChopper chopper2) throws FileNotFoundException {
+    public boolean checkViolation(IViolation<SecurityNode> violationNode, SDG sdg) throws FileNotFoundException {
+        ViolationPath violationPath = getVP(violationNode);
         File file = new File("proofs\\sourceFile.java");
         boolean neueHeuristic = true;
-        this.chopper = chopper2;
-        LinkedList<SecurityNode> list = vp.getPathList();
+        this.chopper = new RepsRosayChopper(sdg);
+        LinkedList<SecurityNode> list = violationPath.getPathList();
         SDGNode source = list.get(0);
         SDGNode sink = list.get(1);
         //get collection of nodes involved in illegal flow

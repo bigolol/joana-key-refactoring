@@ -11,8 +11,11 @@ import com.ibm.wala.util.graph.GraphIntegrity;
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.api.sdg.SDGProgram;
 import edu.kit.joana.api.sdg.SDGProgramPart;
+import edu.kit.joana.ifc.sdg.core.SecurityNode;
+import edu.kit.joana.ifc.sdg.core.violations.IViolation;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
 import java.io.IOException;
+import java.util.Collection;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -49,12 +52,12 @@ public class CombinedApproachTest {
     public void testParseFile() throws IOException, ClassHierarchyException, GraphIntegrity.UnsoundGraphException, CancelException, InterruptedException {
     }
 
-    public static void main(String[] args) throws IOException, ClassHierarchyException, GraphIntegrity.UnsoundGraphException, CancelException, InterruptedException {
-        String testCase = "littleArrayTestProgram";
+    public static void main(String[] args) throws IOException, ClassHierarchyException, GraphIntegrity.UnsoundGraphException, CancelException, InterruptedException, CouldntAddAnnoException {
+        String testCase = "plusminusfalsepos";
 
         JoanaAndKeyCheckData parsedData
                 = CombinedApproach.parseInputFile("testdata/" + testCase + ".joak");
-        parsedData.addAnnotations();
+        CombinedApproach.runTestFromCheckData(parsedData);
     }
 
 }

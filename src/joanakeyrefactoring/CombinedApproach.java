@@ -55,7 +55,7 @@ public class CombinedApproach {
      */
     public static void main(String[] args) {
         try {
-            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/jzip.joak");
+            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/plusminusfalsepos.joak");
             CombinedApproach.runTestFromCheckData(parsedCheckData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,17 +82,16 @@ public class CombinedApproach {
 
     public static void checkAnnotatedPDGWithJoanaAndKey(
             IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker violationChecker) throws FileNotFoundException {
-        RepsRosayChopper chopper = new RepsRosayChopper(annotatedAnalysis.getProgram().getSDG());
+
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
 
         int numberOfViolations = violations.size();
         int disprovedViolations = 0;
 
-        for (IViolation<SecurityNode> v : violations) {
-            ViolationPath vp = violationChecker.getVP(v);
+        for (IViolation<SecurityNode> violationNode : violations) {
 
-            boolean disproved = violationChecker.checkViolation(vp,
-                    annotatedAnalysis.getProgram().getSDG(), chopper);
+            boolean disproved = violationChecker.checkViolation(violationNode,
+                    annotatedAnalysis.getProgram().getSDG());
 
             if (disproved) {
                 disprovedViolations++;
