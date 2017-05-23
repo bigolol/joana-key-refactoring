@@ -33,6 +33,19 @@ import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
 
 public class ViolationsViaKeyChecker {
 
+    class ViolationChopData {
+
+        public final SDGNode violationSource;
+        public final SDGNode violationSink;
+        public final Collection<SDGNode> violationChop;
+
+        public ViolationChopData(SDGNode violationSource, SDGNode violationSink, Collection<SDGNode> violationChop) {
+            this.violationSource = violationSource;
+            this.violationSink = violationSink;
+            this.violationChop = violationChop;
+        }
+    }
+
     public String[] paramInClass;
     public String pathToJar;
     public RepsRosayChopper chopper;
@@ -52,20 +65,7 @@ public class ViolationsViaKeyChecker {
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
-        loadAndAddList();
-    }
-
-    class ViolationChopData {
-
-        public final SDGNode violationSource;
-        public final SDGNode violationSink;
-        public final Collection<SDGNode> violationChop;
-
-        public ViolationChopData(SDGNode violationSource, SDGNode violationSink, Collection<SDGNode> violationChop) {
-            this.violationSource = violationSource;
-            this.violationSink = violationSink;
-            this.violationChop = violationChop;
-        }
+        loadAndAddListOfKeyFeatures();
     }
 
     public ViolationChopData getViolationChopForSecNodeViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
@@ -76,6 +76,27 @@ public class ViolationsViaKeyChecker {
         SDGNode violationSink = violationPathList.get(1);
         Collection<SDGNode> violationChop = chopper.chop(violationSource, violationSink);
         return new ViolationChopData(violationSource, violationSink, violationChop);
+    }
+
+    public boolean tryToDisproveViolationsViaKey(
+            Collection<? extends IViolation<SecurityNode>> violations,
+            SDG sdg) throws FileNotFoundException {
+        int numberOfViolations = violations.size();
+        int disprovedViolations = 0;
+        for (IViolation<SecurityNode> violationNode : violations) {
+            boolean disproved = checkViolation(violationNode, sdg);
+            if (disproved) {
+                disprovedViolations++;
+            }
+        }
+        int remaining = numberOfViolations - disprovedViolations;
+        System.out.println(String.format(
+                "Found %d violations, disproved %d, remaining %d",
+                numberOfViolations, disprovedViolations, remaining));
+        if (remaining == 0) {
+            System.out.println("Program proven secure!");
+        }
+        return remaining == 0;
     }
 
     /**
@@ -118,8 +139,11 @@ public class ViolationsViaKeyChecker {
                     }
                     SDGNode calledMethodNode = sdg.getEntry(formalInNode);
                     //generate spec for KeY
-                    String descOfFormalOutNode = descSink(formalOutNode, sdg);
-                    String descAllFormalInNodes = descOtherParams(formalInNode, sdg);
+                    String descOfFormalOutNode
+                            = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(formalOutNode, sdg);
+                    String descAllFormalInNodes
+                            = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(
+                                    formalInNode, sdg, stateSaver.callGraph);
                     String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
                     Boolean javaLibary = false;
                     if (calledMethodByteCode.contains("java.") || calledMethodByteCode.contains("lang")) {
@@ -244,15 +268,18 @@ public class ViolationsViaKeyChecker {
         SDGNode sink = violationPathSourceAndSink.violationSink;
         SDGNode entryNode = violationPathSourceAndSink.violationSink;
         SDGNode source = violationPathSourceAndSink.violationSource;
-        if (descSink(sink, sdg) == null || descOtherParams(source, sdg) == null) {
+        String descriptionOfSink = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(sink, sdg);
+        String descriptionOfParams
+                = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(source, sdg, stateSaver.callGraph);
+        if (descriptionOfSink == null || descriptionOfParams == null) {
             /**
              * How to check such a method with KeY?
              */
             System.out
                     .println("!!!!DescSink and DescOtherParams = null. For nodes:"
                             + source + ", " + sink);
-            System.out.print("descSink:" + descSink(sink, sdg)
-                    + ", descOtherParams" + descOtherParams(source, sdg) + "/");
+            System.out.print("descSink:" + descriptionOfSink
+                    + ", descOtherParams" + descriptionOfParams + "/");
             System.out.println("/ in method " + sink.getBytecodeMethod()
                     + "and: " + source.getBytecodeMethod());
             return false;
@@ -262,16 +289,15 @@ public class ViolationsViaKeyChecker {
                 + " to " + sink.getBytecodeName());
         System.out.println("\t\ttop level call in " + m.getBytecodeMethod());
         System.out.println("\t\t /*@ requires " + generatePreconditionFromPointsToSet(sdg, m)
-                + ";\n\t\t  @ determines " + descSink(sink, sdg) + " \\by "
-                + descOtherParams(source, sdg) + "; */");
+                + ";\n\t\t  @ determines " + descriptionOfSink + " \\by "
+                + descriptionOfParams + "; */");
         String a1 = m.getBytecodeMethod();
         String b = "\t/*@ requires " + generatePreconditionFromPointsToSet(sdg, m)
-                + ";\n\t  @ determines " + descSink(sink, sdg) + " \\by "
-                + descOtherParams(source, sdg) + "; */";
+                + ";\n\t  @ determines " + descriptionOfSink + " \\by "
+                + descriptionOfParams + "; */";
         String methodName = getMethodNameFromBytecode(a1);
         // wirte method to same file below
-        paramInClass = automationHelper.exportJava(b, methodName, descSink(sink, sdg),
-                descOtherParams(source, sdg));
+        paramInClass = automationHelper.exportJava(b, methodName, descriptionOfParams, descriptionOfParams);
         // create .key file
         String params = "";
         if (paramInClass != null) {
@@ -416,8 +442,7 @@ public class ViolationsViaKeyChecker {
     /**
      * loads List of KeY features in ArrayList keyFeatures
      */
-    public void loadAndAddList() {
-        // load List
+    public void loadAndAddListOfKeyFeatures() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(
                     "dep/JAVALANG.txt"));
@@ -434,7 +459,6 @@ public class ViolationsViaKeyChecker {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // add List with self created Classes and methods
         keyFeatures.addAll(automationHelper.getClassNames());
         Set<String> methods = javaForKeyListener.getMethods();
         keyFeatures.addAll(methods);
@@ -445,300 +469,8 @@ public class ViolationsViaKeyChecker {
         if (c.isEmpty()) {
             return false;
         }
-        /**
-         * get edges involved in flow
-         */
         SDG flowSDG = sdg.subgraph(c);
-
         return false;
-    }
-
-    private boolean checkPattern(SDGEdge e, SDG sdg) {
-        SDGNode v = e.getSource();
-        SDGNode w = e.getTarget();
-        Collection<SDGNodeTuple> callPairs = sdg.getAllFormalPairs(v, w);
-        for (SDGNodeTuple t : callPairs) {
-            SDGNode p = t.getFirstNode();
-            SDGNode r = t.getSecondNode();
-            /**
-             * skip methods that are already secure
-             */
-            if (chopper.chop(p, r).isEmpty()) {
-                continue;
-            }
-            SDGNode callee = sdg.getEntry(p);
-            String methodName = callee.getBytecodeMethod();
-            String[] a2 = methodName.split("\\.");
-            int last = a2.length - 1;
-            String[] a3 = a2[last].split("\\(");
-            methodName = a3[0];
-            System.out.println("match pattern: " + methodName);
-            ArrayList<String> methodString = automationHelper.getJava(methodName);
-
-            ArrayList<String> highVar = new ArrayList<String>();
-            // ArrayList<String> lowVar = new ArrayList<String>();
-            ArrayList<String> arrayNames = new ArrayList<String>();
-            // ArrayList<String> arrayListNames = new ArrayList<String>();
-            /**
-             * get the high and low variables, should normally be done by graph
-             * analysis
-             *
-             */
-            boolean all = true;
-            if (all) {
-
-                // it can be a parameter or a Formal-In Node. Formal In Node:
-                // p.getKind().name().equals("FORMAL_IN")
-                if (!p.getBytecodeName().startsWith("<param> ")
-                        && !p.getKind().name().equals("FORMAL_IN")) {
-                    // TODO: probability of global variables is high, has to be
-                    // handeled
-                    System.out.println("break with node: " + p);
-                    break;
-                }
-                // all parameter as variables
-                String param = descAllParams(p, sdg);
-                String[] params = param.split(",");
-                for (int i = 0; i < params.length; i++) {
-                    highVar.add(params[i]);
-                }
-            } else {
-                // all parameter that influence the result as variables
-                // TODO: ausgabe �berpr�fen
-                SDGNode method = sdg.getEntry(r);
-                CGNode methodCG = stateSaver.callGraph.getNode(sdg.getCGNodeId(method));
-                IR ir = methodCG.getIR();
-                for (SDGNode f : sdg.getFormalInsOfProcedure(method)) {
-                    int f_number = Integer.parseInt(f.getBytecodeName()
-                            .substring(8));
-                    if (f_number != 0
-                            && p.getBytecodeName().startsWith("<param> ")
-                            || p.getKind().name().equals("FORMAL_IN")) {
-                        if (isHighVar(sdg, f, r)) {
-                            String pa = ir.getLocalNames(0,
-                                    ir.getParameter(f_number))[0];
-                            highVar.add(pa);
-                        }
-                    }
-                }
-            }
-
-            /**
-             * get arrays *
-             */
-            for (int i = 0; i < methodString.size(); i++) {
-                String line = methodString.get(i);
-                if (line.contains("[]") && i != 0) {
-                    String ar = line.split("\\[\\]")[1].trim();
-                    ar = ar.split("=")[0].trim();
-                    arrayNames.add(ar);
-                } // array given as a parameter
-                else if (i == 0 && line.contains("[]")) {
-                    String ar = line.split("(")[1];
-                    ar = ar.split(")")[0];
-                    ar = ar.split("[]")[1].split(")")[0].split(",")[0].trim();
-                    arrayNames.add(ar);
-                }
-            }
-
-            ArrayList<String> varArrName = new ArrayList<String>();
-            for (int a = 0; a < methodString.size(); a++) {
-                String line = methodString.get(a);
-                if (line.contains("=") && arrayNames.size() >= 1) {
-                    if (line.contains(arrayNames.get(0))) {
-                        varArrName.add(line.split("=")[1]);
-                    }
-                }
-            }
-
-            /**
-             * check for array access *
-             */
-            boolean highToA = false;
-            boolean lowToA = false;
-            boolean boolLow = false;
-            boolean boolHigh = false;
-            int tresh = 9000;
-            for (int j = 0; j < arrayNames.size(); j++) {
-                for (int i = 0; i < methodString.size(); i++) {
-                    String line = methodString.get(i);
-                    if (line.contains("=")) {
-                        String[] line1 = line.split("=");
-                        for (int k = 0; k < highVar.size(); k++) {
-                            if (line1[1].contains(highVar.get(k))) {
-                                boolHigh = true;
-                            }
-                        }
-                        if (line1[0].contains(arrayNames.get(j)) && boolHigh) {
-                            highToA = true;
-                            tresh = i;
-                        }
-
-                        boolLow = true;                        
-                        if (line.contains(arrayNames.get(j)) && boolLow
-                                && i > tresh) {
-                            lowToA = true;
-                        }
-                    }
-
-                    boolLow = false;
-                    boolHigh = false;
-                }
-                if (lowToA && highToA) {
-                    return true;
-                } else {
-                    lowToA = false;
-                    highToA = false;
-                }
-            }
-            // that was array-heuristic
-
-            // Multiplication with zero
-            for (int i = 0; i < methodString.size(); i++) {
-                String line = methodString.get(i);
-                if (line.contains("*0") || line.contains("* 0")) { // ||
-                    // line.contains(nullFunction.get(i))
-                    return true;
-                }
-            }
-            // identity
-            // calculate value of every variable that influences result
-        }
-
-        return false;
-    }
-
-    public String descAllParams(SDGNode n, SDG sdg) {
-        StringBuilder sb = new StringBuilder();
-        if (!n.getBytecodeName().startsWith("<param> ")
-                && !n.getKind().name().equals("FORMAL_IN")) {
-            return null;
-        }
-        SDGNode method = sdg.getEntry(n);
-        CGNode methodCG = stateSaver.callGraph.getNode(sdg.getCGNodeId(method));
-        // get IR to get names of the parameters. Need to compile classes with
-        // sufficient debug information for this.
-        
-        IR ir = methodCG.getIR();
-
-        String delim = "";
-        for (SDGNode p : sdg.getFormalInsOfProcedure(method)) {
-            /**
-             * only describe real parameters
-             */
-            if (!p.getBytecodeName().startsWith("<param> ")
-                    && !p.getKind().name().equals("FORMAL_IN")) {
-                continue;
-            }
-            // TODO: change for global Variables
-            if (p.getBytecodeName().startsWith("<param> ")) {
-                int p_number = Integer.parseInt(p.getBytecodeName()
-                        .substring(8));
-                /**
-                 * find out parameter name through IR
-                 */
-                sb.append(delim).append(
-                        ir.getLocalNames(0, ir.getParameter(p_number))[0]);
-            } else {
-                String forInName = p.getBytecodeName();
-                // System.out.println(forInName);
-                String[] forInNames = forInName.split("\\.");
-                forInName = forInNames[forInNames.length - 1];
-                sb.append(delim).append(forInNames);
-            }
-            delim = ", ";
-        }
-        /**
-         * if no other parameter is found, we need to insert "\\nothing" to
-         * generate valid JML
-         */
-        if (sb.toString().equals("")) {
-            return "\\nothing";
-        }
-        return sb.toString();
-    }
-
-    /**
-     * describe the sink of a flow within a method. Currently only available for
-     * result nodes. Returns null otherwise.
-     *
-     * @param n sink node
-     * @param sdg the SDG for our program
-     * @return Description of sink node (null if no description possible)
-     */
-    private String descSink(SDGNode n, SDG sdg) {
-        if (n.getKind() == SDGNode.Kind.EXIT) {
-            return "\\result";
-        } else {
-            return "this";
-        }
-        // return null;
-    }
-
-    /**
-     * describe the params except the source of a flow within a method.
-     * Currently only available for true parameter nodes (explicit parameters
-     * and this). Returns null otherwise.
-     *
-     * @param n source node
-     * @param sdg the SDG for our program
-     * @return Description of params except source node (null if no description
-     * possible)
-     */
-    private String descOtherParams(SDGNode n, SDG sdg) {
-        StringBuilder sb = new StringBuilder();
-        try {
-            if (!n.getBytecodeName().startsWith("<param> ")
-                    && !n.getKind().name().equals("FORMAL_IN")) {
-                return null;
-            }
-            SDGNode method = sdg.getEntry(n);
-            CGNode methodCG = stateSaver.callGraph.getNode(sdg.getCGNodeId(method));
-            /**
-             * get IR to get names of the parameters. Need to compile classes
-             * with sufficient debug information for this.
-             */
-            IR ir = methodCG.getIR();
-
-            String delim = "";
-            Set<SDGNode> ps = sdg.getFormalInsOfProcedure(method);
-            for (SDGNode p : ps) {
-
-                /**
-                 * only describe real parameters
-                 */
-                if (p == n
-                        || (!p.getBytecodeName().startsWith("<param> ") && !p
-                        .getKind().name().equals("FORMAL_IN"))) {
-                    continue;
-                }
-                if (p.getBytecodeName().startsWith("<param> ")) {
-                    int p_number = Integer.parseInt(p.getBytecodeName()
-                            .substring(8));
-                    /**
-                     * find out parameter name through IR
-                     */
-                    sb.append(delim).append(
-                            ir.getLocalNames(0, ir.getParameter(p_number))[0]);
-                } else {
-                    String forInName = p.getBytecodeName();
-                    // System.out.println(forInName);
-                    String[] forInNames = forInName.split("\\.");
-                    forInName = forInNames[forInNames.length - 1];
-                    sb.append(delim).append(forInNames);
-                }
-                delim = ", ";
-            }
-            /**
-             * if no other parameter is found, we need to insert "\\nothing" to
-             * generate valid JML
-             */
-        } catch (Exception e) {
-            if (sb.toString().equals("")) {
-                return "\\nothing";
-            }
-        }
-        return sb.toString();
     }
 
     /**

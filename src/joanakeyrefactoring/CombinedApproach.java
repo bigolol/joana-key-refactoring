@@ -60,30 +60,8 @@ public class CombinedApproach {
 
     public static void checkAnnotatedPDGWithJoanaAndKey(
             IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker violationChecker) throws FileNotFoundException {
-
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
-
-        int numberOfViolations = violations.size();
-        int disprovedViolations = 0;
-
-        for (IViolation<SecurityNode> violationNode : violations) {
-
-            boolean disproved = violationChecker.checkViolation(violationNode,
-                    annotatedAnalysis.getProgram().getSDG());
-
-            if (disproved) {
-                disprovedViolations++;
-            }
-        }
-
-        int remaining = numberOfViolations - disprovedViolations;
-
-        System.out.println(String.format(
-                "Found %d violations, disproved %d, remaining %d",
-                numberOfViolations, disprovedViolations, remaining));
-        if (remaining == 0) {
-            System.out.println("Program proven secure!");
-        }
+        violationChecker.tryToDisproveViolationsViaKey(violations, annotatedAnalysis.getProgram().getSDG());
     }
 
     public static void addAnnotationsFileBased(
@@ -91,15 +69,12 @@ public class CombinedApproach {
             List<String> annotationsSink,
             List<String> annotationsSource,
             String annotationPath) throws IOException {
-
         FileInputStream annotationSourceStream = new FileInputStream(annotationPath);
         Collection<IFCAnnotation> annotationCollection
                 = ExtractAnnotations.loadAnnotations(annotationSourceStream, ana.getProgram().getSDG());
-
         annotationCollection.forEach((annotation) -> {
             ana.addAnnotation(annotation);
         });
-
     }
 
     public static JoanaAndKeyCheckData parseInputFile(String filePath)
