@@ -268,7 +268,7 @@ public class AutomationHelper {
     }
 
     /**
-     * Creates the Iinformation flow Proof Obligation for KeY
+     * Creates the Information flow Proof Obligation for KeY
      *
      * @param javaFile
      * @param method
@@ -356,7 +356,6 @@ public class AutomationHelper {
     public boolean runKeY(String pathKeY, String obligation) {
         boolean result = false;
         // String cmd = "java -Xmx512m -jar KeY.jar --auto proofObIF.key";
-
         String cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObIF.key";
         // String cmd =
         // "java -Xmx512m -jar C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\KeY\\key\\key\\deployment\\KeY.jar --auto C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\workspaceJoana\\HybridApproach\\proofObIF.key";

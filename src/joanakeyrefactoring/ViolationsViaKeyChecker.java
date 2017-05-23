@@ -107,7 +107,7 @@ public class ViolationsViaKeyChecker {
      * @throws FileNotFoundException
      */
     public boolean checkViolation(IViolation<SecurityNode> violationNode, SDG sdg) throws FileNotFoundException {
-        File file = new File("proofs\\sourceFile.java");
+        File sourceFile = new File("proofs/sourceFile.java");
         boolean neueHeuristic = true;
         ViolationChopData violationChopData = getViolationChopForSecNodeViolation(violationNode, sdg);
         if (violationChopData.violationChop.isEmpty()) {
@@ -149,7 +149,8 @@ public class ViolationsViaKeyChecker {
                     if (calledMethodByteCode.contains("java.") || calledMethodByteCode.contains("lang")) {
                         javaLibary = true;
                     }
-                    String descriptionStringForKey = "\t/*@ requires " + generatePreconditionFromPointsToSet(sdg, calledMethodNode)
+                    String descriptionStringForKey = "\t/*@ requires " + 
+                            KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver)
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
                             + descAllFormalInNodes + "; */";
                     String methodName = getMethodNameFromBytecode(calledMethodByteCode);
@@ -158,12 +159,12 @@ public class ViolationsViaKeyChecker {
                         break;
                     }
                     if (descOfFormalOutNode == null || descAllFormalInNodes == null) {
-                        //how to check this?
                         removable = false;
                         break;
                     }
                     // write method to same file below
-                    paramInClass = automationHelper.exportJava(descriptionStringForKey, methodName, descOfFormalOutNode, descAllFormalInNodes);
+                    paramInClass = automationHelper.exportJava(
+                            descriptionStringForKey, methodName, descOfFormalOutNode, descAllFormalInNodes);
                     // create .key file
                     String params = "";
                     if (paramInClass != null) {
@@ -184,15 +185,13 @@ public class ViolationsViaKeyChecker {
 
                     if (!result || !resultFunc) {
                         if (!fullyAutomatic) {
-                            System.out.println("From node: " + formalInNode + " to node: "
-                                    + formalOutNode);
-                            System.out
-                                    .println("type \"y\" to verify method manually or \"n\" to go on automatically ");
+                            System.out.println("From node: " + formalInNode + " to node: " + formalOutNode);
+                            System.out.println("type \"y\" to verify method manually or \"n\" to go on automatically ");
                             Scanner scanInput = new Scanner(System.in);
                             String keyAnswer = scanInput.nextLine();
                             if (keyAnswer.equals("y")) {
                                 // open JAVA and KeY
-                                automationHelper.openJava(file);
+                                automationHelper.openJava(sourceFile);
                                 automationHelper.openKeY(pathToJar, methodNameKeY);
 
                                 System.out.println("type y if KeY could prove");
@@ -239,11 +238,11 @@ public class ViolationsViaKeyChecker {
          * all summary edges are checked but the program is not found secure, so
          * we have to check the top level: the annotated method itself
          */
-        boolean result = checkTopLevelComplete(sdg, violationChopData, file);
+        boolean result = checkTopLevelComplete(sdg, violationChopData, sourceFile);
         if (!result) {
-            result = checkTopLevelComplete(sdg, violationChopData, file);
+            result = checkTopLevelComplete(sdg, violationChopData, sourceFile);
             if (!result) {
-                result = checkTopLevelComplete(sdg, violationChopData, file);
+                result = checkTopLevelComplete(sdg, violationChopData, sourceFile);
             }
         }
         if (result) {
@@ -288,11 +287,11 @@ public class ViolationsViaKeyChecker {
         System.out.println("Summary edge from: " + source.getBytecodeName()
                 + " to " + sink.getBytecodeName());
         System.out.println("\t\ttop level call in " + m.getBytecodeMethod());
-        System.out.println("\t\t /*@ requires " + generatePreconditionFromPointsToSet(sdg, m)
+        System.out.println("\t\t /*@ requires " + KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, m, stateSaver)
                 + ";\n\t\t  @ determines " + descriptionOfSink + " \\by "
                 + descriptionOfParams + "; */");
         String a1 = m.getBytecodeMethod();
-        String b = "\t/*@ requires " + generatePreconditionFromPointsToSet(sdg, m)
+        String b = "\t/*@ requires " + KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, m, stateSaver)
                 + ";\n\t  @ determines " + descriptionOfSink + " \\by "
                 + descriptionOfParams + "; */";
         String methodName = getMethodNameFromBytecode(a1);
@@ -471,88 +470,6 @@ public class ViolationsViaKeyChecker {
         }
         SDG flowSDG = sdg.subgraph(c);
         return false;
-    }
-
-    /**
-     * Calculates non-aliasing information for parameters of a method node using
-     * JOANA's points-to information. From the paper: Definition 9 (Generation
-     * of preconditions). Let o be a reference and P_o its points-to set. We
-     * generate the following precondition: for all o' in P_o: o = o'
-     *
-     * @param sdg our SDG
-     * @param methodNode method node to check
-     * @return non-aliasing information as a string that can be used as
-     * precondition
-     */
-    public String generatePreconditionFromPointsToSet(SDG sdg, SDGNode methodNode) {
-        PointerAnalysis<? extends InstanceKey> pointerAnalyis = stateSaver.pointerAnalyis;
-        //get the call graph node corresponding to the SDG method node
-        CGNode methodNodeInCallGraph = stateSaver.callGraph.getNode(sdg.getCGNodeId(methodNode));
-        // get IR for parameter names
-        IR ir = methodNodeInCallGraph.getIR();
-        Iterable<PointerKey> pointerKeys = pointerAnalyis.getPointerKeys();
-        ArrayList<LocalPointerKey> localPointerKeys = new ArrayList<LocalPointerKey>();
-        for (PointerKey currentPointerKey : pointerKeys) {
-            if (currentPointerKey instanceof LocalPointerKey) {
-                LocalPointerKey localPointerKey = (LocalPointerKey) currentPointerKey;
-                if (localPointerKey.getNode() == methodNodeInCallGraph && localPointerKey.isParameter()) {
-                    localPointerKeys.add(localPointerKey);
-                }
-            }
-        }
-        // calculate individual non-alias clauses
-        ArrayList<String> pointsToResult = calculateNonAliases(localPointerKeys, pointerAnalyis, ir);
-        StringBuilder stringBuilder = new StringBuilder();
-        String delim = "";
-        //chain clauses together by conjunction
-        for (String nonAliased : pointsToResult) {
-            stringBuilder.append(delim).append(nonAliased);
-            delim = " && ";
-        }
-        /**
-         * for simpler code, if we don't have any clauses, we return "true" here
-         * instead of writing code that does not emit a aliasing precondition.
-         * do it the proper way
-         */
-        if (stringBuilder.toString().equals("")) {
-            return "true";
-        }
-        return stringBuilder.toString();
-    }
-
-    private ArrayList<String> calculateNonAliases(
-            ArrayList<LocalPointerKey> localPointerKeys,
-            PointerAnalysis<? extends InstanceKey> pointerAnalysis, IR ir) {
-        int amountLocalPointerKeys = localPointerKeys.size();
-        ArrayList<String> result = new ArrayList<String>();
-        // enumerate all two element subsets of pointer keys and check if those two have disjunct points-to sets
-        for (int i = 0; i < amountLocalPointerKeys; i++) {
-            OrdinalSet<? extends InstanceKey> pointsToSet = pointerAnalysis.getPointsToSet(localPointerKeys.get(i));
-            for (int j = i + 1; j < amountLocalPointerKeys; j++) {
-                if (disjunct(pointsToSet, pointerAnalysis.getPointsToSet(localPointerKeys.get(j)))) {
-                    // get the names of the parameters associated with the pointer keys                     
-                    String o1 = ir.getLocalNames(0, localPointerKeys.get(i).getValueNumber())[0];
-                    String o2 = ir.getLocalNames(0, localPointerKeys.get(j).getValueNumber())[0];
-                    // if points-to sets are disjunct, o1 and o2 cannot alias
-                    result.add(o1 + " != " + o2);
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * calculates whether two Ordinal sets are disjunct.
-     */
-    private boolean disjunct(OrdinalSet<?> s1, OrdinalSet<?> s2) {
-        for (Object e1 : s1) {
-            for (Object e2 : s2) {
-                if (e1.equals(e2)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**
