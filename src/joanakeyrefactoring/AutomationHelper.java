@@ -75,6 +75,7 @@ public class AutomationHelper {
      * string (exept the package declaration at the beginning); also puts the
      * content into the classes-hasmap at the key [classname] * @param file the
      * java file to whose content is to be read
+     *
      * @return the java file's content as a String
      */
     public String putFileContentsIntoStringAndIntoClassMap(File file) {
@@ -194,10 +195,9 @@ public class AutomationHelper {
      * @param descOtherParams
      * @return
      */
-    public String[] exportJava(
+    public String[] createJavaFileForKeyToDisproveMEthod(
             String descriptionForKey, String methodName, String descSink,
-            String descOtherParams) {
-        ArrayList<String> allMethodNames = new ArrayList<>();
+            String descOtherParams) throws FileNotFoundException, UnsupportedEncodingException, IOException {
 
         String globalVariables = "";
         globalVariables = javaForKeyListener.getFieldsWithNullableAsString();
@@ -216,38 +216,44 @@ public class AutomationHelper {
             sbClasses.append(System.lineSeparator());
         }
         otherClasses = sbClasses.toString();
-      
-        String allOtherMethods = getAllMethodsCalledByDisproveMethod(completeMethod, allMethodNames);
+
+        String allOtherMethods = getAllMethodsCalledByDisproveMethod(completeMethod);
+
         // write specification and source code in file
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter("proofs\\sourceFile.java", "UTF-8");
-            writer.println("package proofs;");
-            writer.println("public class sourceFile{");
-            writer.println(globalVariables);
-            writer.println(descriptionForKey);
-            writer.println(completeMethod);
-            writer.println(allOtherMethods);
-            writer.println(System.lineSeparator() + "}");
-            writer.println(otherClasses);
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        File proofFile = new File("proofs/sourceFile.java");
+        if (!proofFile.exists()) {
+            proofFile.createNewFile();
         }
+        PrintWriter writer;
+        writer = new PrintWriter("proofs/sourceFile.java", "UTF-8");
+        writer.println("package proofs;");
+        writer.println("public class sourceFile{");
+        writer.println(globalVariables);
+        writer.println(descriptionForKey);
+        writer.println(completeMethod);
+        writer.println(allOtherMethods);
+        writer.println(System.lineSeparator() + "}");
+        writer.println(otherClasses);
+        writer.close();
+
         return javaForKeyListener.getParamsOfMethod(methodName);
     }
 
-    private String getAllMethodsCalledByDisproveMethod(String completeMethod, ArrayList<String> allMethodNames) {
-        // goes through every line of the method and if it finds a method call,
-        // it adds the method to the stringbuilder (using the listener). 
-        // Does this work? Why
-        // doesnt one need to add the other key stuff we have to add to the 
-        // disproved method? And I am so certain this can be done way better
-      
+    /**
+     * goes through every line of the method and if it finds a method call, it
+     * adds the method to the stringbuilder (using the listener). Does this
+     * work? Why doesnt one need to add the other key stuff we have to add to
+     * the disproved method? And I am so certain this can be done way better
+     *
+     * @param completeMethod the method body for which the called methods will
+     * all be assembled in the string
+     * @return all methods called in the passed method body
+     */
+    private String getAllMethodsCalledByDisproveMethod(String completeMethod) {
+
         StringBuilder sbOM = new StringBuilder();
         String[] lines = completeMethod.split(System.lineSeparator());
+        List<String> allMethodNames = new ArrayList<>();
         for (String line : lines) {
             String methodCallPattern = "(.*)([a-zA-Z1-9]+)(\\s*)([=a-zA-Z1-9]+)(\\s*)([a-zA-Z1-9]+)([a-zA-Z1-9]*)(\\()([a-zA-Z]+)(.*)";
             // Create Pattern object

@@ -30,6 +30,9 @@ import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ViolationsViaKeyChecker {
 
@@ -160,9 +163,14 @@ public class ViolationsViaKeyChecker {
                         removable = false;
                         break;
                     }
-                    // write method to same file below
-                    paramInClass = automationHelper.exportJava(
-                            descriptionStringForKey, methodName, descOfFormalOutNode, descAllFormalInNodes);
+                    try {
+                        // write method to same file below
+                        paramInClass = automationHelper.createJavaFileForKeyToDisproveMEthod(
+                                descriptionStringForKey, methodName, descOfFormalOutNode, descAllFormalInNodes);
+                    } catch (Exception ex) {
+                        removable = false;
+                        break;
+                    }
                     // create .key file
                     String params = "";
                     if (paramInClass != null) {
@@ -291,8 +299,14 @@ public class ViolationsViaKeyChecker {
                 + ";\n\t  @ determines " + descriptionOfSink + " \\by "
                 + descriptionOfParams + "; */";
         String methodName = getMethodNameFromBytecode(a1);
-        // wirte method to same file below
-        paramInClass = automationHelper.exportJava(b, methodName, descriptionOfParams, descriptionOfParams);
+        try {
+            // wirte method to same file below
+            paramInClass = automationHelper.createJavaFileForKeyToDisproveMEthod(b, methodName, descriptionOfParams, descriptionOfParams);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
+        }
         // create .key file
         String params = "";
         if (paramInClass != null) {
