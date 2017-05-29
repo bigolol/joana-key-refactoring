@@ -26,11 +26,10 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     private static Map<String, List<String>> creators = new HashMap<>();
     private static List<String> createdName = new ArrayList<>();
     private static String methodName = "";
-    private static String holeMethod = "";
+    private static String completeMethod = "";
     private boolean inConstructor = false;
     private String constructorName;
     private String className = "";
-    private String holeMethodMinus1;
     private static Map<String, String> paramsWithNullable = new HashMap<>();
     private static List<String> fieldsCorrect = new ArrayList<>();
     private static List<String> classList = new ArrayList<>();
@@ -38,13 +37,47 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     public ParseJavaForKeyListener() {
     }
 
+    /**
+     * takes as input a string containing every .java file of interest and then
+     * extracts all necessary information. This string is created by the
+     * Automationhelpers method called
+     * readAllSourceFilesIntoOneStringAndFillClassMap.
+     *
+     * @param allClasses the string file containing the summary of every .java
+     * file of interest to us, i e every file which belongs to the checked
+     * program
+     */
     public ParseJavaForKeyListener(String allClasses) {
         ANTLRInputStream input = new ANTLRInputStream(allClasses);
         saveAllRequirements(input);
     }
 
+    /**
+     * creates the syntax tree and visits it
+     * @param input the ANTLRInputStream which represents the java file 
+     * which summarizes all .java files belonging to the project
+     */
+    private void saveAllRequirements(ANTLRInputStream input) {
+        JavaLexer lexer = new JavaLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        JavaParser parser = new JavaParser(tokens);
+        JavaParser.CompilationUnitContext compilationUnitContext = parser.compilationUnit();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
+        walker.walk(listener, compilationUnitContext);
+    }
+
     public List<String[]> getFields() {
         return fields;
+    }
+    
+    public String getFieldsAsString() {
+        StringBuilder sb = new StringBuilder();
+        for (String[] field : fields) {
+            sb.append(field[0] + " " + field[1] + ";");
+            sb.append(System.lineSeparator());
+        }
+        return sb.toString();
     }
 
     public String getFieldsCorrectAsString() {
@@ -58,16 +91,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
 
     public Set<String> getMethods() {
         return methods.keySet();
-    }
-
-    public String getFieldsAsString() {
-        StringBuilder sb = new StringBuilder();
-        for (String[] field : fields) {
-            sb.append(field[0] + " " + field[1] + ";");
-            sb.append(System.lineSeparator());
-        }
-        return sb.toString();
-    }
+    }    
 
     public String getConstructorOfMethod(String methodName) {
         return constructors.get(methodName);
@@ -99,26 +123,40 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return creators.get(methodName);
     }
 
+    /**
+     * if the visitor enters a field decl, this function adds the fields type and
+     * name as an array of strings to the fields List and adds the declaration
+     * with the string @nullable after the type decl to the fieldsCorrect List
+     * 
+     * ex: public static int x -> {"int", "x"} into fields
+     *                          -> "int @nullable x" into fieldsCorrect
+     *
+     * @param ctx
+     */
     @Override
     public void enterFieldDeclaration(JavaParser.FieldDeclarationContext ctx) {
-        String[] field = new String[2];
-        field[0] = ctx.getChild(0).getText();
-        field[1] = ctx.getChild(1).getText();
-        fields.add(field);
-        int a = ctx.start.getStartIndex();
-        int b = ctx.stop.getStopIndex();
-        Interval interval = new Interval(a, b);
+        String typeAsString = ctx.getChild(0).getText();
+        String idAsString = ctx.getChild(1).getText();
+        fields.add(new String[]{typeAsString, idAsString});
+        String declWithInsertedNullable = insertNullableAfterTypeIntoFieldDecl(ctx);
+        fieldsCorrect.add(declWithInsertedNullable);
+    }
+
+    private String insertNullableAfterTypeIntoFieldDecl(JavaParser.FieldDeclarationContext ctx) {
+        int startIndex = ctx.start.getStartIndex();
+        int stopIndex = ctx.stop.getStopIndex();
+        Interval interval = new Interval(startIndex, stopIndex);
         CharStream input = ctx.start.getInputStream();
         String nullable = "/*@nullable*/ ";
         String[] fieldArray = input.getText(interval).split(" ");
-        StringBuilder sbF = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < fieldArray.length; i++) {
-            sbF.append(fieldArray[i] + " ");
+            stringBuilder.append(fieldArray[i] + " ");
             if (i == 0) {
-                sbF.append(nullable);
+                stringBuilder.append(nullable);
             }
         }
-        fieldsCorrect.add(sbF.toString());
+        return stringBuilder.toString();
     }
 
     @Override
@@ -180,28 +218,28 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     public void enterMyMethodName(JavaParser.MyMethodNameContext ctx) {
         createdName = new ArrayList<String>();
         methodName = ctx.getText();
-        methods.put(methodName, holeMethod);
+        methods.put(methodName, completeMethod);
         methodsAndClasses.put(methodName, className);
-        if (holeMethod.contains(".substring")
-                || holeMethod.contains(".getByte")) {
+        if (completeMethod.contains(".substring")
+                || completeMethod.contains(".getByte")) {
             createdName.add("String.methods");
         }
         creators.put(methodName, createdName);
     }
 
+    
     @Override
     public void enterMethodDeclaration(JavaParser.MethodDeclarationContext ctx) {
-        int a = ctx.start.getStartIndex();
-        int b = ctx.stop.getStopIndex();
-        Interval interval = new Interval(a, b);
+        int startIndex = ctx.start.getStartIndex();
+        int endIndex = ctx.stop.getStopIndex();
+        Interval interval = new Interval(startIndex, endIndex);
         CharStream input = ctx.start.getInputStream();
-        holeMethod = input.getText(interval);
-        String[] lines = holeMethod.split(System.getProperty("line.separator"));
+        completeMethod = input.getText(interval);
+        String[] lines = completeMethod.split(System.getProperty("line.separator"));
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < lines.length; i++) {
             sb.append(lines[i] + System.lineSeparator());
         }
-        holeMethodMinus1 = sb.toString();
     }
 
     @Override
@@ -248,13 +286,4 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         walker.walk(listener, compilationUnitContext);
     }
 
-    private void saveAllRequirements(ANTLRInputStream input) {
-        JavaLexer lexer = new JavaLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        JavaParser parser = new JavaParser(tokens);
-        JavaParser.CompilationUnitContext compilationUnitContext = parser.compilationUnit();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
-        walker.walk(listener, compilationUnitContext);
-    }
 }

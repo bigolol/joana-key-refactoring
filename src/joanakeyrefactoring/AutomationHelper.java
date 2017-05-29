@@ -46,7 +46,7 @@ public class AutomationHelper {
     }
 
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
-        this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());;
+        this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());
         return this.javaForKeyListener;
     }
 
@@ -133,11 +133,11 @@ public class AutomationHelper {
             String descriptionForKey, String methodName, String descSink,
             String descOtherParams) {
         ArrayList<String> allMethodNames = new ArrayList<>();
-
+        
         String globalVariables = "";
         globalVariables = javaForKeyListener.getFieldsCorrectAsString();
-        // complete method with Java
-        String completeMethod = "";
+
+        String completeMethod = ""; 
         if (methodName.contains("<init>")) {
             methodName = methodName.split("\\.")[1];
             completeMethod = javaForKeyListener.getConstructorOfMethod(methodName);
