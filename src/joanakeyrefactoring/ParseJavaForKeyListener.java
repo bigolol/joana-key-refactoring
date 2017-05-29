@@ -33,6 +33,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     private static Map<String, String> paramsWithNullable = new HashMap<>();
     private static List<String> fieldsCorrect = new ArrayList<>();
     private static List<String> classList = new ArrayList<>();
+    private static final String nullable = "/*@nullable*/ ";
 
     public ParseJavaForKeyListener() {
     }
@@ -54,8 +55,9 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
 
     /**
      * creates the syntax tree and visits it
-     * @param input the ANTLRInputStream which represents the java file 
-     * which summarizes all .java files belonging to the project
+     *
+     * @param input the ANTLRInputStream which represents the java file which
+     * summarizes all .java files belonging to the project
      */
     private void saveAllRequirements(ANTLRInputStream input) {
         JavaLexer lexer = new JavaLexer(input);
@@ -70,7 +72,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     public List<String[]> getFields() {
         return fields;
     }
-    
+
     public String getFieldsAsString() {
         StringBuilder sb = new StringBuilder();
         for (String[] field : fields) {
@@ -91,7 +93,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
 
     public Set<String> getMethods() {
         return methods.keySet();
-    }    
+    }
 
     public String getConstructorOfMethod(String methodName) {
         return constructors.get(methodName);
@@ -124,12 +126,13 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     }
 
     /**
-     * if the visitor enters a field decl, this function adds the fields type and
-     * name as an array of strings to the fields List and adds the declaration
-     * with the string @nullable after the type decl to the fieldsCorrect List
-     * 
-     * ex: public static int x -> {"int", "x"} into fields
-     *                          -> "int @nullable x" into fieldsCorrect
+     * if the visitor enters a field decl, this function adds the fields type
+     * and name as an array of strings to the fields List and adds the
+     * declaration with the string @nullable after the type decl to the
+     * fieldsCorrect List
+     *
+     * ex: public static int x -> {"int", "x"} into fields -> "int @nullable x"
+     * into fieldsCorrect
      *
      * @param ctx
      */
@@ -147,7 +150,6 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         int stopIndex = ctx.stop.getStopIndex();
         Interval interval = new Interval(startIndex, stopIndex);
         CharStream input = ctx.start.getInputStream();
-        String nullable = "/*@nullable*/ ";
         String[] fieldArray = input.getText(interval).split(" ");
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < fieldArray.length; i++) {
@@ -159,59 +161,98 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return stringBuilder.toString();
     }
 
+    /**
+     * sets inConstructor bool to true, and adds the constructor decl to the
+     * constructors hashmap under the key of the class name. Also sets var
+     * contructorName to the constructors name
+     *
+     * Example: C(int x, int y){} -> ["C"] => [C(int x, int y)] in constructors
+     *
+     * @param ctx
+     */
     @Override
     public void enterConstructorDeclaration(JavaParser.ConstructorDeclarationContext ctx) {
         inConstructor = true;
-        constructors.put(ctx.getChild(0).getText(), ctx.getText());
-        constructorName = ctx.getChild(0).getText();
+        String className = ctx.getChild(0).getText();
+        String entireCtorDecl = ctx.getText();
+        constructors.put(className, entireCtorDecl);
+        constructorName = className;
     }
 
+    /**
+     * This method is called when the visitor enters a method or ctor
+     * declaration and handles its parameters.
+     *
+     * @param ctx
+     */
     @Override
     public void enterFormalParameters(JavaParser.FormalParametersContext ctx) {
         //TODO: nullable auch bei methodenKopf nullable String
         if (inConstructor) {
-            int a = ctx.start.getStartIndex();
-            int b = ctx.stop.getStopIndex();
-            Interval interval = new Interval(a, b);
-            CharStream input = ctx.start.getInputStream();
-            String test = input.getText(interval);
-            String[] param = test.split(",");
-            String[] allParamTypes = new String[param.length];
-            for (int i = 0; i < param.length; i++) {
-                allParamTypes[i] = param[i].trim().split(" ")[0].trim();
-                if (allParamTypes[i].contains("(")) {
-                    String tmp = allParamTypes[i].split("\\(")[1].trim();
-                    allParamTypes[i] = tmp;
-                }
-            }
-            params.put(constructorName, allParamTypes);
-            inConstructor = false;
+            enterFormalParamsInCtor(ctx);
         } else {
-            int a = ctx.start.getStartIndex();
-            int b = ctx.stop.getStopIndex();
-            Interval interval = new Interval(a, b);
-            CharStream input = ctx.start.getInputStream();
-            StringBuilder sbF = new StringBuilder();
-            if (input.getText(interval).length() > 3) {
-                String nullable = "/*@nullable*/ ";
-                String[] paramArray = input.getText(interval).split(",");
-                for (int j = 0; j < paramArray.length; j++) {
-                    String[] fieldArray = paramArray[j].split(" ");
-                    for (int i = 0; i < fieldArray.length; i++) {
-                        sbF.append(fieldArray[i] + " ");
-                        if (i == 0) {
-                            sbF.append(nullable);
-                        }
-                    }
-                    if (j < paramArray.length - 1) {
-                        sbF.append(", ");
+            enterFormalParamsInMethod(ctx);
+        }
+    }
+
+    private void enterFormalParamsInMethod(JavaParser.FormalParametersContext ctx) {
+        String stringBetweenStartAndStop = extractTextBetweenStartAndStopIndex(ctx);
+
+        if (stringBetweenStartAndStop.length() <= 3) { //this means the method takes no parameters
+            paramsWithNullable.put(methodName, "()");
+        } else {
+            StringBuilder stringBuilder = new StringBuilder();
+            String[] paramArray = stringBetweenStartAndStop.split(",");
+            for (int j = 0; j < paramArray.length; j++) {
+                String[] fieldArray = paramArray[j].split(" ");
+                for (int i = 0; i < fieldArray.length; i++) {
+                    stringBuilder.append(fieldArray[i] + " ");
+                    if (i == 0) {
+                        stringBuilder.append(nullable);
                     }
                 }
-            } else {
-                sbF.append("()");
+                if (j < paramArray.length - 1) {
+                    stringBuilder.append(", ");
+                }
             }
-            paramsWithNullable.put(methodName, sbF.toString());
+            paramsWithNullable.put(methodName, stringBuilder.toString());
         }
+    }
+
+    private String extractTextBetweenStartAndStopIndex(ParserRuleContext ctx) {
+        int a = ctx.start.getStartIndex();
+        int b = ctx.stop.getStopIndex();
+        Interval interval = new Interval(a, b);
+        CharStream input = ctx.start.getInputStream();
+        String stringBetweenStartAndStop = input.getText(interval);
+        return stringBetweenStartAndStop;
+    }
+
+    /**
+     * this method extracts all types of the parameters passed to the
+     * constructor as Strings and puts it into the params hashmap, using the
+     * ctors name as key
+     *
+     * @param ctx
+     */
+    private void enterFormalParamsInCtor(JavaParser.FormalParametersContext ctx) {
+        String allParamsAsString = getParameterStringWithoutBrackets(ctx);
+        String[] parameters = allParamsAsString.split(",");
+        String[] allParamTypes = new String[parameters.length];
+        int i = 0;
+        for (String param : parameters) {
+            String parameterType = param.split(" ")[0].trim();
+            allParamTypes[i] = parameterType;
+            ++i;
+        }
+        params.put(constructorName, allParamTypes);
+        inConstructor = false;
+    }
+
+    private String getParameterStringWithoutBrackets(JavaParser.FormalParametersContext ctx) {
+        String allParamsAsString = extractTextBetweenStartAndStopIndex(ctx);
+        allParamsAsString = allParamsAsString.substring(1, allParamsAsString.length() - 1);
+        return allParamsAsString;
     }
 
     @Override
@@ -227,7 +268,6 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         creators.put(methodName, createdName);
     }
 
-    
     @Override
     public void enterMethodDeclaration(JavaParser.MethodDeclarationContext ctx) {
         int startIndex = ctx.start.getStartIndex();
@@ -244,11 +284,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
 
     @Override
     public void enterFormalParameterList(JavaParser.FormalParameterListContext ctx) {
-        int a = ctx.start.getStartIndex();
-        int b = ctx.stop.getStopIndex();
-        Interval interval = new Interval(a, b);
-        CharStream input = ctx.start.getInputStream();
-        String test = input.getText(interval);
+        String test = extractTextBetweenStartAndStopIndex(ctx);
         String[] param = test.split(",");
         String[] allParamTypes = new String[param.length];
         for (int i = 0; i < param.length; i++) {
