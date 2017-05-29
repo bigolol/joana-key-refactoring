@@ -145,16 +145,13 @@ public class ViolationsViaKeyChecker {
                             = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(
                                     formalInNode, sdg, stateSaver.callGraph);
                     String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
-                    Boolean javaLibary = false;
-                    if (calledMethodByteCode.contains("java.") || calledMethodByteCode.contains("lang")) {
-                        javaLibary = true;
-                    }
-                    String descriptionStringForKey = "\t/*@ requires " + 
-                            KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver)
+
+                    String descriptionStringForKey = "\t/*@ requires "
+                            + KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver)
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
                             + descAllFormalInNodes + "; */";
-                        String methodName = getMethodNameFromBytecode(calledMethodByteCode);
-                    if (!isKeyCompatible(methodName, javaLibary)) {
+                    String methodName = getMethodNameFromBytecode(calledMethodByteCode);
+                    if (!isKeyCompatible(calledMethodByteCode)) {
                         removable = false;
                         break;
                     }
@@ -251,6 +248,13 @@ public class ViolationsViaKeyChecker {
         return false;
     }
 
+    private Boolean isJavaLibrary(String calledMethodByteCode) {
+        if (calledMethodByteCode.contains("java.") || calledMethodByteCode.contains("lang")) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Check the top level method for sink or source annotation
      *
@@ -270,17 +274,7 @@ public class ViolationsViaKeyChecker {
         String descriptionOfSink = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(sink, sdg);
         String descriptionOfParams
                 = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(source, sdg, stateSaver.callGraph);
-        if (descriptionOfSink == null || descriptionOfParams == null) {
-            /**
-             * How to check such a method with KeY?
-             */
-            System.out
-                    .println("!!!!DescSink and DescOtherParams = null. For nodes:"
-                            + source + ", " + sink);
-            System.out.print("descSink:" + descriptionOfSink
-                    + ", descOtherParams" + descriptionOfParams + "/");
-            System.out.println("/ in method " + sink.getBytecodeMethod()
-                    + "and: " + source.getBytecodeMethod());
+        if (descriptionOfSink == null || descriptionOfParams == null) {            
             return false;
         }
         SDGNode m = sdg.getEntry(entryNode);
@@ -323,9 +317,7 @@ public class ViolationsViaKeyChecker {
         boolean resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
         System.out.println("Information Flow Result: " + result);
         System.out.println("Functional Result: " + resultFunc);
-        // if(!methodName.contains("secure_voting")){
-        // result = auto.runKeY(javaClass, methodNameKeY, "information flow");
-        // }
+
         long timeEndKeY = System.currentTimeMillis();
         System.out.println("Runtime KeYProof: " + (timeEndKeY - timeStartKeY)
                 / 1000 + " Sec.");
@@ -387,8 +379,7 @@ public class ViolationsViaKeyChecker {
                     isPartOfJavaLibrary = true;
                 }
                 String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
-                boolean isKeYCompatible = isKeyCompatible(methodName,
-                        isPartOfJavaLibrary);
+                boolean isKeYCompatible = isKeyCompatible(calleeByteCodeMethod);
 
                 boolean machtesPattern = isKeYCompatible;
                 boolean isBridge = false;
@@ -420,22 +411,22 @@ public class ViolationsViaKeyChecker {
         return methodName;
     }
 
-    private boolean isKeyCompatible(String methodName, Boolean javaLibary) {
-        if (javaLibary) {
+    private boolean isKeyCompatible(String byteCodeMethodName) {
+        if (isJavaLibrary(byteCodeMethodName)) {
             return false;
         }
+        String methodName = getMethodNameFromBytecode(byteCodeMethodName);
+        
         if (methodName.contains("<init>.")) {
             methodName = methodName.split("\\.")[1];
         }
         List<String> methodFeatures = javaForKeyListener.getCreatedNames(methodName);
         if (methodFeatures == null) {
             methodFeatures = new ArrayList<String>();
-            methodFeatures.add(methodName);
-        } else {
-            methodFeatures.add(methodName);
         }
-        boolean isSubset = keyFeatures.containsAll(methodFeatures);
-        return isSubset;
+
+        methodFeatures.add(methodName);
+        return keyFeatures.containsAll(methodFeatures);
     }
 
     /**

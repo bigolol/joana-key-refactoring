@@ -3,7 +3,7 @@ public class sourceFile{
 
 	/*@ requires true;
 	  @ determines \result \by \nothing; */
-int testMethod(int /*@nullable*/ high ,  /*@nullable*/ int low) {
+int testMethod(int /*@nullable*/  high, int /*@nullable*/  low), {
 		int one = identity(low, high);
 		return one;
 	}
