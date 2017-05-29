@@ -194,12 +194,13 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
             enterFormalParamsInMethod(ctx);
         }
     }
+
     /**
-     * takes the input params to the method and either
-     *  -> inserts nullable between type and id
-     *  -> creates a string (), if the method takes no params
+     * takes the input params to the method and either -> inserts nullable
+     * between type and id -> creates a string (), if the method takes no params
      * puts whatever it created into the paramsWithNullable map
-     * @param ctx 
+     *
+     * @param ctx
      */
     private void enterFormalParamsInMethod(JavaParser.FormalParametersContext ctx) {
         String stringBetweenStartAndStop = extractTextBetweenStartAndStopIndex(ctx);
@@ -212,47 +213,51 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     }
 
     /**
-     * inserts the nullable string between the type and id decl of each of the params
-     * int the passed string
-     * 
-     * eg: (int x, String s, char c) -> (int nullable x, String nullable s, char nullable c)     * 
-     * 
-     * @param stringBetweenStartAndStop the String of all the parameters passed to the method,
-     * including the brackets
-     * @return 
+     * inserts the nullable string between the type and id decl of each of the
+     * params int the passed string
+     *
+     * eg: (int x, String s, char c) -> (int nullable x, String nullable s, char
+     * nullable c) *
+     *
+     * @param stringBetweenStartAndStop the String of all the parameters passed
+     * to the method, including the brackets
+     * @return
      */
     private String insertNullableBetweenMethodParameters(String stringBetweenStartAndStop) {
         StringBuilder stringBuilder = new StringBuilder();
         String[] parameter = stringBetweenStartAndStop.split(",");
-        for(String currentParam : parameter) {
+        for (String currentParam : parameter) {
             String paramDeclWithNullable = insertNullableIntoParamDecl(currentParam);
             stringBuilder.append(paramDeclWithNullable);
             stringBuilder.append(", ");
         }
         return stringBuilder.toString();
     }
-    
+
     /**
      * inserts the nullable string inbetween a parameters type and id:
-     * 
+     *
      * eg: int x -> itn nullable x
-     * 
-     * @param currentParam the string decl of the param into which nullable will be inserted
+     *
+     * @param currentParam the string decl of the param into which nullable will
+     * be inserted
      * @return the decl with nullable inserted
      */
     private String insertNullableIntoParamDecl(String currentParam) {
         String[] paramSplit = currentParam.trim().split(" ");
         String created = paramSplit[0] + " " + nullable;
-        for(int i = 1; i < paramSplit.length; ++i) created += " " + paramSplit[i];
+        for (int i = 1; i < paramSplit.length; ++i) {
+            created += " " + paramSplit[i];
+        }
         return created;
     }
 
     /**
      * this method takes in a ParserRuleCtx and returns the string contained
      * between ints start and stopindex
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * @param ctx the context for which the text is to be extracted
      * @return the text as a string between ctx.start.getStartIndex() and
      * ctx.stop.getStopIndex()
@@ -308,22 +313,22 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
 
     @Override
     public void enterMethodDeclaration(JavaParser.MethodDeclarationContext ctx) {
-        int startIndex = ctx.start.getStartIndex();
-        int endIndex = ctx.stop.getStopIndex();
-        Interval interval = new Interval(startIndex, endIndex);
-        CharStream input = ctx.start.getInputStream();
-        completeMethod = input.getText(interval);
-        String[] lines = completeMethod.split(System.getProperty("line.separator"));
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i < lines.length; i++) {
-            sb.append(lines[i] + System.lineSeparator());
-        }
+        completeMethod = extractTextBetweenStartAndStopIndex(ctx);       
     }
 
+    /**
+     * I think this method tries to generate a method signature that
+     * joana can deal with, but it currently only translates a byte array
+     * intoi [B and puts this type into the params map. So, if a methods
+     * decl is visited, it 
+     * a) generates an entry for the paramswithnullable array and
+     * b) does this right here. 
+     * @param ctx 
+     */
     @Override
     public void enterFormalParameterList(JavaParser.FormalParameterListContext ctx) {
-        String test = extractTextBetweenStartAndStopIndex(ctx);
-        String[] param = test.split(",");
+        String textBetweenStartAndStop = extractTextBetweenStartAndStopIndex(ctx);
+        String[] param = textBetweenStartAndStop.split(",");
         String[] allParamTypes = new String[param.length];
         for (int i = 0; i < param.length; i++) {
             allParamTypes[i] = param[i].trim().split(" ")[0].trim();
@@ -359,7 +364,5 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
         walker.walk(listener, compilationUnitContext);
     }
-
-    
 
 }
