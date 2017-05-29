@@ -44,48 +44,10 @@ public class AutomationHelper {
     public ArrayList<String> getClassNames() {
         return classNames;
     }
-    
+
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
         this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());;
         return this.javaForKeyListener;
-    }
-
-    /**
-     * Creates loop invariants. Is not complete and only fills the determines
-     * clause.
-     *
-     * @param descSinkG
-     * @param descOtherParamsG
-     * @param methodName
-     * @param loopJava
-     * @return loop invariant
-     */
-    public String createLoopInvariant(String descSinkG,
-            String descOtherParamsG, String methodName, String loopJava) {
-        StringBuilder sb = new StringBuilder();
-        String loopInvariant = "";
-
-        String header = "\t/*\t@ loop_invariant " + "";
-        String assignable = "\t \t @ assignable " + "";
-        String descSink = descSinkG + "";
-        String descOtherParams = descOtherParamsG + "";
-
-        String determines = "\t \t @ determines " + descSink + " \\by "
-                + descOtherParams + "; ";
-        String decreases = "\t \t @ decreases " + "" + "*/";
-
-        sb.append(header);
-        sb.append(System.lineSeparator());
-        if (assignable.length() > 11) {
-            sb.append(assignable);
-            sb.append(System.lineSeparator());
-        }
-        sb.append(determines);
-        sb.append(System.lineSeparator());
-        sb.append(decreases);
-        loopInvariant = sb.toString();
-
-        return loopInvariant;
     }
 
     /**
@@ -149,7 +111,8 @@ public class AutomationHelper {
     }
 
     /**
-     * Exports all necessary code into one file.
+     * Exports all necessary code into one file. uses createloopinvariant for
+     * some reason
      *
      * @param descriptionForKey
      * @param methodName
@@ -166,8 +129,6 @@ public class AutomationHelper {
         // Global Variables with Parser:
         String globalVariables = "";
         globalVariables = javaForKeyListener.getFieldsCorrectAsString();
-        // System.out.println("global variables: " + globalVariables);
-
         // complete method with Java
         String completeMethod = "";
         if (methodName.contains("<init>")) {
@@ -187,7 +148,7 @@ public class AutomationHelper {
                 if (lineLoop.contains("for(") || lineLoop.contains("for (")
                         || lineLoop.contains("while(")
                         || lineLoop.contains("while (")) {
-                    String loopInv = createLoopInvariant(descSink,
+                    String loopInv = KeyStringGenerator.createLoopInvariant(descSink,
                             descOtherParams, methodName, "");
                     array[i] = loopInv + System.lineSeparator() + array[i];
                 }
@@ -355,12 +316,8 @@ public class AutomationHelper {
      */
     public boolean runKeY(String pathKeY, String obligation) {
         boolean result = false;
-        // String cmd = "java -Xmx512m -jar KeY.jar --auto proofObIF.key";
         String cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObIF.key";
-        // String cmd =
-        // "java -Xmx512m -jar C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\KeY\\key\\key\\deployment\\KeY.jar --auto C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\workspaceJoana\\HybridApproach\\proofObIF.key";
         if (obligation == "functional") {
-            // cmd = "java -Xmx512m -jar KeY.jar --auto proofObFunc.key";
             cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObFunc.key";
         }
         Runtime r = Runtime.getRuntime();
@@ -396,11 +353,7 @@ public class AutomationHelper {
      */
     public boolean openKeY(String fileName, String methodName) {
         boolean result = false;
-        // String cmd =
-        // "C:\\Users\\Marko\\Desktop\\Beweissysteme\\bin\\startProver.bat";
         String cmd = "java -Xmx1024m -jar C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\KeY\\key\\key\\deployment\\KeY.jar";
-        // String cmd =
-        // "java -Xmx2048m -jar C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\KeY\\key\\key\\deployment\\KeY.jar --auto C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\workspaceJoana\\HybridApproach\\proofObIF.key";
         Runtime r = Runtime.getRuntime();
         Process pr;
         try {
@@ -599,239 +552,7 @@ public class AutomationHelper {
         // return completeMethod;
     }
 
-    /**
-     * Exports all necessary code in one File and returns the params of the
-     * method that is to be proven. It uses a manual
-     *
-     * @param b
-     * @param methodName
-     * @param descSink
-     * @param descOtherParams
-     * @return params of the method that is to be proven.
-     */
-    public String[] exportJavaWithoutParser(String b, String methodName,
-            String descSink, String descOtherParams) {
-        // Global Variables with Parser:
-        String completeMethod = "";
-        String globalVariables = "";
-        String lineSave = "";
-        // read global variables
-        try {
-            BufferedReader br = new BufferedReader(
-                    new FileReader(pathToJavaFile));
-            StringBuilder sbGV = new StringBuilder();
-            String line = br.readLine();
-
-            // creates String with the complete method
-            boolean globVar = false;
-            while (line != null) {
-                if (line.contains("static void main")) {
-                    break;
-                }
-                if ((line.contains(" class "))) {
-                    line = br.readLine();
-                    globVar = true;
-                }
-                if (globVar) {
-                    sbGV.append(line);
-                    sbGV.append(System.lineSeparator());
-                }
-                line = br.readLine();
-            }
-            globalVariables = sbGV.toString();
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // read method
-        ArrayList<String> allMethodNames = new ArrayList<String>();
-        ArrayList<String> allMethodNames2 = new ArrayList<String>();
-        try {
-            BufferedReader br = new BufferedReader(
-                    new FileReader(pathToJavaFile));
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-            int counter = -1;
-            boolean methodFound = false;
-
-            // creates String with the complete method
-            while (line != null && counter != 0) {
-                if ((line.contains(" " + methodName + "(") && (line
-                        .contains("public")
-                        || line.contains("private")
-                        || line.contains("boolean") || line.contains("int") || line
-                        .contains("void")))
-                        || methodFound) {
-                    if (counter == -1) {
-                        counter = 0;
-                        // get parameter number and type for .key file
-                        String[] p1 = line.split("\\(");
-                        String p2 = p1[1].substring(0, p1[1].indexOf(")"));
-                        String[] p3 = p2.split(",");
-                        for (int i = 0; i < p3.length; i++) {
-                            p3[i] = p3[i].trim();
-                            String[] p4 = p3[i].split(" ");
-                            p3[i] = p4[0];
-                        }
-                        paramInClass = p3;
-                    }
-                    methodFound = true;
-
-                    // ignore comments and specially specifications
-                    if (line.contains("\\/*)")) {
-                        if (line.contains("*\\/")) {
-                            line = br.readLine();
-                        } else {
-                            while (!line.contains("*\\/")) {
-                                line = br.readLine();
-                            }
-                            line = br.readLine();
-                        }
-                    }
-                    // check if method call occurs
-                    if (counter != 0) {
-                        String pattern = "(.*)([a-zA-Z1-9]+)(\\s*)([=a-zA-Z1-9]+)(\\s*)([a-zA-Z1-9]+)([a-zA-Z1-9]*)(\\()([a-zA-Z]+)(.*)";
-                        // Create Pattern object
-                        Pattern r = Pattern.compile(pattern);
-                        // Create matcher object.
-                        Matcher m = r.matcher(line);
-                        String lineOc = line;
-                        if (m.find() && !lineOc.contains("\\\\")) {
-                            if (lineOc.contains("=")) {
-                                lineOc = lineOc.split("=")[1];
-                            }
-                            lineOc = lineOc.split("\\(")[0];
-                            if (!allMethodNames.contains(lineOc.trim())) {
-                                allMethodNames.add(lineOc.trim());
-                            }
-                        }
-                    }
-                    StringBuilder sbLoop = new StringBuilder();
-                    String lineLoop = line;
-                    if (counter != 0 && lineLoop.contains("for(")
-                            || lineLoop.contains("for (")
-                            || lineLoop.contains("while(")
-                            || lineLoop.contains("while (")) {
-                        br.mark(100);
-                        int loopCounter = -1;
-                        while (lineLoop != null && loopCounter != 0) {
-                            if (loopCounter == -1) {
-                                loopCounter = 0;
-                            }
-                            sbLoop.append(lineLoop);
-                            String findOpen = "{";
-                            String findClose = "}";
-                            loopCounter += countMatches(lineLoop, findOpen);
-                            loopCounter -= countMatches(lineLoop, findClose);
-                            lineLoop = br.readLine();
-                        }
-                        String loop = sbLoop.toString();
-                        String loopInv = createLoopInvariant(descSink,
-                                descOtherParams, methodName, loop);
-                        br.reset();
-                        sb.append(loopInv);
-                        sb.append(System.lineSeparator());
-                    }
-                    /*
-					 * Here the line is added to the String, beforehand a number
-					 * of checks are executed
-                     */
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    String findOpen = "{";
-                    String findClose = "}";
-                    counter += countMatches(line, findOpen);
-                    counter -= countMatches(line, findClose);
-
-                }
-                line = br.readLine();
-                // lineSave = line;
-            }
-            completeMethod = sb.toString();
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // add additional methods
-        StringBuilder allMethods = new StringBuilder();
-        for (int i = 0; i < allMethodNames.size(); i++) {
-            methodName = allMethodNames.get(i);
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(
-                        pathToJavaFile));
-                StringBuilder sbOtherMethod = new StringBuilder();
-                String line = br.readLine();
-                int counter = -1;
-                boolean methodFound = false;
-
-                // creates String with the complete method
-                while (line != null && counter != 0) {
-                    if ((line.contains(" " + methodName + "(") && (line
-                            .contains("public")
-                            || line.contains("private")
-                            || line.contains("boolean") || line.contains("int") || line
-                            .contains("void")))
-                            || methodFound) {
-                        if (counter == -1) {
-                            counter = 0;
-                        }
-                        methodFound = true;
-                        sbOtherMethod.append(line);
-                        sbOtherMethod.append(System.lineSeparator());
-                        String findOpen = "{";
-                        String findClose = "}";
-                        counter += countMatches(line, findOpen);
-                        counter -= countMatches(line, findClose);
-
-                        // check if method call occurs
-                        if (counter != 0) {
-                            String pattern = "(.*)([a-zA-Z1-9]+)([a-zA-Z1-9]+)([a-zA-Z1-9]+)([a-zA-Z1-9]*)(\\()([a-zA-Z]+)(.*)";
-                            // Create Pattern object
-                            Pattern r = Pattern.compile(pattern);
-                            // Create matcher object.
-                            Matcher m = r.matcher(line);
-                            if (m.find() && !line.contains("\\\\")) {
-                                if (line.contains("=")) {
-                                    line = line.split("=")[1];
-                                }
-                                line = line.split("\\(")[0];
-                                allMethodNames2.add(line);
-                            }
-                        }
-                    }
-                    line = br.readLine();
-                }
-                allMethods.append(sbOtherMethod.toString());
-                br.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        String allOtherMethods = allMethods.toString();
-
-        // write specification and source code in file
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter("proofs\\sourceFile.java", "UTF-8");
-            writer.println("package proofs;");
-            writer.println("public class sourceFile{");
-            writer.println(globalVariables);
-            writer.println(b);
-            writer.println(completeMethod);
-            writer.println(allOtherMethods);
-            writer.println("}");
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        return paramInClass;
-    }
-
+   
     /**
      * Counts the matches of "findOpen" in "line". Is used in
      * exportJavaWithoutParser, which is currently not used.

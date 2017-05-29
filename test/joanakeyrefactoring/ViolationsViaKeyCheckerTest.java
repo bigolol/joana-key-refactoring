@@ -23,7 +23,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -72,7 +71,8 @@ public class ViolationsViaKeyCheckerTest {
         SDGNode formalOutNode = allFormalNodePairsForActualNodes.iterator().next().getSecondNode();
         SDGNode calledMethodNode = sdg.getEntry(formalInNode);
 
-        String precondition = violationsViaKeyChecker.generatePreconditionFromPointsToSet(sdg, calledMethodNode);
+        String precondition = KeyStringGenerator.generatePreconditionFromPointsToSet(
+                sdg, calledMethodNode, parsedData.getStateSaver());
         System.out.println(precondition);
     }
 

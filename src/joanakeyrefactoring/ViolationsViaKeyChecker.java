@@ -153,7 +153,7 @@ public class ViolationsViaKeyChecker {
                             KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver)
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
                             + descAllFormalInNodes + "; */";
-                    String methodName = getMethodNameFromBytecode(calledMethodByteCode);
+                        String methodName = getMethodNameFromBytecode(calledMethodByteCode);
                     if (!isKeyCompatible(methodName, javaLibary)) {
                         removable = false;
                         break;
