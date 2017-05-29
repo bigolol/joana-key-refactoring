@@ -194,29 +194,49 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
             enterFormalParamsInMethod(ctx);
         }
     }
-
+    /**
+     * takes the input params to the method and either
+     *  -> inserts nullable between type and id
+     *  -> creates a string (), if the method takes no params
+     * puts whatever it created into the paramsWithNullable map
+     * @param ctx 
+     */
     private void enterFormalParamsInMethod(JavaParser.FormalParametersContext ctx) {
         String stringBetweenStartAndStop = extractTextBetweenStartAndStopIndex(ctx);
-
         if (stringBetweenStartAndStop.length() <= 3) { //this means the method takes no parameters
             paramsWithNullable.put(methodName, "()");
         } else {
-            StringBuilder stringBuilder = new StringBuilder();
-            String[] paramArray = stringBetweenStartAndStop.split(",");
-            for (int j = 0; j < paramArray.length; j++) {
-                String[] fieldArray = paramArray[j].split(" ");
-                for (int i = 0; i < fieldArray.length; i++) {
-                    stringBuilder.append(fieldArray[i] + " ");
-                    if (i == 0) {
-                        stringBuilder.append(nullable);
-                    }
-                }
-                if (j < paramArray.length - 1) {
-                    stringBuilder.append(", ");
-                }
-            }
-            paramsWithNullable.put(methodName, stringBuilder.toString());
+            String methodParamsWithNullable = insertNullableBetweenMethodParameters(stringBetweenStartAndStop);
+            paramsWithNullable.put(methodName, methodParamsWithNullable);
         }
+    }
+
+    /**
+     * inserts the nullable string between the type and id decl of each of the params
+     * int the passed string
+     * 
+     * eg: (int x, String s, char c) -> (int nullable x, String nullable s, char nullable c)
+     * 
+     * 
+     * @param stringBetweenStartAndStop
+     * @return 
+     */
+    private String insertNullableBetweenMethodParameters(String stringBetweenStartAndStop) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String[] parameter = stringBetweenStartAndStop.split(",");
+        for(String currentParam : parameter) {
+            String paramDeclWithNullable = insertNullableIntoParamDecl(currentParam);
+            stringBuilder.append(paramDeclWithNullable);
+            stringBuilder.append(", ");
+        }
+        return stringBuilder.toString();
+    }
+    
+    private String insertNullableIntoParamDecl(String currentParam) {
+        String[] paramSplit = currentParam.trim().split(" ");
+        String created = paramSplit[0] + " " + nullable;
+        for(int i = 1; i < paramSplit.length; ++i) created += " " + paramSplit[i];
+        return created;
     }
 
     private String extractTextBetweenStartAndStopIndex(ParserRuleContext ctx) {
@@ -321,5 +341,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
         walker.walk(listener, compilationUnitContext);
     }
+
+    
 
 }
