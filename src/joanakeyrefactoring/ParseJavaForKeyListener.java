@@ -215,10 +215,10 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
      * inserts the nullable string between the type and id decl of each of the params
      * int the passed string
      * 
-     * eg: (int x, String s, char c) -> (int nullable x, String nullable s, char nullable c)
+     * eg: (int x, String s, char c) -> (int nullable x, String nullable s, char nullable c)     * 
      * 
-     * 
-     * @param stringBetweenStartAndStop
+     * @param stringBetweenStartAndStop the String of all the parameters passed to the method,
+     * including the brackets
      * @return 
      */
     private String insertNullableBetweenMethodParameters(String stringBetweenStartAndStop) {
@@ -232,6 +232,14 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return stringBuilder.toString();
     }
     
+    /**
+     * inserts the nullable string inbetween a parameters type and id:
+     * 
+     * eg: int x -> itn nullable x
+     * 
+     * @param currentParam the string decl of the param into which nullable will be inserted
+     * @return the decl with nullable inserted
+     */
     private String insertNullableIntoParamDecl(String currentParam) {
         String[] paramSplit = currentParam.trim().split(" ");
         String created = paramSplit[0] + " " + nullable;
@@ -239,10 +247,20 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return created;
     }
 
+    /**
+     * this method takes in a ParserRuleCtx and returns the string contained
+     * between ints start and stopindex
+     * 
+     * 
+     * 
+     * @param ctx the context for which the text is to be extracted
+     * @return the text as a string between ctx.start.getStartIndex() and
+     * ctx.stop.getStopIndex()
+     */
     private String extractTextBetweenStartAndStopIndex(ParserRuleContext ctx) {
-        int a = ctx.start.getStartIndex();
-        int b = ctx.stop.getStopIndex();
-        Interval interval = new Interval(a, b);
+        int startIndex = ctx.start.getStartIndex();
+        int stopIndex = ctx.stop.getStopIndex();
+        Interval interval = new Interval(startIndex, stopIndex);
         CharStream input = ctx.start.getInputStream();
         String stringBetweenStartAndStop = input.getText(interval);
         return stringBetweenStartAndStop;
