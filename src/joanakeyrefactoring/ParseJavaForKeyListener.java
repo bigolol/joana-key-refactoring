@@ -91,8 +91,8 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return methods.keySet();
     }
 
-    public String getConstructorOfMethod(String methodName) {
-        return constructors.get(methodName);
+    public String getConstructorByName(String ctorName) {
+        return constructors.get(ctorName);
     }
 
     public String getParamsWithNullable(String methodName) {
@@ -296,6 +296,12 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return allParamsAsString;
     }
 
+    
+    /**
+     * I am not sure what MyMethod is, but this seems to build a kind of reverse
+     * index where it maps method names to class names
+     * @param ctx 
+     */
     @Override
     public void enterMyMethodName(JavaParser.MyMethodNameContext ctx) {
         createdName = new ArrayList<String>();
