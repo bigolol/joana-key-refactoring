@@ -184,10 +184,20 @@ public class ViolationsViaKeyChecker {
                     }
                     String methodNameKeY = methodName + "(" + params + ")";
                     String newJavaFile = "proofs.sourceFile";
-                    automationHelper.createKeYFile(newJavaFile, methodNameKeY);
+                    try {
+                        automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
+                    } catch (IOException ex) {
+                        removable = false;
+                        break;
+                    }
                     // executeKeY with parameter, read result
-                    boolean result = automationHelper.runKeY(pathToKeyJar, "information flow");
-                    boolean resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
+                    boolean result = false, resultFunc = false;
+                    try {
+                        result = automationHelper.runKeY(pathToKeyJar, "information flow");
+                        resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
+                    } catch (IOException ex) {
+                        Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
                     if (!result || !resultFunc) {
                         if (!fullyAutomatic) {
@@ -240,21 +250,16 @@ public class ViolationsViaKeyChecker {
             }
         }
 
-        /**
-         * all summary edges are checked but the program is not found secure, so
-         * we have to check the top level: the annotated method itself
-         */
-        boolean result = checkTopLevelComplete(sdg, violationChopData, sourceFile);
-        if (!result) {
-            result = checkTopLevelComplete(sdg, violationChopData, sourceFile);
-            if (!result) {
-                result = checkTopLevelComplete(sdg, violationChopData, sourceFile);
-            }
+        try {
+            /**
+             * all summary edges are checked but the program is not found
+             * secure, so we have to check the top level: the annotated method
+             * itself
+             */
+            return checkTopLevelComplete(sdg, violationChopData, sourceFile);
+        } catch (IOException ex) {
+            return false;
         }
-        if (result) {
-            return true;
-        }
-        return false;
     }
 
     private Boolean isJavaLibrary(String calledMethodByteCode) {
@@ -273,7 +278,7 @@ public class ViolationsViaKeyChecker {
      * @param file
      * @return
      */
-    private boolean checkTopLevelComplete(SDG sdg, ViolationChopData violationPathSourceAndSink, File file) {
+    private boolean checkTopLevelComplete(SDG sdg, ViolationChopData violationPathSourceAndSink, File file) throws UnsupportedEncodingException, IOException {
         // does not work properly
         // checks the top level method of the source annotation (not the one
         // from the sink)
@@ -320,7 +325,11 @@ public class ViolationsViaKeyChecker {
         }
         String methodNameKeY = methodName + "(" + params + ")";
         String newJavaFile = "proofs.sourceFile";
-        automationHelper.createKeYFile(newJavaFile, methodNameKeY);
+        try {
+            automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
+        } catch (IOException ex) {
+            Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
+        }
         automationHelper.createKeYFileFunctional(newJavaFile, methodNameKeY);
 
         long timeStartKeY = System.currentTimeMillis();

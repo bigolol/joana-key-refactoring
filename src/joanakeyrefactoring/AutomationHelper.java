@@ -279,42 +279,39 @@ public class AutomationHelper {
     }
 
     /**
-     * Creates the Information flow Proof Obligation for KeY
+     * Creates the Information flow Proof Obligation for KeY.
      *
      * @param javaFile
      * @param method
      */
-    public void createKeYFile(String javaFile, String method) {
+    public void createKeYFileIF(String javaFile, String method) throws IOException {
         PrintWriter writer;
-        try {
-            writer = new PrintWriter("proofObIF.key", "UTF-8");
-            String firstRow = "\\profile \"Java Profile\";";
-            writer.println(firstRow);
-            // Java Source
-            String js = "\\javaSource \"proofs\";";
-            writer.println(js);
-            // Proof Obligation
-            String p1 = "\\proofObligation \"#Proof Obligation Settings";
-            writer.println(p1);
-            String obliName = "name = " + javaFile + "[" + javaFile
-                    + "\\\\:\\\\:" + method + "].Non-interference contract.0";
-            writer.println(obliName);
-            String obliContract = "contract = " + javaFile + "[" + javaFile
-                    + "\\\\:\\\\:" + method + "].Non-interference contract.0";
-            writer.println(obliContract);
-            // String obliClass =
-            // "class=de.uka.ilkd.key.proof.init.InfFlowContractPO";
-            String obliClass = "class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO";
-            writer.println(obliClass);
-            String end = "\";";
-            writer.println(end);
-
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        File proofObFile = new File("proofObs/proofObIF.key");
+        if (!proofObFile.exists()) {
+            proofObFile.createNewFile();
         }
+        writer = new PrintWriter("proofObIF.key", "UTF-8");
+        String firstRow = "\\profile \"Java Profile\";";
+        writer.println(firstRow);
+        // Java Source
+        String js = "\\javaSource \"proofs\";";
+        writer.println(js);
+        // Proof Obligation
+        String p1 = "\\proofObligation \"#Proof Obligation Settings";
+        writer.println(p1);
+        String obliName = "name = " + javaFile + "[" + javaFile
+                + "\\\\:\\\\:" + method + "].Non-interference contract.0";
+        writer.println(obliName);
+        String obliContract = "contract = " + javaFile + "[" + javaFile
+                + "\\\\:\\\\:" + method + "].Non-interference contract.0";
+        writer.println(obliContract);
+        // String obliClass =
+        // "class=de.uka.ilkd.key.proof.init.InfFlowContractPO";
+        String obliClass = "class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO";
+        writer.println(obliClass);
+        String end = "\";";
+        writer.println(end);
+        writer.close();
     }
 
     /**
@@ -323,38 +320,34 @@ public class AutomationHelper {
      * @param javaFile
      * @param method
      */
-    public void createKeYFileFunctional(String javaFile, String method) {
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter("proofObFunc.key", "UTF-8");
-            String firstRow = "\\profile \"Java Profile\";";
-            writer.println(firstRow);
-            // Java Source
-            String js = "\\javaSource \"proofs\";";
-            writer.println(js);
-            // Proof Obligation
-            String p1 = "\\proofObligation \"#Proof Obligation Settings";
-            writer.println(p1);
-            String obliName = "name = " + javaFile + "[" + javaFile
-                    + "\\\\:\\\\:" + method + "].JML operation contract.0";
-            writer.println(obliName);
-            String obliContract = "contract = " + javaFile + "[" + javaFile
-                    + "\\\\:\\\\:" + method + "].JML operation contract.0";
-            writer.println(obliContract);
-            // String obliClass =
-            // "class=de.uka.ilkd.key.proof.init.InfFlowContractPO";
-            String obliClass = "class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO";
-            writer.println(obliClass);
-            String end = "\";";
-            writer.println(end);
-
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+    public void createKeYFileFunctional(String javaFile, String method) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+        File proofObFile = new File("proofObs/proofObFunc.key");
+        if (!proofObFile.exists()) {
+            proofObFile.createNewFile();
         }
-
+        PrintWriter writer;
+        writer = new PrintWriter("proofObFunc.key", "UTF-8");
+        String firstRow = "\\profile \"Java Profile\";";
+        writer.println(firstRow);
+        // Java Source
+        String js = "\\javaSource \"proofs\";";
+        writer.println(js);
+        // Proof Obligation
+        String p1 = "\\proofObligation \"#Proof Obligation Settings";
+        writer.println(p1);
+        String obliName = "name = " + javaFile + "[" + javaFile
+                + "\\\\:\\\\:" + method + "].JML operation contract.0";
+        writer.println(obliName);
+        String obliContract = "contract = " + javaFile + "[" + javaFile
+                + "\\\\:\\\\:" + method + "].JML operation contract.0";
+        writer.println(obliContract);
+        // String obliClass =
+        // "class=de.uka.ilkd.key.proof.init.InfFlowContractPO";
+        String obliClass = "class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO";
+        writer.println(obliClass);
+        String end = "\";";
+        writer.println(end);
+        writer.close();
     }
 
     /**
@@ -364,33 +357,33 @@ public class AutomationHelper {
      * @param obligation
      * @return result of the proof
      */
-    public boolean runKeY(String pathKeY, String obligation) {
+    public boolean runKeY(String pathKeY, String obligation) throws IOException {
         boolean result = false;
-        String cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObIF.key";
+        String cmd = "";
         if (obligation == "functional") {
-            cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObFunc.key";
+            cmd = "dep/java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObFunc.key";
+        } else {
+            cmd = "dep/java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObIF.key";
         }
         Runtime r = Runtime.getRuntime();
         Process pr;
-        try {
-            pr = r.exec(cmd);
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(
-                    pr.getInputStream()));
 
-            String s;
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-                if (s.contains("Number of goals remaining open: 0")) {
-                    result = true;
-                }
-                // TODO:
-                if (s.contains("Proof loading failed")) {
-                    result = false;
-                }
+        pr = r.exec(cmd);
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(
+                pr.getInputStream()));
+
+        String s;
+        while ((s = stdInput.readLine()) != null) {
+            System.out.println(s);
+            if (s.contains("Number of goals remaining open: 0")) {
+                result = true;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            // TODO:
+            if (s.contains("Proof loading failed")) {
+                result = false;
+            }
         }
+
         return result;
     }
 

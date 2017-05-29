@@ -5,22 +5,24 @@
             <url>src/joanakeyrefactoring/AutomationHelper.java</url>
             <bookmark id="1">
                 <name/>
-                <line>110</line>
+                <line>85</line>
                 <key/>
             </bookmark>
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/test/joanakeyrefactoring/CombinedApproachTest.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/CombinedApproach.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/StateSaver.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/test/joanakeyrefactoring/AutomationHelperTest.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/ViolationsViaKeyChecker.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/ParseJavaForKeyListener.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/test/joanakeyrefactoring/ViolationsViaKeyCheckerTest.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/test/joanakeyrefactoring/ParseJavaForKeyListenerTest.java</file>
-            <file>file:/home/holger/Code/hiwi/joana-api-refactoring/src/joanakeyrefactoring/AutomationHelper.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/src/joanakeyrefactoring/ViolationsViaKeyChecker.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/src/joanakeyrefactoring/KeyStringGenerator.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/src/joanakeyrefactoring/CombinedApproach.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/src/joanakeyrefactoring/ParseJavaForKeyListener.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/src/joanakeyrefactoring/AutomationHelper.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/src/joanakeyrefactoring/antlr/JavaParser.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/test/joanakeyrefactoring/ParseJavaForKeyListenerTest.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/test/joanakeyrefactoring/ViolationsViaKeyCheckerTest.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/src/joanakeyrefactoring/StateSaver.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/test/joanakeyrefactoring/ListenerTest.java</file>
+            <file>file:/media/holgerklein/Volume/Code/Java/hiwi/joana-key-refactoring/test/joanakeyrefactoring/AutomationHelperTest.java</file>
         </group>
     </open-files>
 </project-private>
