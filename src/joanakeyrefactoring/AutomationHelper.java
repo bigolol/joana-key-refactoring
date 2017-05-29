@@ -122,22 +122,15 @@ public class AutomationHelper {
     }
 
     /**
-     * 
-     * @param descriptionForKey
-     * @param methodName
-     * @param descSink
+     * uses the data extracted from the java listener to add loop invariants and
+     * change the params so that key can use them. 
+     * @param methodName the name of the method to be modified
+     * @param descSink the key description of the sink
      * @param descOtherParams
-     * @return 
+     * @return a String containing the modified method decl which key can work with
      */
-    public String[] exportJava(
-            String descriptionForKey, String methodName, String descSink,
-            String descOtherParams) {
-        ArrayList<String> allMethodNames = new ArrayList<>();
-        
-        String globalVariables = "";
-        globalVariables = javaForKeyListener.getFieldsWithNullableAsString();
-
-        String completeMethod = ""; 
+    private String generateMethodDecsrForKey(String methodName, String descSink, String descOtherParams) {
+        String completeMethod = "";
         if (methodName.contains("<init>")) {
             methodName = methodName.split("\\.")[1];
             completeMethod = javaForKeyListener.getConstructorOfMethod(methodName);
@@ -165,6 +158,26 @@ public class AutomationHelper {
             }
             completeMethod = sb.toString();
         }
+        return completeMethod;
+    }
+    
+    /**
+     * 
+     * @param descriptionForKey
+     * @param methodName
+     * @param descSink
+     * @param descOtherParams
+     * @return 
+     */
+    public String[] exportJava(
+            String descriptionForKey, String methodName, String descSink,
+            String descOtherParams) {
+        ArrayList<String> allMethodNames = new ArrayList<>();
+        
+        String globalVariables = "";
+        globalVariables = javaForKeyListener.getFieldsWithNullableAsString();
+
+        String completeMethod = generateMethodDecsrForKey(methodName, descSink, descOtherParams);        
 
         System.out.println("complete Method: " + completeMethod);
 

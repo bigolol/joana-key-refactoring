@@ -146,8 +146,9 @@ public class ViolationsViaKeyChecker {
                                     formalInNode, sdg, stateSaver.callGraph);
                     String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
 
-                    String descriptionStringForKey = "\t/*@ requires "
-                            + KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver)
+                    String descriptionStringForKey
+                            = "\t/*@ requires "
+                            + descAllFormalInNodes
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
                             + descAllFormalInNodes + "; */";
                     String methodName = getMethodNameFromBytecode(calledMethodByteCode);
@@ -274,7 +275,8 @@ public class ViolationsViaKeyChecker {
         String descriptionOfSink = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(sink, sdg);
         String descriptionOfParams
                 = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(source, sdg, stateSaver.callGraph);
-        if (descriptionOfSink == null || descriptionOfParams == null) {            
+        if (descriptionOfSink == null || descriptionOfParams == null) {
+
             return false;
         }
         SDGNode m = sdg.getEntry(entryNode);
@@ -416,7 +418,7 @@ public class ViolationsViaKeyChecker {
             return false;
         }
         String methodName = getMethodNameFromBytecode(byteCodeMethodName);
-        
+
         if (methodName.contains("<init>.")) {
             methodName = methodName.split("\\.")[1];
         }

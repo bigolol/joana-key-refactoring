@@ -225,7 +225,9 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         for (String currentParam : parameter) {
             String paramDeclWithNullable = insertNullableIntoParamDecl(currentParam);
             stringBuilder.append(paramDeclWithNullable);
-            stringBuilder.append(", ");
+            if (!paramDeclWithNullable.endsWith(")")) {
+                stringBuilder.append(", ");
+            }
         }
         return stringBuilder.toString();
     }
@@ -314,11 +316,11 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
 
     /**
      * I think this method tries to generate a method signature that joana can
-     * deal with, but it currently only translates a byte array into [B and
-     * puts this type into the params map. So, if a methods decl is visited, it
-     * a) generates an entry for the paramswithnullable array and 
-     * b) does this right here.
-     * So yeah, idk. Prolly isnt needed.
+     * deal with, but it currently only translates a byte array into [B and puts
+     * this type into the params map. So, if a methods decl is visited, it a)
+     * generates an entry for the paramswithnullable array and b) does this
+     * right here. So yeah, idk. Prolly isnt needed.
+     *
      * @param ctx
      */
     @Override
