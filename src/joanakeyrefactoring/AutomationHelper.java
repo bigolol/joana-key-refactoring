@@ -51,7 +51,11 @@ public class AutomationHelper {
     }
 
     /**
-     * @return a String summarizing all .java files
+     * finds all .java files in the supplied pathtoJavaFile-folder and extracts
+     * all their content, putting it into the classes-hashmap. It then puts all 
+     * the content into one String and returns it.
+     * @return The combined content of every .java file in the directory pointed
+     * to by the pathtoJavaFile-String
      */
     public String readAllSourceFilesIntoOneStringAndFillClassMap() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -65,6 +69,14 @@ public class AutomationHelper {
         return stringBuilder.toString();
     }
 
+    /**
+     * goes through the contents of a given .java file and reads it into a string
+     * (exept the package declaration at the beginning); 
+     * also puts the content into the classes-hasmap at the key [classname]
+     *      * 
+     * @param file the java file to whose content is to be read
+     * @return the java file's content as a String
+     */
     public String putFileContentsIntoStringAndIntoClassMap(File file) {
         StringBuilder stringBuilderForFile = new StringBuilder();
         try {
@@ -89,11 +101,10 @@ public class AutomationHelper {
     }
 
     /**
-     * Lists all files that are in the folder. Used for summarizing all java
-     * files of a package.
+     * Recursively finds and lists all .java files in a given folder
      *
-     * @param folder becomes a folder of .java files
-     * @return ArrayList of all files in the folder
+     * @param folder the folder containing the .java files to be collected
+     * @return The collection of all .java files in folder
      */
     public Collection<File> listAllJavaFilesInFolder(final File folder) {
         List<File> fileNames = new ArrayList<File>();
@@ -111,22 +122,18 @@ public class AutomationHelper {
     }
 
     /**
-     * Exports all necessary code into one file. uses createloopinvariant for
-     * some reason
-     *
+     * 
      * @param descriptionForKey
      * @param methodName
      * @param descSink
      * @param descOtherParams
-     * @return the parameter of the method that is to be proven
+     * @return 
      */
     public String[] exportJava(
             String descriptionForKey, String methodName, String descSink,
             String descOtherParams) {
         ArrayList<String> allMethodNames = new ArrayList<>();
 
-        // TODO: use Parser change classpathJava to classpathPackage
-        // Global Variables with Parser:
         String globalVariables = "";
         globalVariables = javaForKeyListener.getFieldsCorrectAsString();
         // complete method with Java
@@ -353,7 +360,7 @@ public class AutomationHelper {
      */
     public boolean openKeY(String fileName, String methodName) {
         boolean result = false;
-        String cmd = "java -Xmx1024m -jar C:\\Users\\Marko\\Documents\\Uni\\PraxisderForschung\\KeY\\key\\key\\deployment\\KeY.jar";
+        String cmd = "java -Xmx1024m -jar dep\\KeY.jar";
         Runtime r = Runtime.getRuntime();
         Process pr;
         try {
@@ -377,7 +384,6 @@ public class AutomationHelper {
     /**
      * Opens a file on the desktop. Is used to open the java .java file for the
      * key proof.
-     *
      * @param file
      */
     public void openJava(File file) {
