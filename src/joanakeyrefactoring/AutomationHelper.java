@@ -396,35 +396,6 @@ public class AutomationHelper {
     }
 
     /**
-     * Automatic creation of the .jar file. Not used currently jar File should
-     * be created manually
-     *
-     * @param fileName
-     * @return
-     */
-    public boolean runMakeJar(String fileName) {
-        boolean result = true;
-        String cmd = "...location of makejar... makejar ...file... ";
-        System.out.println(cmd);
-        Runtime r = Runtime.getRuntime();
-        Process pr;
-        try {
-            pr = r.exec(cmd);
-            BufferedReader stdInput = new BufferedReader(new InputStreamReader(
-                    pr.getInputStream()));
-
-            String s;
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            result = false;
-        }
-        return result;
-    }
-
-    /**
      * Currently not used but can be used, if furhter properties are needed for
      * the KeY proof
      *
@@ -503,5 +474,5 @@ public class AutomationHelper {
     public void setJavaForKeyListener(ParseJavaForKeyListener javaForKeyListener) {
         this.javaForKeyListener = javaForKeyListener;
     }
-    
+
 }
