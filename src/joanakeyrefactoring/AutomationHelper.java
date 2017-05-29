@@ -220,12 +220,12 @@ public class AutomationHelper {
         String allOtherMethods = getAllMethodsCalledByDisproveMethod(completeMethod);
 
         // write specification and source code in file
-        File proofFile = new File("proofs/sourceFile.java");
+        File proofFile = new File("proofObs/proofs/sourceFile.java");
         if (!proofFile.exists()) {
             proofFile.createNewFile();
         }
         PrintWriter writer;
-        writer = new PrintWriter("proofs/sourceFile.java", "UTF-8");
+        writer = new PrintWriter("proofObs/proofs/sourceFile.java", "UTF-8");
         writer.println("package proofs;");
         writer.println("public class sourceFile{");
         writer.println(globalVariables);
@@ -290,7 +290,7 @@ public class AutomationHelper {
         if (!proofObFile.exists()) {
             proofObFile.createNewFile();
         }
-        writer = new PrintWriter("proofObIF.key", "UTF-8");
+        writer = new PrintWriter("proofObs/proofObIF.key", "UTF-8");
         String firstRow = "\\profile \"Java Profile\";";
         writer.println(firstRow);
         // Java Source
@@ -326,7 +326,7 @@ public class AutomationHelper {
             proofObFile.createNewFile();
         }
         PrintWriter writer;
-        writer = new PrintWriter("proofObFunc.key", "UTF-8");
+        writer = new PrintWriter("proofObs/proofObFunc.key", "UTF-8");
         String firstRow = "\\profile \"Java Profile\";";
         writer.println(firstRow);
         // Java Source

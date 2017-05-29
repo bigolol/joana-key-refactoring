@@ -147,11 +147,13 @@ public class ViolationsViaKeyChecker {
                     String descAllFormalInNodes
                             = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(
                                     formalInNode, sdg, stateSaver.callGraph);
+                    String pointsTo = KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver);
+                    
                     String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
 
                     String descriptionStringForKey
                             = "\t/*@ requires "
-                            + descAllFormalInNodes
+                            + pointsTo
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
                             + descAllFormalInNodes + "; */";
                     String methodName = getMethodNameFromBytecode(calledMethodByteCode);
