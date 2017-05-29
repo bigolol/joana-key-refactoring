@@ -18,25 +18,22 @@ import org.antlr.v4.runtime.tree.*;
  */
 public class ParseJavaForKeyListener extends JavaBaseListener {
 
-    private static List<String[]> fields = new ArrayList<>();
-    private static Map<String, String> methods = new HashMap<>();
-    private static Map<String, String> methodsAndClasses = new HashMap<>();
-    private static Map<String, String> constructors = new HashMap<>();
-    private static Map<String, String[]> params = new HashMap<>();
-    private static Map<String, List<String>> creators = new HashMap<>();
-    private static List<String> createdName = new ArrayList<>();
-    private static String methodName = "";
-    private static String completeMethod = "";
+    private List<String[]> fields = new ArrayList<>();
+    private Map<String, String> methods = new HashMap<>();
+    private Map<String, String> methodsAndClasses = new HashMap<>();
+    private Map<String, String> constructors = new HashMap<>();
+    private Map<String, String[]> params = new HashMap<>();
+    private Map<String, List<String>> creators = new HashMap<>();
+    private List<String> createdName = new ArrayList<>();
+    private String methodName = "";
+    private String completeMethod = "";
     private boolean inConstructor = false;
     private String constructorName;
     private String className = "";
-    private static Map<String, String> paramsWithNullable = new HashMap<>();
-    private static List<String> fieldsCorrect = new ArrayList<>();
-    private static List<String> classList = new ArrayList<>();
+    private Map<String, String> paramsWithNullable = new HashMap<>();
+    private List<String> fieldsWithNullable = new ArrayList<>();
+    private List<String> classList = new ArrayList<>();
     private static final String nullable = "/*@nullable*/ ";
-
-    public ParseJavaForKeyListener() {
-    }
 
     /**
      * takes as input a string containing every .java file of interest and then
@@ -65,8 +62,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         JavaParser parser = new JavaParser(tokens);
         JavaParser.CompilationUnitContext compilationUnitContext = parser.compilationUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
-        ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
-        walker.walk(listener, compilationUnitContext);
+        walker.walk(this, compilationUnitContext);
     }
 
     public List<String[]> getFields() {
@@ -82,9 +78,9 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return sb.toString();
     }
 
-    public String getFieldsCorrectAsString() {
+    public String getFieldsWithNullableAsString() {
         StringBuilder sb = new StringBuilder();
-        for (String field : fieldsCorrect) {
+        for (String field : fieldsWithNullable) {
             sb.append(field);
             sb.append(System.lineSeparator());
         }
@@ -142,7 +138,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         String idAsString = ctx.getChild(1).getText();
         fields.add(new String[]{typeAsString, idAsString});
         String declWithInsertedNullable = insertNullableAfterTypeIntoFieldDecl(ctx);
-        fieldsCorrect.add(declWithInsertedNullable);
+        fieldsWithNullable.add(declWithInsertedNullable);
     }
 
     private String insertNullableAfterTypeIntoFieldDecl(JavaParser.FieldDeclarationContext ctx) {
@@ -313,17 +309,17 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
 
     @Override
     public void enterMethodDeclaration(JavaParser.MethodDeclarationContext ctx) {
-        completeMethod = extractTextBetweenStartAndStopIndex(ctx);       
+        completeMethod = extractTextBetweenStartAndStopIndex(ctx);
     }
 
     /**
-     * I think this method tries to generate a method signature that
-     * joana can deal with, but it currently only translates a byte array
-     * intoi [B and puts this type into the params map. So, if a methods
-     * decl is visited, it 
-     * a) generates an entry for the paramswithnullable array and
-     * b) does this right here. 
-     * @param ctx 
+     * I think this method tries to generate a method signature that joana can
+     * deal with, but it currently only translates a byte array into [B and
+     * puts this type into the params map. So, if a methods decl is visited, it
+     * a) generates an entry for the paramswithnullable array and 
+     * b) does this right here.
+     * So yeah, idk. Prolly isnt needed.
+     * @param ctx
      */
     @Override
     public void enterFormalParameterList(JavaParser.FormalParameterListContext ctx) {
@@ -352,17 +348,6 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     @Override
     public void enterClassDeclaration(JavaParser.ClassDeclarationContext ctx) {
         className = ctx.getChild(1).getText();
-        classList.add(ctx.getChild(1).getText());
+        classList.add(className);
     }
-
-    private static void printCompilationUnit(ANTLRInputStream input) {
-        JavaLexer lexer = new JavaLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        JavaParser parser = new JavaParser(tokens);
-        JavaParser.CompilationUnitContext compilationUnitContext = parser.compilationUnit();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        ParseJavaForKeyListener listener = new ParseJavaForKeyListener();
-        walker.walk(listener, compilationUnitContext);
-    }
-
 }

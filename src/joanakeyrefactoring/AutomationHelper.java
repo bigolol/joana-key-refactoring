@@ -135,7 +135,7 @@ public class AutomationHelper {
         ArrayList<String> allMethodNames = new ArrayList<>();
         
         String globalVariables = "";
-        globalVariables = javaForKeyListener.getFieldsCorrectAsString();
+        globalVariables = javaForKeyListener.getFieldsWithNullableAsString();
 
         String completeMethod = ""; 
         if (methodName.contains("<init>")) {
