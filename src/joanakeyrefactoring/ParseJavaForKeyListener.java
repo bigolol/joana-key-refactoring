@@ -34,7 +34,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     private Map<String, String> paramsWithNullable = new HashMap<>();
     private List<String> fieldsWithNullable = new ArrayList<>();
     private List<String> classList = new ArrayList<>();
-    private static final String nullable = "/*@nullable@*/ ";
+    private static final String nullable = "/*@ nullable @*/ ";
     private boolean isStaticMethod = false;
 
     /**
