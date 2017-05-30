@@ -140,7 +140,7 @@ public class ViolationsViaKeyChecker {
                         continue;
                     }
                     SDGNode calledMethodNode = sdg.getEntry(formalInNode);
-                    String myDescOther = KeyStringGenerator.generateKeyDescrForParamsViaListener(formalInNode, sdg, javaForKeyListener);
+                    //String myDescOther = KeyStringGenerator.generateKeyDescrForParamsViaListener(formalInNode, sdg, javaForKeyListener);
                     //generate spec for KeY
                     String descOfFormalOutNode
                             = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(formalOutNode, sdg);
@@ -155,7 +155,7 @@ public class ViolationsViaKeyChecker {
                             = "\t/*@ requires "
                             + pointsTo
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
-                            + myDescOther + "; */";
+                            + descAllFormalInNodes + "; */";
                     String methodName = getMethodNameFromBytecode(calledMethodByteCode);
                     if (!isKeyCompatible(calledMethodByteCode)) {
                         removable = false;
@@ -188,6 +188,7 @@ public class ViolationsViaKeyChecker {
                     String newJavaFile = "proofs.sourceFile";
                     try {
                         automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
+                        automationHelper.createKeYFileFunctional(newJavaFile, methodNameKeY);
                     } catch (IOException ex) {
                         removable = false;
                         break;

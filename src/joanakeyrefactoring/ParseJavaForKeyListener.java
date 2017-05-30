@@ -34,7 +34,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     private Map<String, String> paramsWithNullable = new HashMap<>();
     private List<String> fieldsWithNullable = new ArrayList<>();
     private List<String> classList = new ArrayList<>();
-    private static final String nullable = "/*@nullable*/ ";
+    private static final String nullable = "/*@nullable@*/ ";
     private boolean isStaticMethod = false;
 
     /**
@@ -255,7 +255,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     /**
      * inserts the nullable string inbetween a parameters type and id:
      *
-     * eg: int x -> itn nullable x
+     * eg: int x -> int nullable x
      *
      * @param currentParam the string decl of the param into which nullable will
      * be inserted
@@ -273,7 +273,6 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     /**
      * this method takes in a ParserRuleCtx and returns the string contained
      * between ints start and stopindex
-     *
      *
      *
      * @param ctx the context for which the text is to be extracted
@@ -371,7 +370,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
             allParamTypes[i] = param[i].trim().split(" ")[0].trim();
             if (allParamTypes[i].contains("byte[]")) {
                 allParamTypes[i] = "[B";
-            }
+            } 
         }
         paramTypes.put(methodName, allParamTypes);
     }
