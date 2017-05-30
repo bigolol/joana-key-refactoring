@@ -46,7 +46,9 @@ public class AutomationHelper {
     }
 
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
-        this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());
+        if (this.javaForKeyListener == null) {
+            this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());
+        }
         return this.javaForKeyListener;
     }
 
@@ -361,9 +363,9 @@ public class AutomationHelper {
         boolean result = false;
         String cmd = "";
         if (obligation == "functional") {
-            cmd = "dep/java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObFunc.key";
+            cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObFunc.key";
         } else {
-            cmd = "dep/java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObIF.key";
+            cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObIF.key";
         }
         Runtime r = Runtime.getRuntime();
         Process pr;

@@ -1,7 +1,6 @@
 package joanakeyrefactoring;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,14 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.ssa.IR;
-import com.ibm.wala.util.intset.OrdinalSet;
 
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation;
@@ -149,6 +140,7 @@ public class ViolationsViaKeyChecker {
                         continue;
                     }
                     SDGNode calledMethodNode = sdg.getEntry(formalInNode);
+                    String myDescOther = KeyStringGenerator.generateKeyDescrForParamsViaListener(formalInNode, sdg, javaForKeyListener);
                     //generate spec for KeY
                     String descOfFormalOutNode
                             = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(formalOutNode, sdg);
@@ -163,7 +155,7 @@ public class ViolationsViaKeyChecker {
                             = "\t/*@ requires "
                             + pointsTo
                             + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
-                            + descAllFormalInNodes + "; */";
+                            + myDescOther + "; */";
                     String methodName = getMethodNameFromBytecode(calledMethodByteCode);
                     if (!isKeyCompatible(calledMethodByteCode)) {
                         removable = false;

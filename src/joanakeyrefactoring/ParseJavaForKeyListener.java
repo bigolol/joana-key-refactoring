@@ -18,11 +18,12 @@ import org.antlr.v4.runtime.tree.*;
  */
 public class ParseJavaForKeyListener extends JavaBaseListener {
 
+    private Map<String, String[]> methodParamNames = new HashMap<>();
     private List<String[]> fields = new ArrayList<>();
     private Map<String, String> methods = new HashMap<>();
     private Map<String, String> methodsAndClasses = new HashMap<>();
     private Map<String, String> constructors = new HashMap<>();
-    private Map<String, String[]> params = new HashMap<>();
+    private Map<String, String[]> paramTypes = new HashMap<>();
     private Map<String, List<String>> creators = new HashMap<>();
     private List<String> createdName = new ArrayList<>();
     private String methodName = "";
@@ -34,6 +35,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     private List<String> fieldsWithNullable = new ArrayList<>();
     private List<String> classList = new ArrayList<>();
     private static final String nullable = "/*@nullable*/ ";
+    private boolean isStaticMethod = false;
 
     /**
      * takes as input a string containing every .java file of interest and then
@@ -114,7 +116,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     }
 
     public String[] getParamsOfMethod(String methodName) {
-        return params.get(methodName);
+        return paramTypes.get(methodName);
     }
 
     public List<String> getCreatedNames(String methodName) {
@@ -183,12 +185,30 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
      */
     @Override
     public void enterFormalParameters(JavaParser.FormalParametersContext ctx) {
-        //TODO: nullable auch bei methodenKopf nullable String
         if (inConstructor) {
             enterFormalParamsInCtor(ctx);
         } else {
             enterFormalParamsInMethod(ctx);
         }
+        addParamNamesToMap(ctx);
+    }
+
+    private void addParamNamesToMap(JavaParser.FormalParametersContext ctx) {
+        String params = getParameterStringWithoutBrackets(ctx);
+        String paramsSplit[] = params.split(",");
+        List<String> paramNames = new ArrayList<>();
+        if (!isStaticMethod) {
+            paramNames.add("this");
+        }
+        for (String paramName : paramsSplit) {
+            String splitAtSpace[] = paramName.split(" ");
+            String name = splitAtSpace[splitAtSpace.length - 1].trim();
+            paramNames.add(name);
+        }
+        
+        String arr[] = new String[paramNames.size()];
+        paramNames.toArray(arr);
+        methodParamNames.put(methodName, arr);
     }
 
     /**
@@ -286,7 +306,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
             allParamTypes[i] = parameterType;
             ++i;
         }
-        params.put(constructorName, allParamTypes);
+        paramTypes.put(constructorName, allParamTypes);
         inConstructor = false;
     }
 
@@ -296,11 +316,11 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         return allParamsAsString;
     }
 
-    
     /**
      * I am not sure what MyMethod is, but this seems to build a kind of reverse
      * index where it maps method names to class names
-     * @param ctx 
+     *
+     * @param ctx
      */
     @Override
     public void enterMyMethodName(JavaParser.MyMethodNameContext ctx) {
@@ -318,6 +338,19 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     @Override
     public void enterMethodDeclaration(JavaParser.MethodDeclarationContext ctx) {
         completeMethod = extractTextBetweenStartAndStopIndex(ctx);
+    }
+
+    @Override
+    public void enterModifier(JavaParser.ModifierContext ctx) {
+        String modStr = ctx.getText();
+        if (modStr.equals("static")) {
+            isStaticMethod = true;
+        }
+    }
+
+    @Override
+    public void exitMethodBody(JavaParser.MethodBodyContext ctx) {
+        isStaticMethod = false;
     }
 
     /**
@@ -340,7 +373,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
                 allParamTypes[i] = "[B";
             }
         }
-        params.put(methodName, allParamTypes);
+        paramTypes.put(methodName, allParamTypes);
     }
 
     @Override
@@ -358,4 +391,26 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         className = ctx.getChild(1).getText();
         classList.add(className);
     }
+
+    String[] getParamsOfMethodByByteCode(String bytecodeMethod) {
+        String name = getMethodNameFromBC(bytecodeMethod);
+        String nameSepByDots[] = name.split("\\.");
+        String onlyMethodName = nameSepByDots[nameSepByDots.length - 1];
+        String onlyClassName = nameSepByDots[nameSepByDots.length - 2];
+        return getParamNamesOfMethodInClass(onlyClassName, onlyMethodName);
+    }
+
+    private String[] getTypesOfBCMethod(String bytecodeMethod) {
+        String passedTypes = bytecodeMethod.split("\\(")[1].split("\\)")[0];
+        return new String[]{};
+    }
+
+    private String getMethodNameFromBC(String bytecodeMethod) {
+        return bytecodeMethod.split("\\(")[0];
+    }
+
+    private String[] getParamNamesOfMethodInClass(String onlyClassName, String onlyMethodName) {
+        return methodParamNames.get(onlyMethodName);
+    }
+
 }

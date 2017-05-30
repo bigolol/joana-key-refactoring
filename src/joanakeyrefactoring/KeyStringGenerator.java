@@ -40,12 +40,47 @@ public class KeyStringGenerator {
             return "this";
         }
     }
-    
-    public static String myGenKeyDecsForParamsExceptSourceNode(
+
+    public static String generateKeyDescrForParamsViaListener(
             SDGNode sourceNode, SDG sdg, ParseJavaForKeyListener listener) {
+        final String param = "<param>";
+        final String formalIn = "FORMAL_IN";
+        String srcNodeByteCodeName = sourceNode.getBytecodeName();
+        String srcNodeKindName = sourceNode.getKind().name();
+        if (!srcNodeByteCodeName.startsWith(param)
+                && !srcNodeKindName.equals(formalIn)) {
+            return null;
+        }
+        SDGNode methodNodeInSDG = sdg.getEntry(sourceNode);
+        String methodNameBC = methodNodeInSDG.getBytecodeMethod();
+        Set<SDGNode> formalInNodesOfProcedure = sdg.getFormalInsOfProcedure(methodNodeInSDG);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (SDGNode currentFormalInNode : formalInNodesOfProcedure) {
+            String currentNodeBC = currentFormalInNode.getBytecodeName();
+            String nameOfKind = currentFormalInNode.getKind().name();
+            if (currentFormalInNode == sourceNode
+                    || (!nameOfKind.startsWith(param) && !nameOfKind.equals("FORMAL_IN"))) {
+                continue;
+            }
+            if (currentNodeBC.startsWith(param)) {
+               int paramPos = Integer.parseInt(currentNodeBC.substring(param.length() + 1)); //+ 1 for the trailing space
+               String paramName = listener.getParamsOfMethodByByteCode(methodNameBC)[paramPos];
+               stringBuilder.append(paramName).append(", ");
+            } else {
+                String[] forInNames = currentNodeBC.split("\\.");
+                currentNodeBC = forInNames[forInNames.length - 1];
+                stringBuilder.append(currentNodeBC).append(", ");
+            }            
+        }
         
-        return "\\nothing";
-    } 
+        String created = stringBuilder.toString();
+
+        if (created.length() == 0) {
+            return "\\nothing";
+        } else {
+            return created.substring(0, created.length() - 2);
+        }
+    }
 
     /**
      * describe the params except the source of a flow within a method.
@@ -67,7 +102,7 @@ public class KeyStringGenerator {
         }
         SDGNode methodNodeInSDG = sdg.getEntry(sourceNode);
         int cgNodeId = sdg.getCGNodeId(methodNodeInSDG);
-        
+
         // get IR to get names of the parameters. Need to compile classes
         // with sufficient debug information for this.
         CGNode methodNodeInCG = callGraph.getNode(cgNodeId);
@@ -75,7 +110,7 @@ public class KeyStringGenerator {
 
         String delim = "";
         Set<SDGNode> formalInNodesOfProcedure = sdg.getFormalInsOfProcedure(methodNodeInSDG);
-        
+
         StringBuilder stringBuilder = new StringBuilder();
         for (SDGNode currentFormalInNode : formalInNodesOfProcedure) {
             final String param = "<param>";
@@ -91,16 +126,20 @@ public class KeyStringGenerator {
                 SSAInstruction[] instructions = intermedRep.getInstructions();
                 int index = 0;
                 for (; index < instructions.length; index++) {
-                    if(instructions[index] != null) break;
-                }                        
+                    if (instructions[index] != null) {
+                        break;
+                    }
+                }
                 String[] localNames = intermedRep.getLocalNames(index, valueNumber);
-                if(localNames == null) continue;
+                if (localNames == null) {
+                    continue;
+                }
                 String nameOfParameter = localNames[0];
                 stringBuilder.append(delim).append(nameOfParameter);
             } else {
                 String[] forInNames = bytecodeName.split("\\.");
                 bytecodeName = forInNames[forInNames.length - 1];
-                stringBuilder.append(delim).append(forInNames);
+                stringBuilder.append(delim).append(bytecodeName);
             }
             delim = ", ";
         }
