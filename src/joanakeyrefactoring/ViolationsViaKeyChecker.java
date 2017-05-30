@@ -102,6 +102,15 @@ public class ViolationsViaKeyChecker {
         return remaining == 0;
     }
 
+    public boolean myDreamCheckViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
+        //violationChop = getViolationChop(violationNode, sdg);
+        //SDG violationChopSubgraph = sdg.subgraph(violationChopData.violationChop);
+        //Collection<Edge> edgesSorted = sortEdgesByMetric(violationChopSubgraph);
+        //a_i, a_o = getActualIn, getActualOutNode
+        //L_i = allFormalInNodes 
+        return false;
+    }
+
     /**
      * checks a violation (information about one supposed illegal flow) uses KeY
      * to check whether this is a false positive
@@ -110,7 +119,6 @@ public class ViolationsViaKeyChecker {
      * @throws FileNotFoundException
      */
     public boolean checkViolation(IViolation<SecurityNode> violationNode, SDG sdg) throws FileNotFoundException {
-        File sourceFile = new File("proofs/sourceFile.java");
         boolean neueHeuristic = true;
         ViolationChopData violationChopData = getViolationChopForSecNodeViolation(violationNode, sdg);
         if (violationChopData.violationChop.isEmpty()) {
@@ -148,7 +156,7 @@ public class ViolationsViaKeyChecker {
                             = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(
                                     formalInNode, sdg, stateSaver.callGraph);
                     String pointsTo = KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver);
-                    
+
                     String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
 
                     String descriptionStringForKey
@@ -209,7 +217,6 @@ public class ViolationsViaKeyChecker {
                             String keyAnswer = scanInput.nextLine();
                             if (keyAnswer.equals("y")) {
                                 // open JAVA and KeY
-                                automationHelper.openJava(sourceFile);
                                 automationHelper.openKeY(pathToJar, methodNameKeY);
 
                                 System.out.println("type y if KeY could prove");
@@ -234,11 +241,9 @@ public class ViolationsViaKeyChecker {
                 if (removable) {
                     sdg.removeEdge(summaryEdgeToBeChecked);
                     violationChopInducedSubgraph.removeEdge(summaryEdgeToBeChecked);
-                    /**
-                     * recalculating of the chop after deleting the summary
-                     * edge; if the new chop is empty, our alarm is found to be
-                     * a false alarm
-                     */
+                    // recalculating of the chop after deleting the summary
+                    // edge; if the new chop is empty, our alarm is found to be
+                    // a false alarm
                     Collection<SDGNode> recalcViolationChop = chopper.chop(violationChopData.violationSource, violationChopData.violationSink);
                     if (recalcViolationChop.isEmpty()) {
                         return true;
@@ -253,12 +258,10 @@ public class ViolationsViaKeyChecker {
         }
 
         try {
-            /**
-             * all summary edges are checked but the program is not found
-             * secure, so we have to check the top level: the annotated method
-             * itself
-             */
-            return checkTopLevelComplete(sdg, violationChopData, sourceFile);
+            //all summary edges are checked but the program is not found
+            // secure, so we have to check the top level: the annotated method
+            // itself
+            return checkTopLevelComplete(sdg, violationChopData);
         } catch (IOException ex) {
             return false;
         }
@@ -280,7 +283,7 @@ public class ViolationsViaKeyChecker {
      * @param file
      * @return
      */
-    private boolean checkTopLevelComplete(SDG sdg, ViolationChopData violationPathSourceAndSink, File file) throws UnsupportedEncodingException, IOException {
+    private boolean checkTopLevelComplete(SDG sdg, ViolationChopData violationPathSourceAndSink) throws UnsupportedEncodingException, IOException {
         // does not work properly
         // checks the top level method of the source annotation (not the one
         // from the sink)
@@ -359,7 +362,6 @@ public class ViolationsViaKeyChecker {
                 String keyAnswer = scanInput.nextLine();
                 if (keyAnswer.equals("y")) {
                     // open JAVA and KeY
-                    automationHelper.openJava(file);
                     automationHelper.openKeY(pathToJar, methodNameKeY);
 
                     System.out.println("type y if KeY could prove");

@@ -12,6 +12,7 @@ import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.util.intset.OrdinalSet;
 import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
@@ -39,6 +40,12 @@ public class KeyStringGenerator {
             return "this";
         }
     }
+    
+    public static String myGenKeyDecsForParamsExceptSourceNode(
+            SDGNode sourceNode, SDG sdg, ParseJavaForKeyListener listener) {
+        
+        return "\\nothing";
+    } 
 
     /**
      * describe the params except the source of a flow within a method.
@@ -52,54 +59,60 @@ public class KeyStringGenerator {
      */
     public static String generateKeyDecsriptionForParamsExceptSourceNode(
             SDGNode sourceNode, SDG sdg, CallGraph callGraph) {
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            if (!sourceNode.getBytecodeName().startsWith("<param> ")
-                    && !sourceNode.getKind().name().equals("FORMAL_IN")) {
-                return null;
-            }
-            SDGNode methodNodeInSDG = sdg.getEntry(sourceNode);
-            CGNode methodNodeInCG = callGraph.getNode(sdg.getCGNodeId(methodNodeInSDG));
-            // get IR to get names of the parameters. Need to compile classes
-            // with sufficient debug information for this.
-
-            IR ir = methodNodeInCG.getIR();
-
-            String delim = "";
-            Set<SDGNode> formalInNodesOfProcedure = sdg.getFormalInsOfProcedure(methodNodeInSDG);
-            for (SDGNode currentFormalInNode : formalInNodesOfProcedure) {
-
-                /**
-                 * only describe real parameters
-                 */
-                if (currentFormalInNode == sourceNode
-                        || (!currentFormalInNode.getBytecodeName().startsWith("<param> ")
-                        && !currentFormalInNode.getKind().name().equals("FORMAL_IN"))) {
-                    continue;
-                }
-                if (currentFormalInNode.getBytecodeName().startsWith("<param> ")) {
-                    int p_number = Integer.parseInt(currentFormalInNode.getBytecodeName()
-                            .substring(8));
-                    //find out parameter name through IR
-                    stringBuilder.append(delim).append(ir.getLocalNames(0, ir.getParameter(p_number))[0]);
-                } else {
-                    String forInName = currentFormalInNode.getBytecodeName();
-                    String[] forInNames = forInName.split("\\.");
-                    forInName = forInNames[forInNames.length - 1];
-                    stringBuilder.append(delim).append(forInNames);
-                }
-                delim = ", ";
-            }
-            //if no other parameter is found, we need to insert "\\nothing" to
-            //generate valid JML
-        } catch (Exception e) {
-            if (stringBuilder.toString().equals("")) {
-                return "\\nothing";
-            }
+        String srcNodeByteCodeName = sourceNode.getBytecodeName();
+        String srcNodeKindName = sourceNode.getKind().name();
+        if (!srcNodeByteCodeName.startsWith("<param>")
+                && !srcNodeKindName.equals("FORMAL_IN")) {
+            return null;
         }
+        SDGNode methodNodeInSDG = sdg.getEntry(sourceNode);
+        int cgNodeId = sdg.getCGNodeId(methodNodeInSDG);
+        
+        // get IR to get names of the parameters. Need to compile classes
+        // with sufficient debug information for this.
+        CGNode methodNodeInCG = callGraph.getNode(cgNodeId);
+        IR intermedRep = methodNodeInCG.getIR(); //represents instructions of method, close to bytecode
+
+        String delim = "";
+        Set<SDGNode> formalInNodesOfProcedure = sdg.getFormalInsOfProcedure(methodNodeInSDG);
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        for (SDGNode currentFormalInNode : formalInNodesOfProcedure) {
+            final String param = "<param>";
+            String bytecodeName = currentFormalInNode.getBytecodeName();
+            String nameOfKind = currentFormalInNode.getKind().name();
+            if (currentFormalInNode == sourceNode
+                    || (!nameOfKind.startsWith(param) && !nameOfKind.equals("FORMAL_IN"))) {
+                continue;
+            }
+            if (bytecodeName.startsWith(param)) {
+                int p_number = Integer.parseInt(bytecodeName.substring(param.length() + 1)); //+ 1 for the trailing space
+                int valueNumber = intermedRep.getParameter(p_number); //starts at 1, meaning vn 1 is this for methods
+                SSAInstruction[] instructions = intermedRep.getInstructions();
+                int index = 0;
+                for (; index < instructions.length; index++) {
+                    if(instructions[index] != null) break;
+                }                        
+                String[] localNames = intermedRep.getLocalNames(index, valueNumber);
+                if(localNames == null) continue;
+                String nameOfParameter = localNames[0];
+                stringBuilder.append(delim).append(nameOfParameter);
+            } else {
+                String[] forInNames = bytecodeName.split("\\.");
+                bytecodeName = forInNames[forInNames.length - 1];
+                stringBuilder.append(delim).append(forInNames);
+            }
+            delim = ", ";
+        }
+        //if no other parameter is found, we need to insert "\\nothing" to
+        //generate valid JML
+        if (stringBuilder.toString().equals("")) {
+            return "\\nothing";
+        }
+
         return stringBuilder.toString();
     }
-    
+
     /**
      * Creates loop invariants. Is not complete and only fills the determines
      * clause.
@@ -137,7 +150,7 @@ public class KeyStringGenerator {
 
         return loopInvariant;
     }
-    
+
     /**
      * Calculates non-aliasing information for parameters of a method node using
      * JOANA's points-to information. From the paper: Definition 9 (Generation
@@ -205,8 +218,8 @@ public class KeyStringGenerator {
         }
         return result;
     }
-    
-        /**
+
+    /**
      * calculates whether two Ordinal sets are disjunct.
      */
     private static boolean disjunct(OrdinalSet<?> s1, OrdinalSet<?> s2) {
@@ -219,6 +232,5 @@ public class KeyStringGenerator {
         }
         return true;
     }
-
 
 }
