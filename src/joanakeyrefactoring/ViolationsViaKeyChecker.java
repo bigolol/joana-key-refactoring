@@ -1,16 +1,9 @@
 package joanakeyrefactoring;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation;
@@ -21,7 +14,6 @@ import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +26,6 @@ public class ViolationsViaKeyChecker {
     private AutomationHelper automationHelper;
     private boolean fullyAutomatic;
     private String pathToKeyJar;
-    private ArrayList<String> keyFeatures = new ArrayList<String>();
     private ParseJavaForKeyListener javaForKeyListener;
     private ViolationsWrapper violationsWrapper;
 
@@ -47,7 +38,6 @@ public class ViolationsViaKeyChecker {
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
-        loadAndAddListOfKeyFeatures();
     }
 
     public ViolationChop getViolationChopForSecNodeViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
@@ -86,7 +76,7 @@ public class ViolationsViaKeyChecker {
                 continue;
             }
             SDGNode calledMethodNode = sdg.getEntry(formalInNode);
-             //generate spec for KeY
+            //generate spec for KeY
             String descOfFormalOutNode
                     = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(formalOutNode, sdg);
             String descAllFormalInNodes
@@ -102,12 +92,6 @@ public class ViolationsViaKeyChecker {
                     + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
                     + descAllFormalInNodes + "; */";
             String methodName = getMethodNameFromBytecode(calledMethodByteCode);
-            if (!isKeyCompatible(calledMethodByteCode)) {
-                return false;
-            }
-            if (descOfFormalOutNode == null || descAllFormalInNodes == null) {
-                return false;
-            }
             try {
                 // write method to same file below
                 paramInClass = automationHelper.createJavaFileForKeyToDisproveMEthod(
@@ -171,7 +155,17 @@ public class ViolationsViaKeyChecker {
 
         }
         return false;
-    }    
+    }
+
+    private String getMethodNameFromBytecode(String byteCodeMethod) {
+        String[] a2 = byteCodeMethod.split("\\.");
+        String[] a3 = a2[a2.length - 1].split("\\(");
+        String methodName = a3[0];
+        if (byteCodeMethod.contains("<init>")) {
+            methodName += "." + a2[a2.length - 2].split("\\(")[0];
+        }
+        return methodName;
+    }
 
     /**
      * Checks whether a violaton found by Joana exists on a semantic level in
@@ -194,8 +188,7 @@ public class ViolationsViaKeyChecker {
         //for each
         return false;
     }
-  
-   
+
     private boolean isHighVar(SDG sdg, SDGNode source, SDGNode sink) {
         Collection<SDGNode> c = chopper.chop(source, sink);
         if (c.isEmpty()) {
