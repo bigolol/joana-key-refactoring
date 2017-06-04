@@ -171,28 +171,7 @@ public class ViolationsViaKeyChecker {
 
         }
         return false;
-    }
-
-    public boolean tryToDisproveViolationsViaKey(
-            Collection<? extends IViolation<SecurityNode>> violations,
-            SDG sdg) throws FileNotFoundException {
-        int numberOfViolations = violations.size();
-        int disprovedViolations = 0;
-        for (IViolation<SecurityNode> violationNode : violations) {
-            boolean disproved = checkViolation(violationNode, sdg);
-            if (disproved) {
-                disprovedViolations++;
-            }
-        }
-        int remaining = numberOfViolations - disprovedViolations;
-        System.out.println(String.format(
-                "Found %d violations, disproved %d, remaining %d",
-                numberOfViolations, disprovedViolations, remaining));
-        if (remaining == 0) {
-            System.out.println("Program proven secure!");
-        }
-        return remaining == 0;
-    }
+    }    
 
     /**
      * Checks whether a violaton found by Joana exists on a semantic level in
@@ -215,111 +194,7 @@ public class ViolationsViaKeyChecker {
         //for each
         return false;
     }
-
-    /**
-     * Check the top level method for sink or source annotation
-     *
-     * @param sdg
-     * @param source
-     * @param sink
-     * @param file
-     * @return
-     */
-    private boolean checkTopLevelComplete(SDG sdg, ViolationChop violationPathSourceAndSink) throws UnsupportedEncodingException, IOException {
-        // does not work properly
-        // checks the top level method of the source annotation (not the one
-        // from the sink)
-        SDGNode sink = violationPathSourceAndSink.getViolationSink();
-        SDGNode entryNode = violationPathSourceAndSink.getViolationSink();
-        SDGNode source = violationPathSourceAndSink.getViolationSource();
-        String descriptionOfSink = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(sink, sdg);
-        String descriptionOfParams
-                = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(source, sdg, stateSaver.callGraph);
-        if (descriptionOfSink == null || descriptionOfParams == null) {
-
-            return false;
-        }
-        SDGNode m = sdg.getEntry(entryNode);
-        System.out.println("Summary edge from: " + source.getBytecodeName()
-                + " to " + sink.getBytecodeName());
-        System.out.println("\t\ttop level call in " + m.getBytecodeMethod());
-        System.out.println("\t\t /*@ requires " + KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, m, stateSaver)
-                + ";\n\t\t  @ determines " + descriptionOfSink + " \\by "
-                + descriptionOfParams + "; */");
-        String a1 = m.getBytecodeMethod();
-        String b = "\t/*@ requires " + KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, m, stateSaver)
-                + ";\n\t  @ determines " + descriptionOfSink + " \\by "
-                + descriptionOfParams + "; */";
-        String methodName = getMethodNameFromBytecode(a1);
-        try {
-            // wirte method to same file below
-            paramInClass = automationHelper.createJavaFileForKeyToDisproveMEthod(b, methodName, descriptionOfParams, descriptionOfParams);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        // create .key file
-        String params = "";
-        if (paramInClass != null) {
-            for (int i = 0; i < paramInClass.length; i++) {
-                if (i == 0) {
-                    params += paramInClass[i];
-                } else {
-                    params += "," + paramInClass[i];
-                }
-            }
-        }
-        String methodNameKeY = methodName + "(" + params + ")";
-        String newJavaFile = "proofs.sourceFile";
-        try {
-            automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
-        } catch (IOException ex) {
-            Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        automationHelper.createKeYFileFunctional(newJavaFile, methodNameKeY);
-
-        long timeStartKeY = System.currentTimeMillis();
-        boolean result = false;
-
-        // TODO
-        System.out.println("runKeY: Path:" + pathToKeyJar + " javaClass:"
-                + pathToJar + " methodName: " + methodNameKeY);
-        result = automationHelper.runKeY(pathToKeyJar, "information flow");
-        boolean resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
-        System.out.println("Information Flow Result: " + result);
-        System.out.println("Functional Result: " + resultFunc);
-
-        long timeEndKeY = System.currentTimeMillis();
-        System.out.println("Runtime KeYProof: " + (timeEndKeY - timeStartKeY)
-                / 1000 + " Sec.");
-        if (!result || !resultFunc) {
-            System.out.println("Could not proof method automatically.");
-            if (!fullyAutomatic) {
-                System.out
-                        .println("From node: " + source + " to node: " + sink);
-                System.out
-                        .println("type \"y\" to verify method manually or \"n\" to go on automatically ");
-                Scanner scanInput = new Scanner(System.in);
-                String keyAnswer = scanInput.nextLine();
-                if (keyAnswer.equals("y")) {
-                    // open JAVA and KeY
-                    automationHelper.openKeY(pathToJar, methodNameKeY);
-
-                    System.out.println("type y if KeY could prove");
-                    Scanner scanInput2 = new Scanner(System.in);
-                    String keyAnswer2 = scanInput2.nextLine();
-
-                    if (keyAnswer2.equals("y")) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            }
-        }
-        return result;
-    }
+  
    
     private boolean isHighVar(SDG sdg, SDGNode source, SDGNode sink) {
         Collection<SDGNode> c = chopper.chop(source, sink);
