@@ -28,9 +28,8 @@ import java.util.regex.Pattern;
 public class AutomationHelper {
 
     private final String pathToJavaFile;
-    private String[] paramInClass;
     private ArrayList<String> classNames = new ArrayList<>();
-    final static String lineSeparator = System.getProperty("line.separator");
+    final static String LINE_SEP = System.getProperty("line.separator");
     private ParseJavaForKeyListener javaForKeyListener;
     private HashMap<String, String> classes = new HashMap<>();
 
@@ -314,7 +313,7 @@ public class AutomationHelper {
         String js = "\\javaSource \"proofs\";";
         writer.println(js);
         // Proof Obligation
-        String p1 = "\\proofObligation \"#Proof Obligation Settings";
+        String p1 = "\\proofObligation \"#Proof Obligation Settings\"";
         writer.println(p1);
         String obliName = "name = " + javaFile + "[" + javaFile
                 + "\\\\:\\\\:" + method + "].Non-interference contract.0";
@@ -322,8 +321,7 @@ public class AutomationHelper {
         String obliContract = "contract = " + javaFile + "[" + javaFile
                 + "\\\\:\\\\:" + method + "].Non-interference contract.0";
         writer.println(obliContract);
-        // String obliClass =
-        // "class=de.uka.ilkd.key.proof.init.InfFlowContractPO";
+
         String obliClass = "class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO";
         writer.println(obliClass);
         String end = "\";";
@@ -350,7 +348,7 @@ public class AutomationHelper {
         String js = "\\javaSource \"proofs\";";
         writer.println(js);
         // Proof Obligation
-        String p1 = "\\proofObligation \"#Proof Obligation Settings";
+        String p1 = "\\proofObligation \"#Proof Obligation Settings\"";
         writer.println(p1);
         String obliName = "name = " + javaFile + "[" + javaFile
                 + "\\\\:\\\\:" + method + "].JML operation contract.0";
@@ -358,8 +356,7 @@ public class AutomationHelper {
         String obliContract = "contract = " + javaFile + "[" + javaFile
                 + "\\\\:\\\\:" + method + "].JML operation contract.0";
         writer.println(obliContract);
-        // String obliClass =
-        // "class=de.uka.ilkd.key.proof.init.InfFlowContractPO";
+
         String obliClass = "class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO";
         writer.println(obliClass);
         String end = "\";";
@@ -377,7 +374,7 @@ public class AutomationHelper {
     public boolean runKeY(String pathKeY, String obligation) throws IOException {
         boolean result = false;
         String cmd = "";
-        if (obligation == "functional") {
+        if (obligation.equals("functional")) {
             cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObFunc.key";
         } else {
             cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObIF.key";
@@ -391,16 +388,13 @@ public class AutomationHelper {
 
         String s;
         while ((s = stdInput.readLine()) != null) {
-            System.out.println(s);
             if (s.contains("Number of goals remaining open: 0")) {
                 result = true;
             }
-            // TODO:
             if (s.contains("Proof loading failed")) {
-                result = false;
+                throw new IOException("Proof loading failed");
             }
         }
-
         return result;
     }
 
@@ -463,71 +457,71 @@ public class AutomationHelper {
      */
     public String getSettings() {
         String settings = "\\settings {"
-                + lineSeparator
+                + LINE_SEP
                 + " \"#Proof-Settings-Config-File"
-                + lineSeparator
+                + LINE_SEP
                 + "#Wed Jun 10 12:53:58 CEST 2016"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]VBT_PHASE=VBT_SYM_EX"
-                + lineSeparator
+                + LINE_SEP
                 + "[SMTSettings]useUninterpretedMultiplication=true"
-                + lineSeparator
+                + LINE_SEP
                 + "[SMTSettings]SelectedTaclets="
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]METHOD_OPTIONS_KEY=METHOD_CONTRACT"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]USER_TACLETS_OPTIONS_KEY3=USER_TACLETS_OFF"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]SYMBOLIC_EXECUTION_ALIAS_CHECK_OPTIONS_KEY=SYMBOLIC_EXECUTION_ALIAS_CHECK_NEVER"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]LOOP_OPTIONS_KEY=LOOP_INVARIANT"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]USER_TACLETS_OPTIONS_KEY2=USER_TACLETS_OFF"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]USER_TACLETS_OPTIONS_KEY1=USER_TACLETS_OFF"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]QUANTIFIERS_OPTIONS_KEY=QUANTIFIERS_NON_SPLITTING_WITH_PROGS"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]NON_LIN_ARITH_OPTIONS_KEY=NON_LIN_ARITH_NONE"
-                + lineSeparator
+                + LINE_SEP
                 + "[SMTSettings]instantiateHierarchyAssumptions=true"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]AUTO_INDUCTION_OPTIONS_KEY=AUTO_INDUCTION_OFF"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]DEP_OPTIONS_KEY=DEP_ON"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]BLOCK_OPTIONS_KEY=BLOCK_CONTRACT"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]CLASS_AXIOM_OPTIONS_KEY=CLASS_AXIOM_FREE"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]SYMBOLIC_EXECUTION_NON_EXECUTION_BRANCH_HIDING_OPTIONS_KEY=SYMBOLIC_EXECUTION_NON_EXECUTION_BRANCH_HIDING_OFF"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]QUERY_NEW_OPTIONS_KEY=QUERY_OFF"
-                + lineSeparator
+                + LINE_SEP
                 + "[Strategy]Timeout=-1"
-                + lineSeparator
+                + LINE_SEP
                 + "[Strategy]MaximumNumberOfAutomaticApplications=10000"
-                + lineSeparator
+                + LINE_SEP
                 + "[SMTSettings]integersMaximum=2147483645"
-                + lineSeparator
+                + LINE_SEP
                 + "[Choice]DefaultChoices=assertions-assertions\\:on , initialisation-initialisation\\:disableStaticInitialisation , intRules-intRules\\:arithmeticSemanticsIgnoringOF , programRules-programRules\\:Java , JavaCard-JavaCard\\:on , Strings-Strings\\:on , modelFields-modelFields\\:treatAsAxiom , bigint-bigint\\:on , sequences-sequences\\:on , reach-reach\\:on , integerSimplificationRules-integerSimplificationRules\\:full , wdOperator-wdOperator\\:L , wdChecks-wdChecks\\:off , runtimeExceptions-runtimeExceptions\\:ban"
-                + lineSeparator
+                + LINE_SEP
                 + "[SMTSettings]useConstantsForBigOrSmallIntegers=true"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]STOPMODE_OPTIONS_KEY=STOPMODE_DEFAULT"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]QUERYAXIOM_OPTIONS_KEY=QUERYAXIOM_OFF"
-                + lineSeparator
+                + LINE_SEP
                 + "[StrategyProperty]INF_FLOW_CHECK_PROPERTY=INF_FLOW_CHECK_FALSE"
-                + lineSeparator + "[SMTSettings]maxGenericSorts=2"
-                + lineSeparator + "[SMTSettings]integersMinimum=-2147483645"
-                + lineSeparator + "[SMTSettings]invariantForall=false"
-                + lineSeparator + "[SMTSettings]UseBuiltUniqueness=false"
-                + lineSeparator + "[SMTSettings]explicitTypeHierarchy=false"
-                + lineSeparator + "[Strategy]ActiveStrategy=JavaCardDLStrategy"
-                + lineSeparator
+                + LINE_SEP + "[SMTSettings]maxGenericSorts=2"
+                + LINE_SEP + "[SMTSettings]integersMinimum=-2147483645"
+                + LINE_SEP + "[SMTSettings]invariantForall=false"
+                + LINE_SEP + "[SMTSettings]UseBuiltUniqueness=false"
+                + LINE_SEP + "[SMTSettings]explicitTypeHierarchy=false"
+                + LINE_SEP + "[Strategy]ActiveStrategy=JavaCardDLStrategy"
+                + LINE_SEP
                 + "[StrategyProperty]SPLITTING_OPTIONS_KEY=SPLITTING_DELAYED"
-                + lineSeparator + "	\"" + lineSeparator + "}";
+                + LINE_SEP + "	\"" + LINE_SEP + "}";
         return settings;
     }
 

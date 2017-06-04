@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 
 public class ViolationsViaKeyChecker {
 
-    public String[] paramInClass;
     public String pathToJar;
     public RepsRosayChopper chopper;
     public StateSaver stateSaver;
@@ -63,6 +62,27 @@ public class ViolationsViaKeyChecker {
         }
     }
 
+    private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {
+        SDGNode actualInNode = se.getSource();
+        SDGNode actualOutNode = se.getTarget();
+        Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
+
+        for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
+            createKeyFiles(formalNodeTuple, sdg);
+            boolean result = false, resultFunc = false;
+            try {
+                result = automationHelper.runKeY(pathToKeyJar, "information flow");
+                resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
+            } catch (IOException ex) {
+                Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (!result || !resultFunc) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void createKeyFiles(SDGNodeTuple formalNodeTuple, SDG sdg) throws IOException {
         String methodNameKeY = createJavaFileForKey(formalNodeTuple, sdg);
         String newJavaFile = "proofs.sourceFile";
@@ -94,27 +114,6 @@ public class ViolationsViaKeyChecker {
         }
         params = params.substring(0, params.length() - 2);
         return methodName + "(" + params + ")";
-    }
-
-    private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {
-        SDGNode actualInNode = se.getSource();
-        SDGNode actualOutNode = se.getTarget();
-        Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
-
-        for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
-            createKeyFiles(formalNodeTuple, sdg);
-            boolean result = false, resultFunc = false;
-            try {
-                result = automationHelper.runKeY(pathToKeyJar, "information flow");
-                resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
-            } catch (IOException ex) {
-                Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            if (!result || !resultFunc) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void checkViaUser(SDGNode formalInNode, SDGNode formalOutNode, String methodNameKey) {
