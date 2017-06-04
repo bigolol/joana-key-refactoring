@@ -45,6 +45,12 @@ public class AutomationHelper {
         return classNames;
     }
 
+    /**
+     * initializes the ParseJavaForKeyListener with the string containing all .java files in the supplied folder
+     * 
+     * @return the ParseJavaForKeyListener which parsed the string containing all the combined .java files pointed
+     * to by the pathToJavaFile
+     */
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
         if (this.javaForKeyListener == null) {
             this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());
@@ -190,7 +196,8 @@ public class AutomationHelper {
     }
 
     /**
-     *
+     * Generates the Java file for which Key will disprove the information flow.
+     * It adds all classes 
      * @param descriptionForKey
      * @param methodName
      * @param descSink

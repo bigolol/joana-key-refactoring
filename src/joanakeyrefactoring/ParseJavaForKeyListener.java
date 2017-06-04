@@ -53,7 +53,8 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
     }
 
     /**
-     * creates the syntax tree and visits it
+     * creates the syntax tree and visits it and extracts all data needed to
+     * later create the proof obligations
      *
      * @param input the ANTLRInputStream which represents the java file which
      * summarizes all .java files belonging to the project

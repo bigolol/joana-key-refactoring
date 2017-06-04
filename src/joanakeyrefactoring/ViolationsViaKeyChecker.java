@@ -27,19 +27,6 @@ import java.util.logging.Logger;
 
 public class ViolationsViaKeyChecker {
 
-    class ViolationChopData {
-
-        public final SDGNode violationSource;
-        public final SDGNode violationSink;
-        public final Collection<SDGNode> violationChop;
-
-        public ViolationChopData(SDGNode violationSource, SDGNode violationSink, Collection<SDGNode> violationChop) {
-            this.violationSource = violationSource;
-            this.violationSink = violationSink;
-            this.violationChop = violationChop;
-        }
-    }
-
     public String[] paramInClass;
     public String pathToJar;
     public RepsRosayChopper chopper;
@@ -62,14 +49,13 @@ public class ViolationsViaKeyChecker {
         loadAndAddListOfKeyFeatures();
     }
 
-    public ViolationChopData getViolationChopForSecNodeViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
+    public ViolationChop getViolationChopForSecNodeViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
         ViolationPath violationPath = getViolationPath(violationNode);
         this.chopper = new RepsRosayChopper(sdg);
         LinkedList<SecurityNode> violationPathList = violationPath.getPathList();
         SDGNode violationSource = violationPathList.get(0);
         SDGNode violationSink = violationPathList.get(1);
-        Collection<SDGNode> violationChop = chopper.chop(violationSource, violationSink);
-        return new ViolationChopData(violationSource, violationSink, violationChop);
+        return new ViolationChop(violationSource, violationSink, sdg);
     }
 
     public boolean tryToDisproveViolationsViaKey(
@@ -93,12 +79,25 @@ public class ViolationsViaKeyChecker {
         return remaining == 0;
     }
 
+    /**
+     * Checks whether a violaton found by Joana exists on a semantic level in
+     * the program by checking all summary edges in the violation chop whether
+     * they can be dirsproved using Key. For each summary edge, all formal in
+     * nodes for the actual in and out node
+     *
+     * @param violationNode
+     * @param sdg
+     * @return
+     */
     public boolean myDreamCheckViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
+        
         //violationChop = getViolationChop(violationNode, sdg);
         //SDG violationChopSubgraph = sdg.subgraph(violationChopData.violationChop);
         //Collection<Edge> edgesSorted = sortEdgesByMetric(violationChopSubgraph);
+        //for each summaryedge:
         //a_i, a_o = getActualIn, getActualOutNode
-        //L_i = allFormalInNodes 
+        //
+        //for each
         return false;
     }
 
@@ -106,17 +105,18 @@ public class ViolationsViaKeyChecker {
      * checks a violation (information about one supposed illegal flow) uses KeY
      * to check whether this is a false positive
      *
+     * @param violationNode
      * @return true if there is no illegal flow
      * @throws FileNotFoundException
      */
     public boolean checkViolation(IViolation<SecurityNode> violationNode, SDG sdg) throws FileNotFoundException {
         boolean neueHeuristic = true;
-        ViolationChopData violationChopData = getViolationChopForSecNodeViolation(violationNode, sdg);
-        if (violationChopData.violationChop.isEmpty()) {
+        ViolationChop violChop = getViolationChopForSecNodeViolation(violationNode, sdg);
+        if (violChop.isEmpty()) {
             return true;
         }
         //get edges involved in the flow
-        SDG violationChopInducedSubgraph = sdg.subgraph(violationChopData.violationChop);
+        SDG violationChopInducedSubgraph = sdg.subgraph(violChop.getViolationChop());
         List<SDGEdge> checkedEdges = new ArrayList<SDGEdge>();
         boolean change = true;
         while (change) {
@@ -131,112 +131,14 @@ public class ViolationsViaKeyChecker {
                 //check all possible method invocations; needed in case of dynamic dispatch
                 //name of this collection in the paper: L_i
                 Collection<SDGNodeTuple> allFormalNodePairsForActualNodes = sdg.getAllFormalPairs(actualInNode, actualOutNode);
-                for (SDGNodeTuple formalNodeTuple : allFormalNodePairsForActualNodes) {
-                    //get source and sink node in the callee that induce the summary edge
-                    //name of the nodes in the paper: f_i and f_o
-                    SDGNode formalInNode = formalNodeTuple.getFirstNode();
-                    SDGNode formalOutNode = formalNodeTuple.getSecondNode();
-                    if (chopper.chop(formalInNode, formalOutNode).isEmpty()) {
-                        continue;
-                    }
-                    SDGNode calledMethodNode = sdg.getEntry(formalInNode);
-                    String myDescOther = KeyStringGenerator.generateKeyDescrForParamsViaListener(formalInNode, sdg, javaForKeyListener);
-                    //generate spec for KeY
-                    String descOfFormalOutNode
-                            = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(formalOutNode, sdg);
-                    String descAllFormalInNodes
-                            = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(
-                                    formalInNode, sdg, stateSaver.callGraph);
-                    String pointsTo = KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver);
-
-                    String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
-
-                    String descriptionStringForKey
-                            = "\t/*@ requires "
-                            + pointsTo
-                            + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
-                            + myDescOther + "; */";
-                    String methodName = getMethodNameFromBytecode(calledMethodByteCode);
-                    if (!isKeyCompatible(calledMethodByteCode)) {
-                        removable = false;
-                        break;
-                    }
-                    if (descOfFormalOutNode == null || descAllFormalInNodes == null) {
-                        removable = false;
-                        break;
-                    }
-                    try {
-                        // write method to same file below
-                        paramInClass = automationHelper.createJavaFileForKeyToDisproveMEthod(
-                                descriptionStringForKey, methodName, descOfFormalOutNode, descAllFormalInNodes);
-                    } catch (Exception ex) {
-                        removable = false;
-                        break;
-                    }
-                    // create .key file
-                    String params = "";
-                    if (paramInClass != null) {
-                        for (int i = 0; i < paramInClass.length; i++) {
-                            if (i == 0) {
-                                params += paramInClass[i];
-                            } else {
-                                params += "," + paramInClass[i];
-                            }
-                        }
-                    }
-                    String methodNameKeY = methodName + "(" + params + ")";
-                    String newJavaFile = "proofs.sourceFile";
-                    try {
-                        automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
-                    } catch (IOException ex) {
-                        removable = false;
-                        break;
-                    }
-                    // executeKeY with parameter, read result
-                    boolean result = false, resultFunc = false;
-                    try {
-                        result = automationHelper.runKeY(pathToKeyJar, "information flow");
-                        resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
-                    } catch (IOException ex) {
-                        Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                    if (!result || !resultFunc) {
-                        if (!fullyAutomatic) {
-                            System.out.println("From node: " + formalInNode + " to node: " + formalOutNode);
-                            System.out.println("type \"y\" to verify method manually or \"n\" to go on automatically ");
-                            Scanner scanInput = new Scanner(System.in);
-                            String keyAnswer = scanInput.nextLine();
-                            if (keyAnswer.equals("y")) {
-                                // open JAVA and KeY
-                                automationHelper.openKeY(pathToJar, methodNameKeY);
-
-                                System.out.println("type y if KeY could prove");
-                                Scanner scanInput2 = new Scanner(System.in);
-                                String keyAnswer2 = scanInput2.nextLine();
-
-                                if (!keyAnswer2.equals("y")) {
-                                    removable = false;
-                                    break;
-                                } else {
-                                    result = true;
-                                }
-                            }
-                        }
-                    }
-                    if (!result || !resultFunc) {
-                        removable = false;
-                        break;
-                    }
-
-                }
+                for (SDGNodeTuple formalNodeTuple : allFormalNodePairsForActualNodes) 
                 if (removable) {
                     sdg.removeEdge(summaryEdgeToBeChecked);
                     violationChopInducedSubgraph.removeEdge(summaryEdgeToBeChecked);
                     // recalculating of the chop after deleting the summary
                     // edge; if the new chop is empty, our alarm is found to be
                     // a false alarm
-                    Collection<SDGNode> recalcViolationChop = chopper.chop(violationChopData.violationSource, violationChopData.violationSink);
+                    Collection<SDGNode> recalcViolationChop = chopper.chop(violChop.getViolationSource(), violChop.getViolationSink());
                     if (recalcViolationChop.isEmpty()) {
                         return true;
                     }
@@ -253,7 +155,7 @@ public class ViolationsViaKeyChecker {
             //all summary edges are checked but the program is not found
             // secure, so we have to check the top level: the annotated method
             // itself
-            return checkTopLevelComplete(sdg, violationChopData);
+            return checkTopLevelComplete(sdg, violChop);
         } catch (IOException ex) {
             return false;
         }
@@ -275,13 +177,13 @@ public class ViolationsViaKeyChecker {
      * @param file
      * @return
      */
-    private boolean checkTopLevelComplete(SDG sdg, ViolationChopData violationPathSourceAndSink) throws UnsupportedEncodingException, IOException {
+    private boolean checkTopLevelComplete(SDG sdg, ViolationChop violationPathSourceAndSink) throws UnsupportedEncodingException, IOException {
         // does not work properly
         // checks the top level method of the source annotation (not the one
         // from the sink)
-        SDGNode sink = violationPathSourceAndSink.violationSink;
-        SDGNode entryNode = violationPathSourceAndSink.violationSink;
-        SDGNode source = violationPathSourceAndSink.violationSource;
+        SDGNode sink = violationPathSourceAndSink.getViolationSink();
+        SDGNode entryNode = violationPathSourceAndSink.getViolationSink();
+        SDGNode source = violationPathSourceAndSink.getViolationSource();
         String descriptionOfSink = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(sink, sdg);
         String descriptionOfParams
                 = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(source, sdg, stateSaver.callGraph);
