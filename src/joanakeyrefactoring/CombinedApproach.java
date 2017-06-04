@@ -32,6 +32,8 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,7 +42,7 @@ public class CombinedApproach {
 
     public static void main(String[] args) {
         try {
-            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/jzip.joak");
+            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/plusminusfalsepos.joak");
             CombinedApproach.runTestFromCheckData(parsedCheckData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +63,11 @@ public class CombinedApproach {
     public static void checkAnnotatedPDGWithJoanaAndKey(
             IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker violationChecker) throws FileNotFoundException {
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
-        violationChecker.tryToDisproveViolationsViaKey(violations, annotatedAnalysis.getProgram().getSDG());
+        try {
+            violationChecker.disproveViaKey(violations, annotatedAnalysis.getProgram().getSDG());
+        } catch (IOException ex) {
+            Logger.getLogger(CombinedApproach.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public static void addAnnotationsFileBased(

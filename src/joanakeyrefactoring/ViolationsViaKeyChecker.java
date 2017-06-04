@@ -14,6 +14,7 @@ import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,7 +51,7 @@ public class ViolationsViaKeyChecker {
     }
 
     public void disproveViaKey(Collection<? extends IViolation<SecurityNode>> violations,
-            SDG sdg) {
+            SDG sdg) throws IOException {
         violationsWrapper = new ViolationsWrapper(violations, sdg, javaForKeyListener, automationHelper);
         while (!violationsWrapper.allCheckedOrDisproved()) {
             SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
@@ -62,63 +63,46 @@ public class ViolationsViaKeyChecker {
         }
     }
 
-    private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) {
+    private void createKeyFiles(SDGNodeTuple formalNodeTuple, SDG sdg) throws IOException {
+        String methodNameKeY = createJavaFileForKey(formalNodeTuple, sdg);
+        String newJavaFile = "proofs.sourceFile";
+        automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
+        automationHelper.createKeYFileFunctional(newJavaFile, methodNameKeY);
+
+    }
+
+    private String createJavaFileForKey(SDGNodeTuple formalNodeTuple, SDG sdg) throws UnsupportedEncodingException, IOException {
+        SDGNode formalInNode = formalNodeTuple.getFirstNode();
+        SDGNode formalOutNode = formalNodeTuple.getSecondNode();
+        SDGNode calledMethodNode = sdg.getEntry(formalInNode);
+
+        String descAllFormalInNodes
+                = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(
+                        formalInNode, sdg, stateSaver.callGraph, javaForKeyListener);
+        String descOfFormalOutNode
+                = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(formalOutNode, sdg);
+        String pointsTo = KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver);
+
+        String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
+        String methodName = getMethodNameFromBytecode(calledMethodByteCode);
+
+        String[] paramInClass = automationHelper.createJavaFileForKeyToDisproveMEthod(
+                pointsTo, methodName, descOfFormalOutNode, descAllFormalInNodes);
+        String params = "";
+        for (String s : paramInClass) {
+            params += s + ", ";
+        }
+        params = params.substring(0, params.length() - 2);
+        return methodName + "(" + params + ")";
+    }
+
+    private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {
         SDGNode actualInNode = se.getSource();
         SDGNode actualOutNode = se.getTarget();
         Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
 
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
-            //get source and sink node in the callee that induce the summary edge
-            //name of the nodes in the paper: f_i and f_o
-            SDGNode formalInNode = formalNodeTuple.getFirstNode();
-            SDGNode formalOutNode = formalNodeTuple.getSecondNode();
-            if (chopper.chop(formalInNode, formalOutNode).isEmpty()) {
-                continue;
-            }
-            SDGNode calledMethodNode = sdg.getEntry(formalInNode);
-            //generate spec for KeY
-            String descOfFormalOutNode
-                    = KeyStringGenerator.generateKeyDescriptionForSinkOfFlowWithinMethod(formalOutNode, sdg);
-            String descAllFormalInNodes
-                    = KeyStringGenerator.generateKeyDecsriptionForParamsExceptSourceNode(
-                            formalInNode, sdg, stateSaver.callGraph);
-            String pointsTo = KeyStringGenerator.generatePreconditionFromPointsToSet(sdg, calledMethodNode, stateSaver);
-
-            String calledMethodByteCode = calledMethodNode.getBytecodeMethod();
-
-            String descriptionStringForKey
-                    = "\t/*@ requires "
-                    + pointsTo
-                    + ";\n\t  @ determines " + descOfFormalOutNode + " \\by "
-                    + descAllFormalInNodes + "; */";
-            String methodName = getMethodNameFromBytecode(calledMethodByteCode);
-            try {
-                // write method to same file below
-                paramInClass = automationHelper.createJavaFileForKeyToDisproveMEthod(
-                        descriptionStringForKey, methodName, descOfFormalOutNode, descAllFormalInNodes);
-            } catch (Exception ex) {
-                return false;
-            }
-            // create .key file
-            String params = "";
-            if (paramInClass != null) {
-                for (int i = 0; i < paramInClass.length; i++) {
-                    if (i == 0) {
-                        params += paramInClass[i];
-                    } else {
-                        params += "," + paramInClass[i];
-                    }
-                }
-            }
-            String methodNameKeY = methodName + "(" + params + ")";
-            String newJavaFile = "proofs.sourceFile";
-            try {
-                automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
-                automationHelper.createKeYFileFunctional(newJavaFile, methodNameKeY);
-            } catch (IOException ex) {
-                return false;
-            }
-            // executeKeY with parameter, read result
+            createKeyFiles(formalNodeTuple, sdg);
             boolean result = false, resultFunc = false;
             try {
                 result = automationHelper.runKeY(pathToKeyJar, "information flow");
@@ -126,35 +110,27 @@ public class ViolationsViaKeyChecker {
             } catch (IOException ex) {
                 Logger.getLogger(ViolationsViaKeyChecker.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            if (!result || !resultFunc) {
-                if (!fullyAutomatic) {
-                    System.out.println("From node: " + formalInNode + " to node: " + formalOutNode);
-                    System.out.println("type \"y\" to verify method manually or \"n\" to go on automatically ");
-                    Scanner scanInput = new Scanner(System.in);
-                    String keyAnswer = scanInput.nextLine();
-                    if (keyAnswer.equals("y")) {
-                        // open JAVA and KeY
-                        automationHelper.openKeY(pathToJar, methodNameKeY);
-
-                        System.out.println("type y if KeY could prove");
-                        Scanner scanInput2 = new Scanner(System.in);
-                        String keyAnswer2 = scanInput2.nextLine();
-
-                        if (!keyAnswer2.equals("y")) {
-                            return false;
-                        } else {
-                            result = true;
-                        }
-                    }
-                }
-            }
             if (!result || !resultFunc) {
                 return false;
             }
-
         }
-        return false;
+        return true;
+    }
+
+    private void checkViaUser(SDGNode formalInNode, SDGNode formalOutNode, String methodNameKey) {
+        if (!fullyAutomatic) {
+            System.out.println("From node: " + formalInNode + " to node: " + formalOutNode);
+            System.out.println("type \"y\" to verify method manually or \"n\" to go on automatically ");
+            Scanner scanInput = new Scanner(System.in);
+            String keyAnswer = scanInput.nextLine();
+            if (keyAnswer.equals("y")) {
+                // open JAVA and KeY
+                automationHelper.openKeY(pathToJar, methodNameKey);
+                System.out.println("type y if KeY could prove");
+                Scanner scanInput2 = new Scanner(System.in);
+                String keyAnswer2 = scanInput2.nextLine();
+            }
+        }
     }
 
     private String getMethodNameFromBytecode(String byteCodeMethod) {

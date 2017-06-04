@@ -93,7 +93,8 @@ public class KeyStringGenerator {
      * possible)
      */
     public static String generateKeyDecsriptionForParamsExceptSourceNode(
-            SDGNode sourceNode, SDG sdg, CallGraph callGraph) {
+            SDGNode sourceNode, SDG sdg, CallGraph callGraph, ParseJavaForKeyListener listener) {
+        
         String srcNodeByteCodeName = sourceNode.getBytecodeName();
         String srcNodeKindName = sourceNode.getKind().name();
         if (!srcNodeByteCodeName.startsWith("<param>")
@@ -126,7 +127,7 @@ public class KeyStringGenerator {
                 SSAInstruction[] instructions = intermedRep.getInstructions();
                 String[] localNames = intermedRep.getLocalNames(0, valueNumber);
                 if (localNames == null) {
-                    continue;
+                    return generateKeyDescrForParamsViaListener(sourceNode, sdg, listener);
                 }
                 String nameOfParameter = localNames[0];
                 stringBuilder.append(delim).append(nameOfParameter);

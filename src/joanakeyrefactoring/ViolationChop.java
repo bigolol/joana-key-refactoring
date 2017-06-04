@@ -34,8 +34,8 @@ public class ViolationChop {
         this.violationSource = violationSource;
         this.violationSink = violationSink;
         this.chopper = new RepsRosayChopper(sdg);
-        this.inducedSubgraph = sdg.subgraph(violationChop);
         violationChop = chopper.chop(violationSource, violationSink);
+        this.inducedSubgraph = sdg.subgraph(violationChop);
         findSummaryEdges();
     }
 

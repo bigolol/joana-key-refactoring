@@ -32,7 +32,7 @@ public class ViolationsWrapper {
 
     private Collection<? extends IViolation<SecurityNode>> violations;
     private SDG sdg;
-    private Collection<ViolationChop> violationChops;
+    private Collection<ViolationChop> violationChops = new ArrayList<>();
     private ParseJavaForKeyListener javaForKeyListener;
     private Collection<ViolationChop> chopsContainingCurrentlyCheckedEdge = new ArrayList<>();
     private Collection<SDGEdge> checkedEdges = new ArrayList<>();

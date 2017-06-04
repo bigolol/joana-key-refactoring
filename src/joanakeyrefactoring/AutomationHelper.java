@@ -46,10 +46,11 @@ public class AutomationHelper {
     }
 
     /**
-     * initializes the ParseJavaForKeyListener with the string containing all .java files in the supplied folder
-     * 
-     * @return the ParseJavaForKeyListener which parsed the string containing all the combined .java files pointed
-     * to by the pathToJavaFile
+     * initializes the ParseJavaForKeyListener with the string containing all
+     * .java files in the supplied folder
+     *
+     * @return the ParseJavaForKeyListener which parsed the string containing
+     * all the combined .java files pointed to by the pathToJavaFile
      */
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
         if (this.javaForKeyListener == null) {
@@ -197,7 +198,8 @@ public class AutomationHelper {
 
     /**
      * Generates the Java file for which Key will disprove the information flow.
-     * It adds all classes 
+     * It adds all classes
+     *
      * @param descriptionForKey
      * @param methodName
      * @param descSink
@@ -205,8 +207,14 @@ public class AutomationHelper {
      * @return
      */
     public String[] createJavaFileForKeyToDisproveMEthod(
-            String descriptionForKey, String methodName, String descSink,
+            String pointsTo, String methodName, String descSink,
             String descOtherParams) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+
+        String descriptionForKey
+                = "\t/*@ requires "
+                + pointsTo
+                + ";\n\t  @ determines " + descSink + " \\by "
+                + descOtherParams + "; */";
 
         String globalVariables = "";
         globalVariables = javaForKeyListener.getFieldsWithNullableAsString();
