@@ -13,7 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,45 +23,34 @@ public class BasicSumEdgeComparator implements SummaryEdgeComparator {
     private ArrayList<String> keyFeatures = new ArrayList<String>();
     private SDG sdg;
     private Map<SDGEdge, Collection<ViolationChop>> edgesToChops;
+    private Map<SDGEdge, BasicMetric> edgesToMetric = new HashMap<>();
     private ParseJavaForKeyListener javaForKeyListener;
 
-    public BasicSumEdgeComparator(AutomationHelper automationHelper, SDG sdg, 
+    public BasicSumEdgeComparator(AutomationHelper automationHelper, SDG sdg,
             Map<SDGEdge, Collection<ViolationChop>> edgesToChops, ParseJavaForKeyListener javaForKeyListener) {
         this.sdg = sdg;
         this.edgesToChops = edgesToChops;
         this.javaForKeyListener = javaForKeyListener;
         loadAndAddListOfKeyFeatures(automationHelper);
+        edgesToChops.keySet().forEach((se) -> {
+            mapEdgeToMetric(se);
+        });
     }
-    
-    private List<EdgeMetric> getSummaryEdges(SDG flowSDG) {
-        List<EdgeMetric> summaryEdges = new ArrayList<EdgeMetric>();
-        //clone() is needed because removing/adding edges to check for bridges throws the iterator off
-        Collection<SDGEdge> clonedEdgesFromflowSDG = flowSDG.clone().edgeSet();
-        for (SDGEdge currentEdge : clonedEdgesFromflowSDG) {
-            if (isSummaryEdge(currentEdge) && !checkedEdges.contains(currentEdge)) {
-                SDGNode callee = sdg.getEntry(currentEdge.getSource());
-                String calleeByteCodeMethod = callee.getBytecodeMethod();
-                Boolean isPartOfJavaLibrary = false;
-                if (calleeByteCodeMethod.contains("java.") || calleeByteCodeMethod.contains(".lang.")) {
-                    isPartOfJavaLibrary = true;
-                }
-                String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
-                boolean isKeYCompatible = isKeyCompatible(calleeByteCodeMethod);
 
-                boolean machtesPattern = isKeYCompatible;
-                boolean isBridge = false;
-                int containedSummary = 0;
-                if (neueHeuristic) {
-                    summaryEdges.add(new EdgeMetric(currentEdge, machtesPattern,
-                            isBridge, containedSummary));
-                } else {
-                    summaryEdges.add(new EdgeMetric(currentEdge, isBridge,
-                            containedSummary));
-                }
-            }
+    private void mapEdgeToMetric(SDGEdge se) {
+        SDGNode callee = sdg.getEntry(se.getSource());
+        String calleeByteCodeMethod = callee.getBytecodeMethod();
+        Boolean isPartOfJavaLibrary = false;
+        if (calleeByteCodeMethod.contains("java.") || calleeByteCodeMethod.contains(".lang.")) {
+            isPartOfJavaLibrary = true;
         }
-        Collections.sort(summaryEdges);
-        return summaryEdges;
+        String methodName = getMethodNameFromBytecode(calleeByteCodeMethod);
+        boolean isKeYCompatible = isKeyCompatible(calleeByteCodeMethod);
+
+        boolean machtesPattern = isKeYCompatible;
+        boolean isBridge = false;
+        int containedSummary = 0;
+        edgesToMetric.put(se, new BasicMetric(machtesPattern, isBridge, containedSummary));
     }
 
     private String getMethodNameFromBytecode(String byteCodeMethod) {
@@ -122,28 +111,25 @@ public class BasicSumEdgeComparator implements SummaryEdgeComparator {
     }
 
     @Override
-    public int compare(SDGEdge o1, SDGEdge o2) {
-        if (machtesPattern && !other.machtesPattern) {
-            return -1;
-        }
-        if (containedEdges != other.containedEdges) {
-            return containedEdges - other.containedEdges;
-        }
-        if (isBridge && !other.isBridge) {
-            return -1;
-        }
-        if (!isBridge && other.isBridge) {
-            return 1;
-        }
-        if (!machtesPattern && other.machtesPattern) {
-            return 1;
-        }
+    public int compare(SDGEdge lhs, SDGEdge rhs) {
+        BasicMetric lhsMetric = edgesToMetric.get(lhs);
+        BasicMetric rhsMetric = edgesToMetric.get(rhs);
 
-        /**
-         * TODO: i would like to compare the edges themselves here, but the
-         * comparator for edges already built into JOANA is not public. And i
-         * don't want to copy and paste the code to use it here.
-         */
+        if (lhsMetric.machtesPattern && !rhsMetric.machtesPattern) {
+            return -1;
+        }
+        if (lhsMetric.containedEdges != rhsMetric.containedEdges) {
+            return lhsMetric.containedEdges - rhsMetric.containedEdges;
+        }
+        if (lhsMetric.isBridge && !rhsMetric.isBridge) {
+            return -1;
+        }
+        if (!lhsMetric.isBridge && rhsMetric.isBridge) {
+            return 1;
+        }
+        if (!lhsMetric.machtesPattern && rhsMetric.machtesPattern) {
+            return 1;
+        }
         return 0;
     }
 

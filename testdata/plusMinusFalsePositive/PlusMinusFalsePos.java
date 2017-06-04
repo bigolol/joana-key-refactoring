@@ -13,5 +13,4 @@ public class PlusMinusFalsePos {
 		l = l - h;
 		return l;
 	}
-
 }

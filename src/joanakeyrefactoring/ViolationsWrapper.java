@@ -28,26 +28,24 @@ import java.util.Set;
  *
  * @author holgerklein
  */
-public class Violations {
+public class ViolationsWrapper {
 
     private Collection<? extends IViolation<SecurityNode>> violations;
     private SDG sdg;
     private Collection<ViolationChop> violationChops;
     private ParseJavaForKeyListener javaForKeyListener;
-    private ArrayList<String> keyFeatures = new ArrayList<String>();
     private Collection<ViolationChop> chopsContainingCurrentlyCheckedEdge = new ArrayList<>();
     private Collection<SDGEdge> checkedEdges = new ArrayList<>();
     private Map<SDGEdge, ArrayList<ViolationChop>> summaryEdgesAndContainingChops = new HashMap<>();
 
-    public Violations(Collection<? extends IViolation<SecurityNode>> violations,
+    public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg, ParseJavaForKeyListener forKeyListener, AutomationHelper automationHelper) {
-        loadAndAddListOfKeyFeatures(automationHelper);
         this.javaForKeyListener = forKeyListener;
         this.violations = violations;
         this.sdg = sdg;
         violations.forEach((v) -> {
             violationChops.add(createViolationChop(v, sdg));
-        });       
+        });
         putEdgesAndChopsInMap();
     }
 
@@ -75,7 +73,7 @@ public class Violations {
     private ViolationPath getViolationPath(IViolation<SecurityNode> v) {
         return ((ClassifiedViolation) v).getChops().iterator().next().getViolationPathes().getPathesList().get(0);
     }
-    
+
     public boolean allDisproved() {
         for (ViolationChop vc : violationChops) {
             if (!vc.isEmpty()) {
@@ -85,17 +83,34 @@ public class Violations {
         return true;
     }
 
-    public void removeEdge(EdgeMetric em) {
+    public boolean allCheckedOrDisproved() {
+        for (ViolationChop vc : violationChops) {
+            if (!vc.isEmpty()) {
+                for (SDGEdge se : vc.getSummaryEdges()) {
+                    if (!checkedEdges.contains(se)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public void removeEdge(SDGEdge e) {
         chopsContainingCurrentlyCheckedEdge.forEach((vc) -> {
-            vc.removeEdge(em.edge);
+            vc.removeEdge(e);
             if (vc.isEmpty()) {
                 violationChops.remove(vc);
             }
         });
-        sdg.removeEdge(em.edge);
+        sdg.removeEdge(e);
     }
-    
+
     public void checkedEdge(SDGEdge e) {
         checkedEdges.add(e);
+    }
+
+    public SDGEdge nextSummaryEdge() {
+        return summaryEdgesAndContainingChops.keySet().iterator().next();
     }
 }

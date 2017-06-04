@@ -260,7 +260,7 @@ public class AutomationHelper {
      */
     private String getAllMethodsCalledByDisproveMethod(String completeMethod) {
 
-        StringBuilder sbOM = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         String[] lines = completeMethod.split(System.lineSeparator());
         List<String> allMethodNames = new ArrayList<>();
         for (String line : lines) {
@@ -278,13 +278,13 @@ public class AutomationHelper {
                 if (!allMethodNames.contains(lineOc.trim())) {
                     allMethodNames.add(lineOc.trim());
                     if (javaForKeyListener.getCompleteMethod(lineOc.trim()) != null) {
-                        sbOM.append(javaForKeyListener.getCompleteMethod(lineOc.trim()));
-                        sbOM.append(System.lineSeparator());
+                        stringBuilder.append(javaForKeyListener.getCompleteMethod(lineOc.trim()));
+                        stringBuilder.append(System.lineSeparator());
                     }
                 }
             }
         }
-        return sbOM.toString();
+        return stringBuilder.toString();
     }
 
     /**

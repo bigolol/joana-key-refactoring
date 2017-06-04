@@ -124,13 +124,7 @@ public class KeyStringGenerator {
                 int p_number = Integer.parseInt(bytecodeName.substring(param.length() + 1)); //+ 1 for the trailing space
                 int valueNumber = intermedRep.getParameter(p_number); //starts at 1, meaning vn 1 is this for methods
                 SSAInstruction[] instructions = intermedRep.getInstructions();
-                int index = 0;
-                for (; index < instructions.length; index++) {
-                    if (instructions[index] != null) {
-                        break;
-                    }
-                }
-                String[] localNames = intermedRep.getLocalNames(index, valueNumber);
+                String[] localNames = intermedRep.getLocalNames(0, valueNumber);
                 if (localNames == null) {
                     continue;
                 }
