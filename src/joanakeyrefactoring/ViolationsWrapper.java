@@ -28,7 +28,6 @@ public class ViolationsWrapper {
     private SDG sdg;
     private Collection<ViolationChop> violationChops = new ArrayList<>();
     private ParseJavaForKeyListener javaForKeyListener;
-    private Collection<ViolationChop> chopsContainingCurrentlyCheckedEdge = new ArrayList<>();
     private Collection<SDGEdge> checkedEdges = new ArrayList<>();
     private Map<SDGEdge, ArrayList<ViolationChop>> summaryEdgesAndContainingChops = new HashMap<>();
 
@@ -44,11 +43,14 @@ public class ViolationsWrapper {
     }
 
     private void putEdgesAndChopsInMap() {
+        summaryEdgesAndContainingChops = new HashMap<>();
         violationChops.forEach((vc) -> {
             vc.getSummaryEdges().forEach((se) -> {
                 Collection<ViolationChop> chopList = summaryEdgesAndContainingChops.get(se);
                 if (chopList == null) {
-                    summaryEdgesAndContainingChops.put(se, new ArrayList<>());
+                    ArrayList<ViolationChop> arrayList = new ArrayList<>();
+                    arrayList.add(vc);
+                    summaryEdgesAndContainingChops.put(se, arrayList);
                 } else {
                     chopList.add(vc);
                 }
@@ -91,13 +93,13 @@ public class ViolationsWrapper {
     }
 
     public void removeEdge(SDGEdge e) {
-        chopsContainingCurrentlyCheckedEdge.forEach((vc) -> {
-            vc.removeEdge(e);
+        sdg.removeEdge(e);
+        summaryEdgesAndContainingChops.get(e).forEach((vc) -> {
+            vc.findSummaryEdges();
             if (vc.isEmpty()) {
                 violationChops.remove(vc);
             }
         });
-        sdg.removeEdge(e);
     }
 
     public void checkedEdge(SDGEdge e) {
@@ -105,6 +107,7 @@ public class ViolationsWrapper {
     }
 
     public SDGEdge nextSummaryEdge() {
-        return summaryEdgesAndContainingChops.keySet().iterator().next();
+        SDGEdge next = summaryEdgesAndContainingChops.keySet().iterator().next();
+        return next;
     }
 }
