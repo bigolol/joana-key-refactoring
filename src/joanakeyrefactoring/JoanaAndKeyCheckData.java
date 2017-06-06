@@ -15,16 +15,16 @@ import java.util.List;
  */
 public class JoanaAndKeyCheckData {
 
-    private String pathKeY;
-    private String pathToJar;
-    private String pathToJavaFile;
-    private String entryMethodString;
-    private String annotationPath;
-    private JavaMethodSignature entryMethod;
-    private boolean fullyAutomatic;
-    private IFCAnalysis analysis;
-    private List<SingleAnnotationAdder> singleAnnotationAdders;
-    private StateSaver stateSaver;
+    private final String pathKeY;
+    private final String pathToJar;
+    private final String pathToJavaFile;
+    private final String entryMethodString;
+    private final String annotationPath;
+    private final JavaMethodSignature entryMethod;
+    private final boolean fullyAutomatic;
+    private final IFCAnalysis analysis;
+    private final List<SingleAnnotationAdder> singleAnnotationAdders;
+    private final StateSaver stateSaver;
 
     public JoanaAndKeyCheckData(String pathKeY, String pathToJar, String pathToJavaFile, String entryMethodString, String annotationPath, JavaMethodSignature entryMethod, boolean fullyAutomatic, IFCAnalysis analysis, List<SingleAnnotationAdder> singleAnnotationAdders, StateSaver stateSaver) {
         this.pathKeY = pathKeY;

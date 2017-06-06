@@ -83,7 +83,7 @@ public class CombinedApproach {
         });
     }
 
-        public static JoanaAndKeyCheckData parseInputFile(String filePath)
+    public static JoanaAndKeyCheckData parseInputFile(String filePath)
             throws IOException, ClassHierarchyException, UnsoundGraphException, CancelException {
         BufferedReader br = new BufferedReader(new FileReader(filePath));
         StringBuilder completeString = new StringBuilder();

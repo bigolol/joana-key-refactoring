@@ -5,8 +5,6 @@
  */
 package joanakeyrefactoring;
 
-import edu.kit.joana.ifc.sdg.graph.SDGEdge;
-
 /**
  *
  * @author holgerklein

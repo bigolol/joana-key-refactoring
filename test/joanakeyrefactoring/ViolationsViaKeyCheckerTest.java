@@ -49,31 +49,5 @@ public class ViolationsViaKeyCheckerTest {
     public void tearDown() {
     }
 
-    @Test
-    public void testGeneratePrecondition() throws IOException, ClassHierarchyException, GraphIntegrity.UnsoundGraphException, CancelException {
-        String testCase = "plusminusfalsepos";
-        JoanaAndKeyCheckData parsedData
-                = CombinedApproach.parseInputFile("testdata/" + testCase + ".joak");
-        parsedData.addAnnotations();
-        IViolation<SecurityNode> violationNode = parsedData.getAnalysis().doIFC().iterator().next();
-        AutomationHelper automationHelper = new AutomationHelper(parsedData.getPathToJavaFile());
-        ViolationsViaKeyChecker violationsViaKeyChecker = new ViolationsViaKeyChecker(automationHelper, parsedData);
-        SDG sdg = parsedData.getAnalysis().getProgram().getSDG();
-        ViolationsViaKeyChecker.ViolationChopData violationChopData
-                = violationsViaKeyChecker.getViolationChopForSecNodeViolation(violationNode, sdg);
-        SDG violationChopInducedSubgraph = sdg.subgraph(violationChopData.violationChop);
-        List<EdgeMetric> summaryEdges = violationsViaKeyChecker.getSummaryEdges(sdg, new ArrayList<SDGEdge>(), sdg, false);
-        SDGEdge summaryEdgeToBeChecked = summaryEdges.get(0).edge;
-        SDGNode actualInNode = summaryEdgeToBeChecked.getSource();
-        SDGNode actualOutNode = summaryEdgeToBeChecked.getTarget();
-        Collection<SDGNodeTuple> allFormalNodePairsForActualNodes = sdg.getAllFormalPairs(actualInNode, actualOutNode);
-        SDGNode formalInNode = allFormalNodePairsForActualNodes.iterator().next().getFirstNode();
-        SDGNode formalOutNode = allFormalNodePairsForActualNodes.iterator().next().getSecondNode();
-        SDGNode calledMethodNode = sdg.getEntry(formalInNode);
-
-        String precondition = KeyStringGenerator.generatePreconditionFromPointsToSet(
-                sdg, calledMethodNode, parsedData.getStateSaver());
-        System.out.println(precondition);
-    }
-
+   
 }

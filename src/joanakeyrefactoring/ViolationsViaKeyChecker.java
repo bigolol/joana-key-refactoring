@@ -39,16 +39,7 @@ public class ViolationsViaKeyChecker {
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
     }
-
-    public ViolationChop getViolationChopForSecNodeViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
-        ViolationPath violationPath = getViolationPath(violationNode);
-        this.chopper = new RepsRosayChopper(sdg);
-        LinkedList<SecurityNode> violationPathList = violationPath.getPathList();
-        SDGNode violationSource = violationPathList.get(0);
-        SDGNode violationSink = violationPathList.get(1);
-        return new ViolationChop(violationSource, violationSink, sdg);
-    }
-
+   
     public void disproveViaKey(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg) throws IOException {
         violationsWrapper = new ViolationsWrapper(violations, sdg, javaForKeyListener, automationHelper);
@@ -88,7 +79,6 @@ public class ViolationsViaKeyChecker {
         String newJavaFile = "proofs.sourceFile";
         automationHelper.createKeYFileIF(newJavaFile, methodNameKeY);
         automationHelper.createKeYFileFunctional(newJavaFile, methodNameKeY);
-
     }
 
     private String createJavaFileForKey(SDGNodeTuple formalNodeTuple, SDG sdg) throws UnsupportedEncodingException, IOException {
@@ -141,42 +131,5 @@ public class ViolationsViaKeyChecker {
         }
         return methodName;
     }
-
-    /**
-     * Checks whether a violaton found by Joana exists on a semantic level in
-     * the program by checking all summary edges in the violation chop whether
-     * they can be dirsproved using Key. For each summary edge, all formal in
-     * nodes for the actual in and out node
-     *
-     * @param violationNode
-     * @param sdg
-     * @return
-     */
-    public boolean myDreamCheckViolation(IViolation<SecurityNode> violationNode, SDG sdg) {
-
-        //violationChop = getViolationChop(violationNode, sdg);
-        //SDG violationChopSubgraph = sdg.subgraph(violationChopData.violationChop);
-        //Collection<Edge> edgesSorted = sortEdgesByMetric(violationChopSubgraph);
-        //for each summaryedge:
-        //a_i, a_o = getActualIn, getActualOutNode
-        //
-        //for each
-        return false;
-    }
-
-    private boolean isHighVar(SDG sdg, SDGNode source, SDGNode sink) {
-        Collection<SDGNode> c = chopper.chop(source, sink);
-        if (c.isEmpty()) {
-            return false;
-        }
-        SDG flowSDG = sdg.subgraph(c);
-        return false;
-    }
-
-    /**
-     * get violation path
-     */
-    public ViolationPath getViolationPath(IViolation<SecurityNode> v) {
-        return ((ClassifiedViolation) v).getChops().iterator().next().getViolationPathes().getPathesList().get(0);
-    }
+  
 }

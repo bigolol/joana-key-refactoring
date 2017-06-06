@@ -63,16 +63,16 @@ public class KeyStringGenerator {
                 continue;
             }
             if (currentNodeBC.startsWith(param)) {
-               int paramPos = Integer.parseInt(currentNodeBC.substring(param.length() + 1)); //+ 1 for the trailing space
-               String paramName = listener.getParamsOfMethodByByteCode(methodNameBC)[paramPos];
-               stringBuilder.append(paramName).append(", ");
+                int paramPos = Integer.parseInt(currentNodeBC.substring(param.length() + 1)); //+ 1 for the trailing space
+                String paramName = listener.getParamsOfMethodByByteCode(methodNameBC)[paramPos];
+                stringBuilder.append(paramName).append(", ");
             } else {
                 String[] forInNames = currentNodeBC.split("\\.");
                 currentNodeBC = forInNames[forInNames.length - 1];
                 stringBuilder.append(currentNodeBC).append(", ");
-            }            
+            }
         }
-        
+
         String created = stringBuilder.toString();
 
         if (created.length() == 0) {
@@ -94,7 +94,7 @@ public class KeyStringGenerator {
      */
     public static String generateKeyDecsriptionForParamsExceptSourceNode(
             SDGNode sourceNode, SDG sdg, CallGraph callGraph, ParseJavaForKeyListener listener) {
-        
+
         String srcNodeByteCodeName = sourceNode.getBytecodeName();
         String srcNodeKindName = sourceNode.getKind().name();
         if (!srcNodeByteCodeName.startsWith("<param>")

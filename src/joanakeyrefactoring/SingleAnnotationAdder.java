@@ -5,7 +5,6 @@
  */
 package joanakeyrefactoring;
 
-import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.api.sdg.SDGProgramPart;
 import java.util.Collection;
 import java.util.function.BiConsumer;
@@ -16,6 +15,7 @@ import java.util.function.Supplier;
  * @author holger
  */
 public class SingleAnnotationAdder {
+
     private Supplier<Collection<SDGProgramPart>> programPartSupplier;
     private BiConsumer<SDGProgramPart, String> annoAddMethod;
     private String secLevel;
@@ -25,7 +25,7 @@ public class SingleAnnotationAdder {
         this.annoAddMethod = annoAddMethod;
         this.secLevel = secLevel;
     }
-    
+
     public void addYourselfToAnalysis() {
         programPartSupplier.get().forEach((part) -> {
             annoAddMethod.accept(part, secLevel);
