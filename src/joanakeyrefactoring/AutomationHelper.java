@@ -197,7 +197,8 @@ public class AutomationHelper {
 
     /**
      * Generates the Java file for which Key will disprove the information flow.
-     * It adds all classes
+     *
+     * @TODO definetly might be a bug in here :/
      *
      * @param descriptionForKey
      * @param methodName
@@ -294,6 +295,33 @@ public class AutomationHelper {
         return stringBuilder.toString();
     }
 
+    private void generateKeyFileFrom(
+            String profileString, String javaSourceString,
+            String proofObligationString, String fileName) throws IOException {
+
+        File proofObFile = new File(fileName);
+        if (!proofObFile.exists()) {
+            proofObFile.createNewFile();
+        }
+        String profileTempStr = "\\profile PROFILE;\n";
+        String javaSourceTempStr = "\\javaSource JAVASRC;\n";
+        String proofOblTempStr = "\\proofObligation PROOFOBL;\n";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(profileTempStr.replace("PROFILE", surroundWithApos(profileString)));
+        stringBuilder.append('\n');
+        stringBuilder.append(javaSourceTempStr.replace("JAVASRC", surroundWithApos(javaSourceString)));
+        stringBuilder.append('\n');
+        stringBuilder.append(proofOblTempStr.replace("PROOFOBL", surroundWithApos(proofObligationString)));
+
+        PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+        writer.print(stringBuilder.toString());
+        writer.close();
+    }
+
+    private String surroundWithApos(String s) {
+        return "\"" + s + "\"";
+    }
+
     /**
      * Creates the Information flow Proof Obligation for KeY.
      *
@@ -306,27 +334,17 @@ public class AutomationHelper {
         if (!proofObFile.exists()) {
             proofObFile.createNewFile();
         }
-        writer = new PrintWriter("proofObs/proofObIF.key", "UTF-8");
-        String firstRow = "\\profile \"Java Profile\";";
-        writer.println(firstRow);
-        // Java Source
-        String js = "\\javaSource \"proofs\";";
-        writer.println(js);
-        // Proof Obligation
-        String p1 = "\\proofObligation \"#Proof Obligation Settings\"";
-        writer.println(p1);
-        String obliName = "name = " + javaFile + "[" + javaFile
-                + "\\\\:\\\\:" + method + "].Non-interference contract.0";
-        writer.println(obliName);
-        String obliContract = "contract = " + javaFile + "[" + javaFile
-                + "\\\\:\\\\:" + method + "].Non-interference contract.0";
-        writer.println(obliContract);
 
-        String obliClass = "class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO";
-        writer.println(obliClass);
-        String end = "\";";
-        writer.println(end);
-        writer.close();
+        final String profileStr = "Java Profile";
+        final String javaSourceStr = "proofs";
+        final String proofObligationTemplateString
+                = "#Proof Obligation Settings\n"
+                + "name=proofs.sourceFile[proofs.sourceFile\\\\:\\\\:METHODNAME].Non-interference contract.0\n"
+                + "contract=proofs.sourceFile[proofs.sourceFile\\\\:\\\\:METHODNAME].Non-interference contract.0\n"
+                + "class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO\n";
+        final String proofObligationString = proofObligationTemplateString.replaceAll("METHODNAME", method);
+
+        generateKeyFileFrom(profileStr, javaSourceStr, proofObligationString, "proofObs/proofObIF.key");
     }
 
     /**
@@ -348,7 +366,7 @@ public class AutomationHelper {
         String js = "\\javaSource \"proofs\";";
         writer.println(js);
         // Proof Obligation
-        String p1 = "\\proofObligation \"#Proof Obligation Settings\"";
+        String p1 = "\\proofObligation \"#Proof Obligation Settings";
         writer.println(p1);
         String obliName = "name = " + javaFile + "[" + javaFile
                 + "\\\\:\\\\:" + method + "].JML operation contract.0";

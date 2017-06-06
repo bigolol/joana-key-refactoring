@@ -69,15 +69,15 @@ public class ViolationChop {
         return summaryEdges;
     }
 
-    private boolean isSummaryEdge(SDGEdge currentEdge) {
-        return currentEdge.getKind() == SDGEdge.Kind.SUMMARY;
-    }
-
     private void findSummaryEdges() {
         inducedSubgraph.edgeSet().forEach((e) -> {
             if (isSummaryEdge(e)) {
                 summaryEdges.add(e);
             }
         });
+    }
+
+    private boolean isSummaryEdge(SDGEdge currentEdge) {
+        return currentEdge.getKind() == SDGEdge.Kind.SUMMARY;
     }
 }

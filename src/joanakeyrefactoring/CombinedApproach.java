@@ -54,14 +54,14 @@ public class CombinedApproach {
             CancelException, CouldntAddAnnoException, CancelException {
         checkData.addAnnotations();
         AutomationHelper automationHelper = new AutomationHelper(checkData.getPathToJavaFile());
-        ViolationsViaKeyChecker violationsViaKeyChecker
-                = new ViolationsViaKeyChecker(
+        ViolationsDisproverSemantic violationsViaKeyChecker
+                = new ViolationsDisproverSemantic(
                         automationHelper, checkData);
         checkAnnotatedPDGWithJoanaAndKey(checkData.getAnalysis(), violationsViaKeyChecker);
     }
 
     public static void checkAnnotatedPDGWithJoanaAndKey(
-            IFCAnalysis annotatedAnalysis, ViolationsViaKeyChecker violationChecker) throws FileNotFoundException {
+            IFCAnalysis annotatedAnalysis, ViolationsDisproverSemantic violationChecker) throws FileNotFoundException {
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
         try {
             violationChecker.disproveViaKey(violations, annotatedAnalysis.getProgram().getSDG());
