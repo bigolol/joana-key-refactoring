@@ -1,18 +1,10 @@
 package joanakeyrefactoring;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.ibm.wala.ipa.callgraph.pruned.ApplicationLoaderPolicy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.NullProgressMonitor;
 import com.ibm.wala.util.graph.GraphIntegrity.UnsoundGraphException;
-
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.api.annotations.IFCAnnotation;
 import edu.kit.joana.api.lattice.BuiltinLattices;
@@ -28,7 +20,13 @@ import edu.kit.joana.util.Stubs;
 import edu.kit.joana.wala.core.SDGBuilder.ExceptionAnalysis;
 import edu.kit.joana.wala.core.SDGBuilder.FieldPropagation;
 import edu.kit.joana.wala.core.SDGBuilder.PointsToPrecision;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -42,7 +40,7 @@ public class CombinedApproach {
 
     public static void main(String[] args) {
         try {
-            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/plusminusfalsepos.joak");
+            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/multipleClassesArrFalsePos.joak");
             CombinedApproach.runTestFromCheckData(parsedCheckData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,6 +143,8 @@ public class CombinedApproach {
             securityLevelLattice = BuiltinLattices.STD_SECLEVEL_LOW;
         }
 
+        Collection<SDGProgramPart> allProgramParts = analysis.getProgram().getAllProgramParts();
+
         JSONObject description = jsonObj.getJSONObject("description");
         String from = description.getString("from");
         Supplier<Collection<SDGProgramPart>> partSupplier = null;
@@ -154,16 +154,23 @@ public class CombinedApproach {
             partSupplier
                     = () -> {
                         Collection<SDGCall> allCallsToMethod = analysis.getProgram().getCallsToMethod(JavaMethodSignature.fromString(method));
-                        List<SDGProgramPart> collectedParts = allCallsToMethod.stream().map((call) -> {
+                        List<SDGProgramPart> collectedParts = allCallsToMethod.stream().map((SDGCall call) -> {
                             return (SDGProgramPart) call.getActualParameter(paramPos);
                         }).collect(Collectors.toList());
+                        
                         return collectedParts;
                     };
         } else if (from.equals("programPart")) {
             String programPartString = description.getString("programPart");
             partSupplier
                     = () -> {
-                        return analysis.getProgram().getParts(programPartString).stream().collect(Collectors.toList());
+                        Collection<SDGProgramPart> created = new ArrayList<>();
+                        for (SDGProgramPart p : allProgramParts) {
+                            if (p.toString().equals(programPartString)) {
+                                created.add(p);
+                            }
+                        }
+                        return created;
                     };
         }
 

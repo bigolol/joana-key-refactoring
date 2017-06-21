@@ -10,7 +10,10 @@ package multipleclassesfalsepos;
  * @author holgerklein
  */
 public class ClassB {
+    private void func(){}
+    
     public void putDatumInArr(int h, int[] arr) {
+        func();
         arr[4] = h;
     }
 }

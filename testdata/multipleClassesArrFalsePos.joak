@@ -1,0 +1,11 @@
+//joak file testing multiple classes
+
+pathKeY : "dep/KeY.jar",
+javaClass : "",
+pathToJar : "testdata/multipleClassesFalsePos/MultipleClassesFalsePos/dist/MultipleClassesFalsePos.jar",
+pathToJavaFile : "testdata/multipleClassesFalsePos/MultipleClassesFalsePos/src",
+entryMethod : "multipleclassesfalsepos.MultipleClassesFalsePos",
+annotationPath : "",
+fullyAutomatic : true,
+sources : [{securityLevel : "high", description : {from : "callsToMethod", method : "multipleclassesfalsepos.ClassA.falsePos(I)I", paramPos : 1}}],
+sinks : [{securityLevel : "low", description : {from : "programPart", programPart : "exit of method int multipleclassesfalsepos.ClassA.falsePos(int)"}}]

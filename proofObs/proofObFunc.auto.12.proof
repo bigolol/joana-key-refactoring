@@ -50,7 +50,6 @@ class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO
 
 \proof {
 (keyLog "0" (keyUser "holger" ) (keyVersion "00c1abfd22b738afe24e89fecc2ee4eec2c38f4a"))
-(keyLog "1" (keyUser "holger" ) (keyVersion "00c1abfd22b738afe24e89fecc2ee4eec2c38f4a"))
 
 (autoModeTime "424")
 

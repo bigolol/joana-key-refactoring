@@ -12,11 +12,17 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import joanakeyrefactoring.CustomListener.CreateSimpleCallgraphListener;
+import joanakeyrefactoring.CustomListener.ExtractJavaProjModelListener;
+import joanakeyrefactoring.CustomListener.FindFunctionCallsListener;
+import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 
 /**
  * This class handles all automation processes of the Combined Approach.
@@ -31,7 +37,10 @@ public class AutomationHelper {
     private ArrayList<String> classNames = new ArrayList<>();
     final static String LINE_SEP = System.getProperty("line.separator");
     private ParseJavaForKeyListener javaForKeyListener;
+    private FindFunctionCallsListener callsListener = new FindFunctionCallsListener();
     private HashMap<String, String> classes = new HashMap<>();
+    private ExtractJavaProjModelListener extractJavaProjModelListener = new ExtractJavaProjModelListener();
+    private CreateSimpleCallgraphListener callgraphListener = new CreateSimpleCallgraphListener();
 
     public AutomationHelper(String pathToJavaFile) {
         this.pathToJavaFile = pathToJavaFile;
@@ -53,7 +62,11 @@ public class AutomationHelper {
      */
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
         if (this.javaForKeyListener == null) {
-            this.javaForKeyListener = new ParseJavaForKeyListener(readAllSourceFilesIntoOneStringAndFillClassMap());
+            String allSourcesInOneString = readAllSourceFilesIntoOneStringAndFillClassMap();
+            this.javaForKeyListener = new ParseJavaForKeyListener(allSourcesInOneString);
+            extractJavaProjModelListener.extractDataFromProject(allSourcesInOneString);
+            callgraphListener.createCallGraph(extractJavaProjModelListener.getClasses(),
+                    extractJavaProjModelListener.getMethods(), allSourcesInOneString);
         }
         return this.javaForKeyListener;
     }
@@ -91,10 +104,9 @@ public class AutomationHelper {
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             for (String line = br.readLine(); line != null; line = br.readLine()) {
-                if (!lineIsntPackageDecl(line)) {
-                    stringBuilderForFile.append(line);
-                    stringBuilderForFile.append(System.lineSeparator());
-                }
+                stringBuilderForFile.append(line);
+                stringBuilderForFile.append(System.lineSeparator());
+
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(AutomationHelper.class.getName()).log(Level.SEVERE, null, ex);
@@ -117,17 +129,21 @@ public class AutomationHelper {
      */
     public Collection<File> listAllJavaFilesInFolder(final File folder) {
         List<File> fileNames = new ArrayList<File>();
+        listAllJavaFilesInFolderRec(folder, fileNames);
+        return fileNames;
+    }
+
+    private void listAllJavaFilesInFolderRec(File folder, List<File> fileList) {
         for (final File fileEntry : folder.listFiles()) {
             if (fileEntry.isDirectory()) {
-                listAllJavaFilesInFolder(fileEntry);
+                listAllJavaFilesInFolderRec(fileEntry, fileList);
             } else {
                 if (fileEntry.getName().trim().endsWith(".java")) {
                     classNames.add(fileEntry.getName().split("\\.")[0]);
-                    fileNames.add(fileEntry);
+                    fileList.add(fileEntry);
                 }
             }
         }
-        return fileNames;
     }
 
     /**
@@ -195,6 +211,39 @@ public class AutomationHelper {
         return methodName.contains("<init>");
     }
 
+    public void createJavaFileForKeyToDisproveMethod2(
+            String pointsTo, String methodName, String descSink,
+            String descOtherParams) {
+        String completeMethod = javaForKeyListener.getCompleteMethod(methodName);
+        String classContainingMethod = javaForKeyListener.getClass(methodName);
+        //find all needed classes by finding all used methods and containing classes. Then find all methods used by those and so on
+        Set<String> usedClasses = new HashSet<>();
+        usedClasses.add(classContainingMethod);
+        Set<String> checkedMethods = new HashSet<>();
+        checkedMethods.add(methodName);
+
+        Set<String> calledFunctions = callsListener.getCalledFunctions(extractOnlyMethodBody(completeMethod));
+
+    }
+
+    private void addNeededClassesRec(Set<String> checkedMethods, Set<String> neededClasses, String currentMethodName) {
+        if (checkedMethods.contains(currentMethodName)) {
+            return;
+        }
+        neededClasses.add(javaForKeyListener.getClass(currentMethodName));
+        Set<String> allCalledFunctions = callsListener.getCalledFunctions(getBodyForMethodByName(currentMethodName));
+    }
+
+    private String getBodyForMethodByName(String methodName) {
+        return extractOnlyMethodBody(javaForKeyListener.getCompleteMethod(methodName));
+    }
+
+    private String extractOnlyMethodBody(String completeMethod) {
+        completeMethod = completeMethod.trim();
+        int openCurlyIndex = completeMethod.indexOf("{");
+        return completeMethod.substring(openCurlyIndex);
+    }
+
     /**
      * Generates the Java file for which Key will disprove the information flow.
      *
@@ -209,7 +258,7 @@ public class AutomationHelper {
     public String[] createJavaFileForKeyToDisproveMEthod(
             String pointsTo, String methodName, String descSink,
             String descOtherParams) throws FileNotFoundException, UnsupportedEncodingException, IOException {
-
+        createJavaFileForKeyToDisproveMethod2(pointsTo, methodName, descSink, descOtherParams);
         String descriptionForKey
                 = "\t/*@ requires "
                 + pointsTo
@@ -220,7 +269,6 @@ public class AutomationHelper {
         globalVariables = javaForKeyListener.getFieldsWithNullableAsString();
 
         String completeMethod = generateMethodDescrForKey(methodName, descSink, descOtherParams);
-
         String otherClasses = "";
         StringBuilder sbClasses = new StringBuilder();
         String classOfMethod = javaForKeyListener.getClass(methodName);

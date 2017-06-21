@@ -16,7 +16,7 @@ sources : [
 sinks : [ 
 	{
 		securityLevel : "low",
-		description : {from : "programPart", programPart : "PlusMinusFalsePos.testMethod(II)I->exit"}
+		description : {from : "programPart", programPart : "exit of method int PlusMinusFalsePos.testMethod(int, int)"}
 	}
 ]
 

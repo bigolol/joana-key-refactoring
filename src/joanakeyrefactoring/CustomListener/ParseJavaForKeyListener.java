@@ -1,4 +1,4 @@
-package joanakeyrefactoring;
+package joanakeyrefactoring.CustomListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.Set;
 import joanakeyrefactoring.antlr.JavaBaseListener;
 import joanakeyrefactoring.antlr.JavaLexer;
 import joanakeyrefactoring.antlr.JavaParser;
-
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.*;
@@ -392,7 +391,7 @@ public class ParseJavaForKeyListener extends JavaBaseListener {
         classList.add(className);
     }
 
-    String[] getParamsOfMethodByByteCode(String bytecodeMethod) {
+    public String[] getParamsOfMethodByByteCode(String bytecodeMethod) {
         String name = getMethodNameFromBC(bytecodeMethod);
         String nameSepByDots[] = name.split("\\.");
         String onlyMethodName = nameSepByDots[nameSepByDots.length - 1];

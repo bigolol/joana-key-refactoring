@@ -5,6 +5,7 @@
  */
 package joanakeyrefactoring;
 
+import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;

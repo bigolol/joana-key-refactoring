@@ -5,6 +5,7 @@
  */
 package joanakeyrefactoring;
 
+import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
@@ -65,6 +66,9 @@ public class KeyFileCreator {
                 descrPointsTo, methodName, descOfFormalOutNode, descAllFormalInNodes);
         String params = "";
         for (String s : paramInClass) {
+            if (s.equals("int[]")) {
+                s = "[I";
+            }
             params += s + ",";
         }
         params = params.substring(0, params.length() - 1);

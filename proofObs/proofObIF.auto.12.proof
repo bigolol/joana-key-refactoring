@@ -2,7 +2,7 @@
 
 \settings {
 "#Proof-Settings-Config-File
-#Wed Jun 21 04:43:28 CEST 2017
+#Wed Jun 21 04:17:31 CEST 2017
 [StrategyProperty]VBT_PHASE=VBT_SYM_EX
 [SMTSettings]useUninterpretedMultiplication=true
 [SMTSettings]SelectedTaclets=
@@ -42,7 +42,7 @@
 \javaSource "proofs";
 
 \proofObligation "#Proof Obligation Settings
-#Wed Jun 21 04:43:28 CEST 2017
+#Wed Jun 21 04:17:31 CEST 2017
 name=proofs.sourceFile[proofs.sourceFile\\:\\:identity(int,int)].Non-interference contract.0
 contract=proofs.sourceFile[proofs.sourceFile\\:\\:identity(int,int)].Non-interference contract.0
 class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO
@@ -50,9 +50,8 @@ class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO
 
 \proof {
 (keyLog "0" (keyUser "holger" ) (keyVersion "00c1abfd22b738afe24e89fecc2ee4eec2c38f4a"))
-(keyLog "1" (keyUser "holger" ) (keyVersion "00c1abfd22b738afe24e89fecc2ee4eec2c38f4a"))
 
-(autoModeTime "668")
+(autoModeTime "607")
 
 (branch "dummy ID"
 (builtin "One Step Simplification" (formula "1"))
