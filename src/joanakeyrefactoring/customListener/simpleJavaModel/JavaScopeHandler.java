@@ -31,7 +31,7 @@ public class JavaScopeHandler {
     }
 
     public void addVar(String id, String type) {
-
+        currentScope.get(currentScope.size() - 1).addVar(id, type);
     }
 
     public void enterNewScope() {

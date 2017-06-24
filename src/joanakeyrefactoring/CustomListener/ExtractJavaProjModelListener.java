@@ -5,8 +5,8 @@
  */
 package joanakeyrefactoring.CustomListener;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import joanakeyrefactoring.antlr.java8.Java8BaseListener;
 import joanakeyrefactoring.antlr.java8.Java8Lexer;
 import joanakeyrefactoring.antlr.java8.Java8Parser;
@@ -15,7 +15,6 @@ import joanakeyrefactoring.customListener.simpleJavaModel.JavaMethod;
 import joanakeyrefactoring.customListener.simpleJavaModel.JavaMethodArgument;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.misc.OrderedHashSet;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -25,14 +24,14 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 public class ExtractJavaProjModelListener extends Java8BaseListener {
 
-    private Set<JavaClass> classes = new OrderedHashSet<>();
-    private Set<JavaMethod> methods = new OrderedHashSet<>();
+    private List<JavaClass> classes = new ArrayList<>();
+    private List<JavaMethod> methods = new ArrayList<>();
     private JavaClass currentClass;
     private String currentPackage;
 
     public void extractDataFromProject(String allClassesInOneString) {
-        classes = new OrderedHashSet<>();
-        methods = new OrderedHashSet<>();
+        classes = new ArrayList<>();
+        methods = new ArrayList<>();
         Java8Lexer lexer = new Java8Lexer(new ANTLRInputStream(allClassesInOneString));
         Java8Parser parser = new Java8Parser(new CommonTokenStream(lexer));
         Java8Parser.CompilationUnitContext parseTree = parser.compilationUnit();
@@ -40,13 +39,14 @@ public class ExtractJavaProjModelListener extends Java8BaseListener {
         walker.walk(this, parseTree);
     }
 
-    public Set<JavaClass> getClasses() {
+    public List<JavaClass> getExtractedClasses() {
         return classes;
     }
 
-    public Set<JavaMethod> getMethods() {
+    public List<JavaMethod> getExtractedMethods() {
         return methods;
     }
+
 
     @Override
     public void enterPackageDeclaration(Java8Parser.PackageDeclarationContext ctx) {

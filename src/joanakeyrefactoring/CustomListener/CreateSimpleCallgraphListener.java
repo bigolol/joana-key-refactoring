@@ -5,16 +5,17 @@
  */
 package joanakeyrefactoring.CustomListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import static joanakeyrefactoring.CustomListener.ExtractJavaProjModelListener.createMethodFromDeclCtx;
 import joanakeyrefactoring.antlr.java8.Java8BaseListener;
 import joanakeyrefactoring.antlr.java8.Java8Lexer;
 import joanakeyrefactoring.antlr.java8.Java8Parser;
 import joanakeyrefactoring.customListener.simpleJavaModel.JavaClass;
 import joanakeyrefactoring.customListener.simpleJavaModel.JavaMethod;
+import joanakeyrefactoring.customListener.simpleJavaModel.JavaMethodArgument;
 import joanakeyrefactoring.customListener.simpleJavaModel.JavaScopeHandler;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -27,15 +28,15 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 public class CreateSimpleCallgraphListener extends Java8BaseListener {
 
-    private Set<JavaClass> classes;
-    private Set<JavaMethod> methods;
+    private List<JavaClass> classes;
+    private List<JavaMethod> methods;
     private Map<String, String> idNamesToTypes;
     private String currentPackage;
     private JavaClass currentClass;
     private JavaMethod currentMethod;
     private JavaScopeHandler javaScopeHandler = new JavaScopeHandler();
 
-    public void createCallGraph(Set<JavaClass> classes, Set<JavaMethod> methods, String allClassesInOneString) {
+    public void createCallGraph(List<JavaClass> classes, List<JavaMethod> methods, String allClassesInOneString) {
         this.classes = classes;
         this.methods = methods;
         idNamesToTypes = new HashMap<>();
@@ -71,6 +72,9 @@ public class CreateSimpleCallgraphListener extends Java8BaseListener {
     public void enterMethodDeclaration(Java8Parser.MethodDeclarationContext ctx) {
         javaScopeHandler.enterNewScope();
         currentMethod = createMethodFromDeclCtx(currentClass, ctx);
+        for(JavaMethodArgument arg : currentMethod.getArgs()) {
+            javaScopeHandler.addVar(arg.getName(), arg.getType());
+        }
     }
 
     @Override
@@ -122,8 +126,46 @@ public class CreateSimpleCallgraphListener extends Java8BaseListener {
 
     @Override
     public void enterMethodInvocation(Java8Parser.MethodInvocationContext ctx) {
-        String methodName = ctx.Identifier().getText();
+        String text = ctx.getText();
+        Java8Parser.MethodNameContext methodName = ctx.methodName();
+        TerminalNode identifier = ctx.Identifier();
 
+        if (methodName != null) { //it is a pure function
+            //do nothing since the class gets added anyways
+
+        } else if (identifier != null) { //it is a function called on an object/class
+            TerminalNode Identifier = ctx.Identifier();
+            String typenameText = ctx.typeName().getText();
+            String varType = javaScopeHandler.getTypeForVar(typenameText);
+            Java8Parser.ArgumentListContext argumentList = ctx.argumentList();
+            List<JavaMethodArgument> args = new ArrayList<>();
+            if(argumentList == null) {
+                
+            } else {
+                List<Java8Parser.ExpressionContext> expressions = argumentList.expression();
+                for(Java8Parser.ExpressionContext expCtx : expressions) {
+                    String passedVarId = expCtx.getText();
+                    String type = javaScopeHandler.getTypeForVar(passedVarId);
+                    args.add(new JavaMethodArgument(type, passedVarId));
+                }
+            }
+            if (varType != null) {
+                for (JavaClass jc : classes) {
+                    if (jc.getName().equals(varType)) {
+                        jc.addDependentMethod(currentMethod);
+                        JavaMethod calledMethod = new JavaMethod(Identifier.getText(), false, currentClass);
+                        calledMethod.getArgs().addAll(args);
+                        final int indexOfCalling = methods.indexOf(currentMethod);
+                        final int indexOfCalled = methods.indexOf(calledMethod);
+                        methods.get(indexOfCalling).getCalledMethods().add(methods.get(indexOfCalled));
+                        break;
+                    }
+                }
+            } else { //it is either static or called by a library function 
+
+            }
+            int i = 0;
+        }
     }
 
 }

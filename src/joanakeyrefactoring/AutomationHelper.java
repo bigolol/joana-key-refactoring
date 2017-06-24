@@ -65,8 +65,8 @@ public class AutomationHelper {
             String allSourcesInOneString = readAllSourceFilesIntoOneStringAndFillClassMap();
             this.javaForKeyListener = new ParseJavaForKeyListener(allSourcesInOneString);
             extractJavaProjModelListener.extractDataFromProject(allSourcesInOneString);
-            callgraphListener.createCallGraph(extractJavaProjModelListener.getClasses(),
-                    extractJavaProjModelListener.getMethods(), allSourcesInOneString);
+            callgraphListener.createCallGraph(extractJavaProjModelListener.getExtractedClasses(),
+                    extractJavaProjModelListener.getExtractedMethods(), allSourcesInOneString);
         }
         return this.javaForKeyListener;
     }
