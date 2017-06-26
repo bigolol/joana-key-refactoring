@@ -32,7 +32,7 @@ public class JavaMethod implements Comparable<JavaMethod> {
 
     public JavaClass getContainingClass() {
         return containingClass;
-    }   
+    }
 
     public List<JavaMethodArgument> getArgs() {
         return args;
@@ -45,7 +45,7 @@ public class JavaMethod implements Comparable<JavaMethod> {
     public boolean isIsStatic() {
         return isStatic;
     }
-    
+
     public void addArgument(JavaMethodArgument arg) {
         args.add(arg);
     }
@@ -69,25 +69,25 @@ public class JavaMethod implements Comparable<JavaMethod> {
         }
         final JavaMethod other = (JavaMethod) obj;
         JavaMethod oth = (JavaMethod) obj;
-        
-        if(!oth.name.equals(name)) {
+
+        if (!oth.name.equals(name)) {
             return false;
         }
-        
-        if(oth.args.size() != args.size()) {
+
+        if (oth.args.size() != args.size()) {
             return false;
         }
-        
-        if(!containingClass.equals(oth.containingClass)) {
+
+        if (!containingClass.equals(oth.containingClass)) {
             return false;
         }
-        
-        for(int i = 0; i < args.size(); ++i) {
-            if(!args.get(i).equals(oth.args.get(i))) {
+
+        for (int i = 0; i < args.size(); ++i) {
+            if (!args.get(i).equals(oth.args.get(i))) {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -98,13 +98,17 @@ public class JavaMethod implements Comparable<JavaMethod> {
 
     @Override
     public String toString() {
-        String s = name;
-        for(JavaMethodArgument arg : args) {
-            s += arg.toString();
+        String created = "javaMethod[name=NAME, args=ARGS]";
+        created = created.replace("NAME", name);
+        String argString = "";
+        for (JavaMethodArgument arg : args) {
+            argString += arg.toString() + ", ";
         }
-        return containingClass.getName() + s;
+        if (argString.length() > 2) {
+            argString = argString.substring(0, argString.length() - 2);
+        }
+        created = created.replace("ARGS", argString);
+        return created;
     }
 
-    
-    
 }

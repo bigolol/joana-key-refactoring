@@ -46,6 +46,12 @@ public class JavaMethodArgument {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "javaMethodParam[type=TYPE, name=NAME]".replace("TYPE", type).replace("NAME", name); 
+    }
+    
     
     
 

@@ -71,4 +71,10 @@ public class JavaClass implements Comparable<JavaClass> {
         return (containingPackage + "." + name).compareTo(o.containingPackage + "." + name);
     }
 
+    @Override
+    public String toString() {
+        return "JavaClass[name=" + name + ", package=" + containingPackage + "]"; 
+    }   
+    
+
 }
