@@ -29,6 +29,10 @@ public class JavaMethod implements Comparable<JavaMethod> {
     public List<JavaMethod> getCalledMethods() {
         return calledMethods;
     }
+    
+    public void addCalledMethod(JavaMethod m) {
+        if(!calledMethods.contains(m)) calledMethods.add(m);
+    }
 
     public JavaClass getContainingClass() {
         return containingClass;
@@ -83,11 +87,10 @@ public class JavaMethod implements Comparable<JavaMethod> {
         }
 
         for (int i = 0; i < args.size(); ++i) {
-            if (!args.get(i).equals(oth.args.get(i))) {
+            if (!args.get(i).getType().equals(oth.args.get(i).getType())) {
                 return false;
             }
         }
-
         return true;
     }
 

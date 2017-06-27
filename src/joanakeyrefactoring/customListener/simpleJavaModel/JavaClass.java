@@ -57,10 +57,10 @@ public class JavaClass implements Comparable<JavaClass> {
             return false;
         }
         final JavaClass other = (JavaClass) obj;
-        if (!Objects.equals(this.name, other.name)) {
+        if (!this.name.equals(other.name)) {
             return false;
         }
-        if (!Objects.equals(this.containingPackage, other.containingPackage)) {
+        if (!this.containingPackage.equals(other.containingPackage)) {
             return false;
         }
         return true;

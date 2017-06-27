@@ -14,10 +14,13 @@
         <group>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/antlr/java8/Java8Lexer.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/customListener/simpleJavaModel/JavaScopeHandler.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/customListener/simpleJavaModel/JavaCallGraph.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/CustomListener/CreateSimpleCallgraphListenerTest.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/CustomListener/ExtractJavaProjModelListener.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/JoanaAndKeyCheckData.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/AutomationHelper.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/customListener/simpleJavaModel/JavaScope.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/CustomListener/ExtractJavaProjModelListenerTest.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/KeyStringGenerator.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/customListener/simpleJavaModel/JavaMethod.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/ViolationsDisproverSemantic.java</file>
@@ -30,6 +33,8 @@
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/antlr/java8/Java8BaseListener.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/CustomListener/FindFunctionCallsListener.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/customListener/simpleJavaModel/JavaMethodArgument.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/antlr/javacg/CgWithLibTest.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/AntlrHelperMainMethod.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/customListener/simpleJavaModel/JavaClass.java</file>
         </group>
     </open-files>

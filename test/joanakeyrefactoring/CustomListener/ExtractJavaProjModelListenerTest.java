@@ -6,6 +6,7 @@
 package joanakeyrefactoring.CustomListener;
 
 import java.util.List;
+import java.util.stream.Stream;
 import joanakeyrefactoring.antlr.java8.Java8Parser;
 import joanakeyrefactoring.customListener.simpleJavaModel.JavaClass;
 import joanakeyrefactoring.customListener.simpleJavaModel.JavaMethod;
@@ -72,7 +73,7 @@ public class ExtractJavaProjModelListenerTest {
                 + "	}\n"
                 + "}";
         ExtractJavaProjModelListener listener = new ExtractJavaProjModelListener();
-        listener.extractDataFromProject(java);
+        listener.extractDataFromProject(Stream.of(java));
         List<JavaMethod> methods = listener.getExtractedMethods();
         assertEquals(methods.get(0).toString(), "javaMethod[name=foo, args=javaMethodParam[type=int, name=i], javaMethodParam[type=String, name=s]]");
     }
@@ -89,16 +90,16 @@ public class ExtractJavaProjModelListenerTest {
                 + "	}\n"
                 + "}";
         ExtractJavaProjModelListener listener = new ExtractJavaProjModelListener();
-        listener.extractDataFromProject(java);
+        listener.extractDataFromProject(Stream.of(java));
         List<JavaMethod> methods = listener.getExtractedMethods();
         assertEquals(methods.size(), 2);
         assertEquals(methods.get(0).toString(), "javaMethod[name=foo, args=javaMethodParam[type=int, name=s]]");
-        assertEquals(methods.get(1), "javaMethod[name=foo, args=javaMethodParam[type=String, name=s]]");
+        assertEquals(methods.get(1).toString(), "javaMethod[name=foo, args=javaMethodParam[type=String, name=s]]");
     }
 
     @Test
     public void testExtractTwoClassesSameName() {
-        String java
+        String java1
                 = "package org.student.simple;"
                 + "public class SimpleClass {\n"
                 + "private int a;\n"
@@ -106,8 +107,9 @@ public class ExtractJavaProjModelListenerTest {
                 + "	}\n"
                 + "	public void foo(String s) {\n"
                 + "	}\n"
-                + "}"
-                + "package org.student.simple.other;"
+                + "}";
+        String java2
+                = "package org.student.other;"
                 + "public class SimpleClass {\n"
                 + "private int a;\n"
                 + "	public void foo(int s) {		\n"
@@ -115,8 +117,16 @@ public class ExtractJavaProjModelListenerTest {
                 + "	public void foo(String s) {\n"
                 + "	}\n"
                 + "}";
+      
         ExtractJavaProjModelListener listener = new ExtractJavaProjModelListener();
-        listener.extractDataFromProject(java);
+        listener.extractDataFromProject(Stream.of(java1, java2));
+        List<JavaClass> extractedClasses = listener.getExtractedClasses();
+        assertNotEquals(extractedClasses.get(0), extractedClasses.get(1));
+        List<JavaMethod> extractedMethods = listener.getExtractedMethods();
+        assertEquals(extractedMethods.get(0).getContainingClass(), extractedClasses.get(0));
+        assertEquals(extractedMethods.get(1).getContainingClass(), extractedClasses.get(0));
+        assertEquals(extractedMethods.get(2).getContainingClass(), extractedClasses.get(1));
+        assertEquals(extractedMethods.get(3).getContainingClass(), extractedClasses.get(1));
     }
 
 }

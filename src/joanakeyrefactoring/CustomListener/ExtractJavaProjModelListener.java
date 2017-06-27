@@ -7,6 +7,7 @@ package joanakeyrefactoring.CustomListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import joanakeyrefactoring.antlr.java8.Java8BaseListener;
 import joanakeyrefactoring.antlr.java8.Java8Lexer;
 import joanakeyrefactoring.antlr.java8.Java8Parser;
@@ -28,6 +29,7 @@ public class ExtractJavaProjModelListener extends Java8BaseListener {
     private List<JavaMethod> methods = new ArrayList<>();
     private JavaClass currentClass;
     private String currentPackage;
+    
 
     public void extractDataFromProject(String allClassesInOneString) {
         classes = new ArrayList<>();
@@ -39,6 +41,18 @@ public class ExtractJavaProjModelListener extends Java8BaseListener {
         walker.walk(this, parseTree);
     }
 
+    public void extractDataFromProject(Stream<String> allClassesOfInterest) {
+        classes = new ArrayList<>();
+        methods = new ArrayList<>();
+        allClassesOfInterest.forEach((s) -> {
+            Java8Lexer lexer = new Java8Lexer(new ANTLRInputStream(s));
+            Java8Parser parser = new Java8Parser(new CommonTokenStream(lexer));
+            Java8Parser.CompilationUnitContext parseTree = parser.compilationUnit();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            walker.walk(this, parseTree);
+        });
+    }
+
     public List<JavaClass> getExtractedClasses() {
         return classes;
     }
@@ -46,7 +60,6 @@ public class ExtractJavaProjModelListener extends Java8BaseListener {
     public List<JavaMethod> getExtractedMethods() {
         return methods;
     }
-
 
     @Override
     public void enterPackageDeclaration(Java8Parser.PackageDeclarationContext ctx) {
@@ -67,7 +80,6 @@ public class ExtractJavaProjModelListener extends Java8BaseListener {
     public void exitClassDeclaration(Java8Parser.ClassDeclarationContext ctx) {
         classes.add(currentClass);
     }
-       
 
     @Override
     public void enterMethodDeclaration(Java8Parser.MethodDeclarationContext ctx) {
@@ -75,7 +87,7 @@ public class ExtractJavaProjModelListener extends Java8BaseListener {
         currentClass.addMethod(method);
         methods.add(method);
     }
-    
+
     public static JavaMethod createMethodFromDeclCtx(JavaClass c, Java8Parser.MethodDeclarationContext ctx) {
         boolean isStatic = false;
         String methodName = ctx.methodHeader().methodDeclarator().Identifier().getText();

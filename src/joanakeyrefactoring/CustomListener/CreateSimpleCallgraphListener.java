@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import static joanakeyrefactoring.CustomListener.ExtractJavaProjModelListener.createMethodFromDeclCtx;
 import joanakeyrefactoring.antlr.java8.Java8BaseListener;
 import joanakeyrefactoring.antlr.java8.Java8Lexer;
@@ -35,6 +36,8 @@ public class CreateSimpleCallgraphListener extends Java8BaseListener {
     private JavaClass currentClass;
     private JavaMethod currentMethod;
     private JavaScopeHandler javaScopeHandler = new JavaScopeHandler();
+    private List<String> imports = new ArrayList<>();
+    private String currentInplaceCreatedType;
 
     public void createCallGraph(List<JavaClass> classes, List<JavaMethod> methods, String allClassesInOneString) {
         this.classes = classes;
@@ -47,9 +50,24 @@ public class CreateSimpleCallgraphListener extends Java8BaseListener {
         walker.walk(this, parseTree);
     }
 
+    public void generateCallGraph(
+            List<JavaClass> classes, List<JavaMethod> methods, Stream<String> classesString) {
+        this.classes = classes;
+        this.methods = methods;
+        idNamesToTypes = new HashMap<>();
+        classesString.forEach((s) -> {
+            Java8Lexer lexer = new Java8Lexer(new ANTLRInputStream(s));
+            Java8Parser parser = new Java8Parser(new CommonTokenStream(lexer));
+            Java8Parser.CompilationUnitContext parseTree = parser.compilationUnit();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            walker.walk(this, parseTree);
+        });
+    }
+
     @Override
     public void enterPackageDeclaration(Java8Parser.PackageDeclarationContext ctx) {
         currentPackage = "";
+        imports = new ArrayList<>();
         for (TerminalNode id : ctx.Identifier()) {
             currentPackage += "." + id.getText();
         }
@@ -57,10 +75,21 @@ public class CreateSimpleCallgraphListener extends Java8BaseListener {
     }
 
     @Override
+    public void enterImportDeclaration(Java8Parser.ImportDeclarationContext ctx) {
+        imports.add(ctx.getText());
+    }      
+    
+    @Override
     public void enterClassDeclaration(Java8Parser.ClassDeclarationContext ctx) {
         javaScopeHandler.enterNewScope();
         String identifier = ctx.normalClassDeclaration().Identifier().getText();
-        currentClass = new JavaClass(identifier, currentPackage);
+        JavaClass classForComparision = new JavaClass(identifier, currentPackage);
+        for(JavaClass c : classes) {
+            if(classForComparision.equals(c)) {
+                currentClass = c;
+                break;
+            }
+        }
     }
 
     @Override
@@ -72,8 +101,14 @@ public class CreateSimpleCallgraphListener extends Java8BaseListener {
     public void enterMethodDeclaration(Java8Parser.MethodDeclarationContext ctx) {
         javaScopeHandler.enterNewScope();
         currentMethod = createMethodFromDeclCtx(currentClass, ctx);
-        for(JavaMethodArgument arg : currentMethod.getArgs()) {
+        for (JavaMethodArgument arg : currentMethod.getArgs()) {
             javaScopeHandler.addVar(arg.getName(), arg.getType());
+        }
+        for(JavaMethod m : methods) {
+            if(m.equals(currentMethod)) {
+                currentMethod = m;
+                break;
+            }
         }
     }
 
@@ -125,47 +160,110 @@ public class CreateSimpleCallgraphListener extends Java8BaseListener {
     }
 
     @Override
-    public void enterMethodInvocation(Java8Parser.MethodInvocationContext ctx) {
+    public void exitMethodInvocation(Java8Parser.MethodInvocationContext ctx) {
         String text = ctx.getText();
         Java8Parser.MethodNameContext methodName = ctx.methodName();
         TerminalNode identifier = ctx.Identifier();
 
-        if (methodName != null) { //it is a pure function
-            //do nothing since the class gets added anyways
-
+        if (methodName != null) { //it is a function in the same class
+            String methodNameText = methodName.getText();
+            List<JavaMethodArgument> parsedArguments = getParsedArguments(ctx);
+            JavaMethod calledMethod = getCalledMethod(currentClass, methodNameText, parsedArguments);
+            currentMethod.addCalledMethod(calledMethod);
+            return;
         } else if (identifier != null) { //it is a function called on an object/class
             TerminalNode Identifier = ctx.Identifier();
             String typenameText = ctx.typeName().getText();
             String varType = javaScopeHandler.getTypeForVar(typenameText);
             Java8Parser.ArgumentListContext argumentList = ctx.argumentList();
             List<JavaMethodArgument> args = new ArrayList<>();
-            if(argumentList == null) {
-                
+            if (argumentList == null) {
+                    
             } else {
-                List<Java8Parser.ExpressionContext> expressions = argumentList.expression();
-                for(Java8Parser.ExpressionContext expCtx : expressions) {
-                    String passedVarId = expCtx.getText();
-                    String type = javaScopeHandler.getTypeForVar(passedVarId);
-                    args.add(new JavaMethodArgument(type, passedVarId));
-                }
+                args = getParsedArguments(ctx);
             }
             if (varType != null) {
+                String packageOfType = getPackageOfType(varType);
+                JavaClass classOfTypeForCamparison = new JavaClass(varType, packageOfType);
                 for (JavaClass jc : classes) {
-                    if (jc.getName().equals(varType)) {
+                    if (classOfTypeForCamparison.equals(jc)) {
                         jc.addDependentMethod(currentMethod);
-                        JavaMethod calledMethod = new JavaMethod(Identifier.getText(), false, currentClass);
-                        calledMethod.getArgs().addAll(args);
-                        final int indexOfCalling = methods.indexOf(currentMethod);
-                        final int indexOfCalled = methods.indexOf(calledMethod);
-                        methods.get(indexOfCalling).getCalledMethods().add(methods.get(indexOfCalled));
+                        JavaMethod calledMethod = getCalledMethod(currentClass, packageOfType, args);
+                        currentMethod.addCalledMethod(calledMethod);
                         break;
                     }
                 }
-            } else { //it is either static or called by a library function 
-
+            } else { 
+                String s = "";
             }
             int i = 0;
         }
     }
+    
+    private JavaMethod getCalledMethod(JavaClass containingClass, String nameOfCalled, List<JavaMethodArgument> args) {
+        JavaMethod methodForComparisons = new JavaMethod(nameOfCalled, false, containingClass);
+        args.forEach((a) -> {
+            methodForComparisons.addArgument(a);
+        });
+        for(JavaMethod method : containingClass.getMethods()) {
+            if(method.equals(methodForComparisons)) {
+                return method;
+            }
+        }
+        return null;
+    }
+    
+    private String getPackageOfType(String type) {
+        for(String s : imports) {
+            if(s.endsWith(type)) {
+                return s;
+            }
+        }
+        return currentPackage;
+    }
 
+    private List<JavaMethodArgument> getParsedArguments(Java8Parser.MethodInvocationContext ctx) {
+        Java8Parser.ArgumentListContext argumentList = ctx.argumentList();
+        String argsText = argumentList.getText();
+        List<JavaMethodArgument> args = new ArrayList<>();
+        if (argumentList == null) {
+            
+        } else {
+            List<Java8Parser.ExpressionContext> expressions = argumentList.expression();
+            for (Java8Parser.ExpressionContext expCtx : expressions) {
+                String passedVarId = expCtx.getText();
+                String type = javaScopeHandler.getTypeForVar(passedVarId);
+                if(type == null) { //its probably created in place
+                    type = currentInplaceCreatedType;
+                }
+                args.add(new JavaMethodArgument(type, passedVarId));
+            }
+        }
+        return args;
+    }
+    
+
+    @Override
+    public void exitClassInstanceCreationExpression_lfno_primary(Java8Parser.ClassInstanceCreationExpression_lfno_primaryContext ctx) {
+        String text = ctx.getText();
+    }
+
+    @Override
+    public void exitPrimaryNoNewArray_lfno_primary(Java8Parser.PrimaryNoNewArray_lfno_primaryContext ctx) {
+        String text = ctx.getText();
+        if(text.startsWith("\"") && text.endsWith("\"")) {
+            currentInplaceCreatedType = "String";
+        }
+    }
+
+    @Override
+    public void exitArrayCreationExpression(Java8Parser.ArrayCreationExpressionContext ctx) {
+        String text = ctx.getText();
+    }
+    
+    
+    
+    
+
+    
 }
