@@ -5,6 +5,8 @@
  */
 package joanakeyrefactoring;
 
+import edu.kit.joana.api.IFCAnalysis;
+import edu.kit.joana.api.sdg.SDGMethod;
 import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation;
@@ -13,11 +15,18 @@ import edu.kit.joana.ifc.sdg.core.violations.paths.ViolationPath;
 import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
+import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
+import edu.kit.joana.ifc.sdg.util.JavaType;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import joanakeyrefactoring.staticCG.JCallGraph;
+import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
 
 /**
  *
@@ -31,18 +40,55 @@ public class ViolationsWrapper {
     private ParseJavaForKeyListener javaForKeyListener;
     private Collection<SDGEdge> checkedEdges = new ArrayList<>();
     private Map<SDGEdge, ArrayList<ViolationChop>> summaryEdgesAndContainingChops = new HashMap<>();
+    private Map<SDGEdge, StaticCGJavaMethod> summaryEdgesAndCorresJavaMethods = new HashMap<>();
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
-            SDG sdg, ParseJavaForKeyListener forKeyListener, AutomationHelper automationHelper) {
+            SDG sdg, ParseJavaForKeyListener forKeyListener, AutomationHelper automationHelper,
+            String pathToJar, IFCAnalysis ana) throws IOException {
         this.javaForKeyListener = forKeyListener;
         this.violations = violations;
         this.sdg = sdg;
+
         violations.forEach((v) -> {
             violationChops.add(createViolationChop(v, sdg));
         });
+
         putEdgesAndChopsInMap();
+
+        JCallGraph callGraph = new JCallGraph();
+        callGraph.generateCG(new File(pathToJar));
+
+        findCGMethodsForSummaryEdges(sdg, ana, callGraph);
     }
 
+    private void findCGMethodsForSummaryEdges(SDG sdg1, IFCAnalysis ana, JCallGraph callGraph) {
+        for (SDGEdge summaryEdge : summaryEdgesAndContainingChops.keySet()) {
+            Collection<SDGNodeTuple> allFormalPairs = sdg1.getAllFormalPairs(summaryEdge.getSource(), summaryEdge.getTarget());
+            SDGNodeTuple firstPair = allFormalPairs.iterator().next();
+            SDGNode methodNode = sdg1.getEntry(firstPair.getFirstNode());
+            String bytecodeMethod = methodNode.getBytecodeMethod();
+            SDGMethod method = ana.getProgram().getMethod(bytecodeMethod);
+            List<JavaType> argumentTypes = method.getSignature().getArgumentTypes();
+            String types = "";
+            for (JavaType currType : argumentTypes) {
+                if (argumentTypes.indexOf(currType) != 0) {
+                    types += ",";
+                }
+                types += currType.toHRString();
+            }
+            String methodName = method.getSignature().getMethodName();
+            String fullyQualifiedMethodName = method.getSignature().getFullyQualifiedMethodName();
+            int classNameEndIndex = fullyQualifiedMethodName.lastIndexOf(".");
+            String className = fullyQualifiedMethodName.substring(0, classNameEndIndex);
+            StaticCGJavaMethod callGraphMethod = callGraph.getMethodFor(className, methodName, types);
+            summaryEdgesAndCorresJavaMethods.put(summaryEdge, callGraphMethod);
+        }
+    }
+
+    public StaticCGJavaMethod getMethodCorresToSummaryEdge(SDGEdge e) {
+        return summaryEdgesAndCorresJavaMethods.get(e);
+    }
+    
     private void putEdgesAndChopsInMap() {
         summaryEdgesAndContainingChops = new HashMap<>();
         violationChops.forEach((vc) -> {

@@ -62,7 +62,7 @@ public class CombinedApproach {
             IFCAnalysis annotatedAnalysis, ViolationsDisproverSemantic violationChecker) throws FileNotFoundException {
         Collection<? extends IViolation<SecurityNode>> violations = annotatedAnalysis.doIFC();
         try {
-            violationChecker.disproveViaKey(violations, annotatedAnalysis.getProgram().getSDG());
+            violationChecker.disproveViaKey(annotatedAnalysis, violations, annotatedAnalysis.getProgram().getSDG());
         } catch (IOException ex) {
             Logger.getLogger(CombinedApproach.class.getName()).log(Level.SEVERE, null, ex);
         }

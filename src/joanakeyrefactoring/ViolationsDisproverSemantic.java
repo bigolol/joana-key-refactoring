@@ -1,5 +1,6 @@
 package joanakeyrefactoring;
 
+import edu.kit.joana.api.IFCAnalysis;
 import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 import java.io.IOException;
 import java.util.Collection;
@@ -37,9 +38,9 @@ public class ViolationsDisproverSemantic {
         this.pathToKeyJar = checkData.getPathKeY();
     }
 
-    public void disproveViaKey(Collection<? extends IViolation<SecurityNode>> violations,
+    public void disproveViaKey(IFCAnalysis analysis, Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg) throws IOException {
-        violationsWrapper = new ViolationsWrapper(violations, sdg, javaForKeyListener, automationHelper);
+        violationsWrapper = new ViolationsWrapper(violations, sdg, javaForKeyListener, automationHelper, pathToJar, analysis);
         while (!violationsWrapper.allCheckedOrDisproved()) {
             SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
             if (canDisproveSummaryEdge(nextSummaryEdge, sdg)) {
@@ -53,8 +54,9 @@ public class ViolationsDisproverSemantic {
     private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {
         SDGNode actualInNode = se.getSource();
         SDGNode actualOutNode = se.getTarget();
+        
         Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
-
+        
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
             KeyFileCreator.createKeyFiles(formalNodeTuple, sdg, automationHelper, stateSaver, javaForKeyListener);
             boolean result = false, resultFunc = false;

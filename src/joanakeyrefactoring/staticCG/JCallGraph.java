@@ -98,4 +98,15 @@ public class JCallGraph {
             visitor.start(alreadyFoundClasses, alreadyFoundMethods);             
         }
     }
+    
+    public StaticCGJavaMethod getMethodFor(String className, String methodName, String argList) {
+        for(StaticCGJavaMethod method : alreadyFoundMethods) {
+            if(method.getContainingClass().getId().equals(className) && method.getId().equals(methodName)
+                     && method.getParameter().equals(argList)) {
+                return method;
+            }
+        }
+        return null;
+    }
+    
 }

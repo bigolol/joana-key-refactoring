@@ -39,9 +39,7 @@ public class AutomationHelper {
     private ParseJavaForKeyListener javaForKeyListener;
     private FindFunctionCallsListener callsListener = new FindFunctionCallsListener();
     private HashMap<String, String> classes = new HashMap<>();
-    private ExtractJavaProjModelListener extractJavaProjModelListener = new ExtractJavaProjModelListener();
-    private CreateSimpleCallgraphListener callgraphListener = new CreateSimpleCallgraphListener();
-
+   
     public AutomationHelper(String pathToJavaFile) {
         this.pathToJavaFile = pathToJavaFile;
     }
@@ -63,10 +61,7 @@ public class AutomationHelper {
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
         if (this.javaForKeyListener == null) {
             String allSourcesInOneString = readAllSourceFilesIntoOneStringAndFillClassMap();
-            this.javaForKeyListener = new ParseJavaForKeyListener(allSourcesInOneString);
-            extractJavaProjModelListener.extractDataFromProject(allSourcesInOneString);
-            callgraphListener.createCallGraph(extractJavaProjModelListener.getExtractedClasses(),
-                    extractJavaProjModelListener.getExtractedMethods(), allSourcesInOneString);
+            this.javaForKeyListener = new ParseJavaForKeyListener(allSourcesInOneString);        
         }
         return this.javaForKeyListener;
     }
