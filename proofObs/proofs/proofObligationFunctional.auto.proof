@@ -2,7 +2,7 @@
 
 \settings {
 "#Proof-Settings-Config-File
-#Sat Jul 01 11:10:20 CEST 2017
+#Sat Jul 01 11:45:39 CEST 2017
 [StrategyProperty]VBT_PHASE=VBT_SYM_EX
 [SMTSettings]useUninterpretedMultiplication=true
 [SMTSettings]SelectedTaclets=
@@ -42,9 +42,9 @@
 \javaSource "";
 
 \proofObligation "#Proof Obligation Settings
-#Sat Jul 01 11:10:20 CEST 2017
-name=multipleclassesfalsepos.ClassB[multipleclassesfalsepos.ClassB\\:\\:putDatumInArr(int,[I)].JML operation contract.0
-contract=multipleclassesfalsepos.ClassB[multipleclassesfalsepos.ClassB\\:\\:putDatumInArr(int,[I)].JML operation contract.0
+#Sat Jul 01 11:45:39 CEST 2017
+name=multipleclassesfalsepos.ClassB[multipleclassesfalsepos.ClassB\\:\\:putDataInArr(int,[I)].JML operation contract.0
+contract=multipleclassesfalsepos.ClassB[multipleclassesfalsepos.ClassB\\:\\:putDataInArr(int,[I)].JML operation contract.0
 class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO
 ";
 
@@ -52,10 +52,10 @@ class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO
 (keyLog "0" (keyUser "holger" ) (keyVersion "00c1abfd22b738afe24e89fecc2ee4eec2c38f4a"))
 (keyLog "1" (keyUser "holger" ) (keyVersion "00c1abfd22b738afe24e89fecc2ee4eec2c38f4a"))
 
-(autoModeTime "569")
+(autoModeTime "586")
 
 (branch "dummy ID"
-(builtin "One Step Simplification" (formula "1") (newnames "h,arr_0,self,exc,heapAtPre,o,f"))
+(builtin "One Step Simplification" (formula "1") (newnames "high,arr_0,self,exc,heapAtPre,o,f"))
 (rule "impRight" (formula "1"))
 (rule "andLeft" (formula "1"))
 (rule "andLeft" (formula "1"))
@@ -121,15 +121,11 @@ class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO
 (builtin "One Step Simplification" (formula "8"))
 (rule "methodCallEmpty" (formula "8") (term "1"))
 (rule "blockEmpty" (formula "8") (term "1"))
-(rule "methodCallWithinClass" (formula "8") (term "1"))
-(rule "methodBodyExpand" (formula "8") (term "1") (newnames "heapBefore_func,savedHeapBefore_func"))
-(builtin "One Step Simplification" (formula "8"))
-(rule "methodCallEmpty" (formula "8") (term "1"))
-(rule "blockEmpty" (formula "8") (term "1"))
 (rule "assignment_to_primitive_array_component" (formula "8"))
 (branch "Normal Execution (var_1 != null)"
    (builtin "One Step Simplification" (formula "8"))
-   (rule "methodCallEmpty" (formula "8") (term "1"))
+   (rule "methodCallReturnIgnoreResult" (formula "8") (term "1"))
+   (builtin "One Step Simplification" (formula "8"))
    (rule "blockEmpty" (formula "8") (term "1"))
    (rule "assignment_write_attribute" (formula "8"))
    (branch "Normal Execution (self != null)"
@@ -165,11 +161,11 @@ class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO
    (builtin "One Step Simplification" (formula "1"))
    (rule "andLeft" (formula "1"))
    (rule "notLeft" (formula "1"))
+   (rule "replace_known_right" (formula "4") (term "0") (ifseqformula "6"))
+   (builtin "One Step Simplification" (formula "4"))
    (rule "replace_known_right" (formula "9") (term "0") (ifseqformula "6"))
    (builtin "One Step Simplification" (formula "9"))
    (rule "false_right" (formula "9"))
-   (rule "replace_known_right" (formula "4") (term "0") (ifseqformula "6"))
-   (builtin "One Step Simplification" (formula "4"))
    (rule "arrayLengthNotNegative" (formula "1") (term "0"))
    (rule "arrayLengthIsAShort" (formula "2") (term "0"))
    (builtin "One Step Simplification" (formula "2"))

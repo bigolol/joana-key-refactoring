@@ -121,9 +121,9 @@ public class CombinedApproach {
             );
         });
 
-        sinks.forEach((src) -> {
+        sinks.forEach((sink) -> {
             singleAnnotationAdders.add(
-                    createAnnotationAdder((JSONObject) src, (part, sec) -> {
+                    createAnnotationAdder((JSONObject) sink, (part, sec) -> {
                         analysis.addSinkAnnotation(part, sec);
                     }, analysis)
             );

@@ -7,7 +7,6 @@ package joanakeyrefactoring;
 
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.api.sdg.SDGMethod;
-import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
@@ -17,7 +16,6 @@ import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import edu.kit.joana.ifc.sdg.util.JavaType;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +35,6 @@ public class ViolationsWrapper {
     private Collection<? extends IViolation<SecurityNode>> violations;
     private SDG sdg;
     private Collection<ViolationChop> violationChops = new ArrayList<>();
-    private ParseJavaForKeyListener javaForKeyListener;
     private Collection<SDGEdge> checkedEdges = new ArrayList<>();
     private Map<SDGEdge, ArrayList<ViolationChop>> summaryEdgesAndContainingChops = new HashMap<>();
     private Map<SDGEdge, StaticCGJavaMethod> summaryEdgesAndCorresJavaMethods = new HashMap<>();
@@ -45,9 +42,8 @@ public class ViolationsWrapper {
         
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
-            SDG sdg, ParseJavaForKeyListener forKeyListener, AutomationHelper automationHelper,
+            SDG sdg, AutomationHelper automationHelper,
             String pathToJar, IFCAnalysis ana, JCallGraph callGraph) throws IOException {
-        this.javaForKeyListener = forKeyListener;
         this.violations = violations;
         this.sdg = sdg;
         this.callGraph = callGraph;
@@ -57,8 +53,6 @@ public class ViolationsWrapper {
         });
 
         putEdgesAndChopsInMap();
-
-
         findCGMethodsForSummaryEdges(sdg, ana, callGraph);
     }
 

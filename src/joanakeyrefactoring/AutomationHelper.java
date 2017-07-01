@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 
 /**
  * This class handles all automation processes of the Combined Approach.
@@ -32,7 +31,6 @@ public class AutomationHelper {
     private final String pathToJavaFile;
     private ArrayList<String> classNames = new ArrayList<>();
     final static String LINE_SEP = System.getProperty("line.separator");
-    private ParseJavaForKeyListener javaForKeyListener;
     private HashMap<String, String> classes = new HashMap<>();
 
     public AutomationHelper(String pathToJavaFile) {
@@ -44,21 +42,6 @@ public class AutomationHelper {
      */
     public ArrayList<String> getClassNames() {
         return classNames;
-    }
-
-    /**
-     * initializes the ParseJavaForKeyListener with the string containing all
-     * .java files in the supplied folder
-     *
-     * @return the ParseJavaForKeyListener which parsed the string containing
-     * all the combined .java files pointed to by the pathToJavaFile
-     */
-    public ParseJavaForKeyListener generateParseJavaForKeyListener() {
-        if (this.javaForKeyListener == null) {
-            String allSourcesInOneString = readAllSourceFilesIntoOneStringAndFillClassMap();
-            this.javaForKeyListener = new ParseJavaForKeyListener(allSourcesInOneString);
-        }
-        return this.javaForKeyListener;
     }
 
     /**
@@ -136,75 +119,13 @@ public class AutomationHelper {
         }
     }
 
-    /**
-     * uses the data extracted from the java listener to add loop invariants and
-     * change the params so that key can use them.
-     *
-     * @param methodName the name of the method to be modified
-     * @param descSink the key description of the sink
-     * @param descOtherParams
-     * @return a String containing the modified method decl which key can work
-     * with
-     */
-    private String generateMethodDescrForKey(String methodName, String descSink, String descOtherParams) {
-        if (isConstructor(methodName)) {
-            methodName = methodName.split("\\.")[1];
-            return javaForKeyListener.getConstructorByName(methodName);
-        } else {
-            String completeMethod = javaForKeyListener.getCompleteMethod(methodName);
-            String[] lines = completeMethod.split(System.lineSeparator());
-            StringBuilder stringBuilder = new StringBuilder();
-            replaceParamsByParamsWithNullable(methodName, stringBuilder, lines);
-            stringBuilder.append(System.lineSeparator());
-            insertLoopInvariants(lines, descSink, descOtherParams, methodName, stringBuilder);
-            completeMethod = stringBuilder.toString();
-            return completeMethod;
-        }
-    }
+   
 
-    private void replaceParamsByParamsWithNullable(String methodName, StringBuilder stringBuilder, String[] lines) {
-        String paramsWithNullable = javaForKeyListener.getParamsWithNullable(methodName);
-        stringBuilder.append(lines[0].split("\\(")[0]);
-        stringBuilder.append(paramsWithNullable + "{");
-    }
-
-    /**
-     * goes through every line and if it spots either a for or while decl, it
-     * places a loopinvariant in front of it.
-     *
-     * eg: for (int i = 0; i < ....) { ... } ->
-     *
-     * I am fairly sure this can be made way better using the listener
-     *
-     * @param array
-     * @param descSink
-     * @param descOtherParams
-     * @param methodName
-     * @param sb
-     */
-    private void insertLoopInvariants(String[] array, String descSink, String descOtherParams, String methodName, StringBuilder sb) {
-        for (int i = 1; i < array.length; i++) {
-            String lineLoop = array[i];
-            if (lineLoop.contains("for(") || lineLoop.contains("for (")
-                    || lineLoop.contains("while(")
-                    || lineLoop.contains("while (")) {
-                String loopInv = KeyStringGenerator.createLoopInvariant(descSink,
-                        descOtherParams, methodName, "");
-                array[i] = loopInv + System.lineSeparator() + array[i];
-            }
-            sb.append(array[i]);
-            sb.append(System.lineSeparator());
-        }
-    }
-
+   
     private static boolean isConstructor(String methodName) {
         return methodName.contains("<init>");
     }
 
-
-    private String getBodyForMethodByName(String methodName) {
-        return extractOnlyMethodBody(javaForKeyListener.getCompleteMethod(methodName));
-    }
 
     private String extractOnlyMethodBody(String completeMethod) {
         completeMethod = completeMethod.trim();
@@ -213,103 +134,7 @@ public class AutomationHelper {
     }    
     
 
-    /**
-     * Generates the Java file for which Key will disprove the information flow.
-     *
-     * @TODO definetly might be a bug in here :/
-     *
-     * @param descriptionForKey
-     * @param methodName
-     * @param descSink
-     * @param descOtherParams
-     * @return
-     */
-    public String[] createJavaFileForKeyToDisproveMEthod(
-            String pointsTo, String methodName, String descSink,
-            String descOtherParams) throws FileNotFoundException, UnsupportedEncodingException, IOException {
-        String descriptionForKey
-                = "\t/*@ requires "
-                + pointsTo
-                + ";\n\t  @ determines " + descSink + " \\by "
-                + descOtherParams + "; */";
-
-        String globalVariables = "";
-        globalVariables = javaForKeyListener.getFieldsWithNullableAsString();
-
-        String completeMethod = generateMethodDescrForKey(methodName, descSink, descOtherParams);
-        String otherClasses = "";
-        StringBuilder sbClasses = new StringBuilder();
-        String classOfMethod = javaForKeyListener.getClass(methodName);
-
-        List<String> classList = javaForKeyListener.getClassList();
-        for (int i = 0; i < classList.size(); i++) {
-            if (!classList.get(i).equals(classOfMethod)) {
-                sbClasses.append(classes.get(classList.get(i)));
-            }
-            sbClasses.append(System.lineSeparator());
-        }
-        otherClasses = sbClasses.toString();
-
-        String allOtherMethods = getAllMethodsCalledByDisproveMethod(completeMethod);
-
-        // write specification and source code in file
-        File proofFile = new File("proofObs/proofs/sourceFile.java");
-        if (!proofFile.exists()) {
-            proofFile.createNewFile();
-        }
-        PrintWriter writer;
-        writer = new PrintWriter("proofObs/proofs/sourceFile.java", "UTF-8");
-        writer.println("package proofs;");
-        writer.println("public class sourceFile{");
-        writer.println(globalVariables);
-        writer.println(descriptionForKey);
-        writer.println(completeMethod);
-        writer.println(allOtherMethods);
-        writer.println(System.lineSeparator() + "}");
-        writer.println(otherClasses);
-        writer.close();
-
-        return javaForKeyListener.getParamsOfMethod(methodName);
-    }
-
-    /**
-     * goes through every line of the method and if it finds a method call, it
-     * adds the method to the stringbuilder (using the listener). Does this
-     * work? Why doesnt one need to add the other key stuff we have to add to
-     * the disproved method? And I am so certain this can be done way better
-     *
-     * @param completeMethod the method body for which the called methods will
-     * all be assembled in the string
-     * @return all methods called in the passed method body
-     */
-    private String getAllMethodsCalledByDisproveMethod(String completeMethod) {
-
-        StringBuilder stringBuilder = new StringBuilder();
-        String[] lines = completeMethod.split(System.lineSeparator());
-        List<String> allMethodNames = new ArrayList<>();
-        for (String line : lines) {
-            String methodCallPattern = "(.*)([a-zA-Z1-9]+)(\\s*)([=a-zA-Z1-9]+)(\\s*)([a-zA-Z1-9]+)([a-zA-Z1-9]*)(\\()([a-zA-Z]+)(.*)";
-            // Create Pattern object
-            Pattern r = Pattern.compile(methodCallPattern);
-            // Create matcher object.
-            Matcher m = r.matcher(line);
-            String lineOc = line;
-            if (m.find() && !lineOc.contains("\\\\")) {
-                if (lineOc.contains("=")) {
-                    lineOc = lineOc.split("=")[1];
-                }
-                lineOc = lineOc.split("\\(")[0];
-                if (!allMethodNames.contains(lineOc.trim())) {
-                    allMethodNames.add(lineOc.trim());
-                    if (javaForKeyListener.getCompleteMethod(lineOc.trim()) != null) {
-                        stringBuilder.append(javaForKeyListener.getCompleteMethod(lineOc.trim()));
-                        stringBuilder.append(System.lineSeparator());
-                    }
-                }
-            }
-        }
-        return stringBuilder.toString();
-    }
+   
 
     private void generateKeyFileFrom(
             String profileString, String javaSourceString,
@@ -557,10 +382,6 @@ public class AutomationHelper {
                 + "[StrategyProperty]SPLITTING_OPTIONS_KEY=SPLITTING_DELAYED"
                 + LINE_SEP + "	\"" + LINE_SEP + "}";
         return settings;
-    }
-
-    public void setJavaForKeyListener(ParseJavaForKeyListener javaForKeyListener) {
-        this.javaForKeyListener = javaForKeyListener;
     }
 
 }

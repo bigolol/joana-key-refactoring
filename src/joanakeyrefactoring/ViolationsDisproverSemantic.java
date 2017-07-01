@@ -1,7 +1,6 @@
 package joanakeyrefactoring;
 
 import edu.kit.joana.api.IFCAnalysis;
-import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Scanner;
@@ -27,7 +26,6 @@ public class ViolationsDisproverSemantic {
     private AutomationHelper automationHelper;
     private boolean fullyAutomatic;
     private String pathToKeyJar;
-    private ParseJavaForKeyListener javaForKeyListener;
     private ViolationsWrapper violationsWrapper;
     private JavaForKeyCreator javaForKeyCreator;
     private JCallGraph callGraph = new JCallGraph();
@@ -37,7 +35,6 @@ public class ViolationsDisproverSemantic {
             AutomationHelper automationHelper,
             JoanaAndKeyCheckData checkData) throws IOException {
         this.automationHelper = automationHelper;
-        this.javaForKeyListener = automationHelper.generateParseJavaForKeyListener();
         this.pathToJar = checkData.getPathToJar();
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
@@ -53,7 +50,7 @@ public class ViolationsDisproverSemantic {
     public void disproveViaKey(IFCAnalysis analysis, Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg) throws IOException {
         violationsWrapper = new ViolationsWrapper(
-                violations, sdg, javaForKeyListener, automationHelper, pathToJar, analysis, callGraph);
+                violations, sdg, automationHelper, pathToJar, analysis, callGraph);
 
         while (!violationsWrapper.allCheckedOrDisproved()) {
             SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();

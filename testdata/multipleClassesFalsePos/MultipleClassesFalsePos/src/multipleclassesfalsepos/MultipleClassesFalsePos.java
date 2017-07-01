@@ -15,7 +15,7 @@ public class MultipleClassesFalsePos {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new ClassA().falsePos(4);
+        new ClassA().falsePos(0);
     }
     
 }

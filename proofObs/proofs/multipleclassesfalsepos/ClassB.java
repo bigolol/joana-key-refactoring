@@ -7,15 +7,15 @@ package multipleclassesfalsepos;
 
 /**
  *
- * @author holgerklein
+ * @author holger
  */
 public class ClassB {
-    private void func(){}
-    
+
 	/*@ requires this != arr;
 	  @ determines this \by this, arr; */
-public putDatumInArr(int/*@ nullable @*/ h, int[]/*@ nullable @*/ arr) {
-        func();
-        arr[4] = h;
+putDataInArr(int/*@ nullable @*/ high, int[]/*@ nullable @*/ arr) {
+        arr[4] = high;
+        return arr;
     }
+    
 }

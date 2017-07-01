@@ -1,9 +1,7 @@
-//joak file testing multiple classes
-
 pathKeY : "dep/KeY.jar",
 javaClass : "",
-pathToJar : "testdata/multipleClassesFalsePos/MultipleClassesFalsePos/dist/MultipleClassesFalsePos.jar",
-pathToJavaFile : "testdata/multipleClassesFalsePos/MultipleClassesFalsePos/src",
+pathToJar : "/home/holger/Code/hiwi/joana-key-refactoring/testdata/multipleClassesFalsePos/MultipleClassesFalsePos/dist/MultipleClassesFalsePos.jar",
+pathToJavaFile : "/home/holger/Code/hiwi/joana-key-refactoring/testdata/multipleClassesFalsePos/MultipleClassesFalsePos/src",
 entryMethod : "multipleclassesfalsepos.MultipleClassesFalsePos",
 annotationPath : "",
 fullyAutomatic : true,

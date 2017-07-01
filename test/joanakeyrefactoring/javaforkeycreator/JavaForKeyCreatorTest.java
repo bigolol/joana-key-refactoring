@@ -71,8 +71,7 @@ public class JavaForKeyCreatorTest {
 
         Collection<? extends IViolation<SecurityNode>> violations = parsedCheckData.getAnalysis().doIFC();
         ViolationsWrapper violationsWrapper = new ViolationsWrapper(
-                violations, sdg,
-                automationHelper.generateParseJavaForKeyListener(),
+                violations, sdg,             
                 automationHelper,
                 parsedCheckData.getPathToJar(),
                 parsedCheckData.getAnalysis(),

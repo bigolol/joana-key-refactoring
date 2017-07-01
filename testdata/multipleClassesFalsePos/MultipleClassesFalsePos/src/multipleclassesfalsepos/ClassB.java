@@ -7,13 +7,13 @@ package multipleclassesfalsepos;
 
 /**
  *
- * @author holgerklein
+ * @author holger
  */
 public class ClassB {
-    private void func(){}
-    
-    public void putDatumInArr(int h, int[] arr) {
-        func();
-        arr[4] = h;
+
+    int[] putDataInArr(int high, int[] arr) {
+        arr[4] = high;
+        return arr;
     }
+    
 }
