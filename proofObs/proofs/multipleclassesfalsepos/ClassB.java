@@ -13,7 +13,7 @@ public class ClassB {
 
 	/*@ requires this != arr;
 	  @ determines this \by this, arr; */
-putDataInArr(int/*@ nullable @*/ high, int[]/*@ nullable @*/ arr) {
+int[] putDataInArr(int/*@ nullable @*/ high, int[]/*@ nullable @*/ arr) {
         arr[4] = high;
         return arr;
     }

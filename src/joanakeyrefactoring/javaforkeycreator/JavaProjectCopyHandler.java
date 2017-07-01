@@ -51,9 +51,9 @@ public class JavaProjectCopyHandler {
     public void addClassToTest(List<String> classContent, StaticCGJavaClass javaClass) throws FileNotFoundException, IOException {
         String relPathForJavaClass = getRelPathForJavaClass(javaClass);
         String className = javaClass.getOnlyClassName();
-        File relPathFile = new File(pathToNew + relPathForJavaClass);
+        File relPathFile = new File(pathToNew + "/" + relPathForJavaClass);
         relPathFile.mkdirs();
-        File javaFile = new File(pathToNew + relPathForJavaClass + className + ".java");
+        File javaFile = new File(pathToNew + relPathForJavaClass + "/" + className + ".java");
         javaFile.createNewFile();
         PrintWriter out = new PrintWriter(javaFile);
         for (String l : classContent) {

@@ -69,7 +69,6 @@ public class ViolationsDisproverSemantic {
         Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
 
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
-            //KeyFileCreator.createKeyFiles(formalNodeTuple, sdg, automationHelper, stateSaver, javaForKeyListener);
             String pathToTestJava = javaForKeyCreator.generateJavaForFormalNodeTuple(
                     formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));            
 

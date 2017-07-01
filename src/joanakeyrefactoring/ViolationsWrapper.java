@@ -66,10 +66,10 @@ public class ViolationsWrapper {
             List<JavaType> argumentTypes = method.getSignature().getArgumentTypes();
             String types = "";
             for (JavaType currType : argumentTypes) {
-                if (argumentTypes.indexOf(currType) != 0) {
-                    types += ",";
-                }
-                types += currType.toHRString();
+                types += currType.toHRString() + ",";
+            }
+            if(!types.isEmpty()) {
+                types = types.substring(0,types.length() - 1);
             }
             String methodName = method.getSignature().getMethodName();
             String fullyQualifiedMethodName = method.getSignature().getFullyQualifiedMethodName();

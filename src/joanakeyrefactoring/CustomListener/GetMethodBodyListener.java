@@ -76,7 +76,8 @@ public class GetMethodBodyListener extends Java8BaseListener {
             for (Java8Parser.MethodModifierContext mod : methodModifier) {
                 methodMods += mod.getText() + " ";
             }
-            methodDeclWithNullable = methodMods + methodDeclWithNullable;
+            String type = ctx.methodHeader().result().getText();
+            methodDeclWithNullable = methodMods + type + " " + methodDeclWithNullable;
         }
     }
 
