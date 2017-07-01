@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.antlr.javacg.CgWithLibTest" skipped="0" tests="2" time="0.226" timestamp="2017-06-27T09:52:35">
+<testsuite errors="1" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.antlr.javacg.CgWithLibTest" skipped="0" tests="1" time="0.0" timestamp="2017-06-27T11:12:47">
   <properties>
     <property name="netbeans.autoupdate.country" value="US" />
     <property name="javac.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes" />
     <property name="javac.includes" value="joanakeyrefactoring/antlr/javacg/CgWithLibTest.java" />
     <property name="ant.core.lib" value="/home/holger/netbeans-8.2/extide/ant/lib/ant.jar" />
     <property name="javadoc.windowtitle" value="" />
-    <property name="user.dir" value="/home/holger/Code/hiwi/joana-key-refactoring" />
+    <property name="user.dir" value="/home/holger" />
     <property name="java.vm.version" value="25.131-b11" />
     <property name="libs.MySQLDriver.classpath" value="/home/holger/netbeans-8.2/ide/modules/ext/mysql-connector-java-5.1.23-bin.jar" />
     <property name="libs.eclipselinkmodelgen.src" value="" />
@@ -41,7 +41,7 @@
     <property name="user.name" value="holger" />
     <property name="copylibs.rebase" value="true" />
     <property name="libs.swing-layout.maven-pom" value="" />
-    <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner joanakeyrefactoring.antlr.javacg.CgWithLibTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=true formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,/home/holger/Code/hiwi/joana-key-refactoring/build/test/results/TEST-joanakeyrefactoring.antlr.javacg.CgWithLibTest.xml crashfile=/home/holger/Code/hiwi/joana-key-refactoring/build/junitvmwatcher2929513892860188351.properties propsfile=/home/holger/Code/hiwi/joana-key-refactoring/build/junit3266217066897594480.properties" />
+    <property name="sun.java.command" value="org.netbeans.Main --cachedir /home/holger/.cache/netbeans/8.2 --userdir /home/holger/.netbeans/8.2 --branding nb" />
     <property name="build.classes.dir" value="build/classes" />
     <property name="netbeans.accept_license_class" value="org.netbeans.license.AcceptLicense" />
     <property name="build.sysclasspath" value="ignore" />
@@ -75,7 +75,7 @@
     <property name="javac.debug" value="true" />
     <property name="javadoc.splitindex" value="true" />
     <property name="file.separator" value="/" />
-    <property name="javac.includesfile.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/null1982072577" />
+    <property name="javac.includesfile.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/null1882275440" />
     <property name="libs.junit_4.maven-pom" value="" />
     <property name="mkdist.disabled" value="false" />
     <property name="javac.test.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes" />
@@ -86,7 +86,6 @@
     <property name="sun.java.launcher" value="SUN_STANDARD" />
     <property name="libs.hibernate4-persistencemodelgen.javadoc" value="" />
     <property name="libs.jaxb.javadoc" value="/home/holger/netbeans-8.2/ide/docs/jaxb-api-doc.zip" />
-    <property name="org.openide.awt.SwingBrowserImpl.do-not-block-awt" value="false" />
     <property name="javac.includes.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/build/test/classes/joanakeyrefactoring/antlr/javacg/CgWithLibTest.class" />
     <property name="ant.home" value="/home/holger/netbeans-8.2/extide/ant" />
     <property name="libs.junit_4.src" value="/home/holger/netbeans-8.2/platform/docs/junit-4.12-sources.jar" />
@@ -120,7 +119,7 @@
     <property name="manifest.available" value="true" />
     <property name="libs.spring-framework300.maven-pom" value="" />
     <property name="run.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes:build/test/classes" />
-    <property name="ant.project.invoked-targets" value="test-single" />
+    <property name="ant.project.invoked-targets" value="debug-test" />
     <property name="test.binaryexcludes" value="" />
     <property name="libs.swing-layout.javadoc" value="/home/holger/netbeans-8.2/platform/docs/swing-layout-1.0.4-doc.zip" />
     <property name="sun.java2d.dpiaware" value="true" />
@@ -130,6 +129,7 @@
     <property name="https.nonProxyHosts" value="localhost|127.0.0.1|holger-ThinkPad-T430s" />
     <property name="libs.PostgreSQLDriver.maven-pom" value="" />
     <property name="java.class.version" value="52.0" />
+    <property name="jpda.address" value="localhost:45337" />
     <property name="libs.hibernate4-persistencemodelgen.maven-pom" value="" />
     <property name="libs.eclipselink.javadoc" value="/home/holger/netbeans-8.2/java/modules/ext/docs/javax.persistence-2.1.0-doc.zip" />
     <property name="user.properties.file" value="/home/holger/.netbeans/8.2/build.properties" />
@@ -258,7 +258,6 @@
     <property name="annotation.processing.enabled" value="true" />
     <property name="libs.jpa2-persistence.src" value="" />
     <property name="libs.jpa20-persistence.src" value="" />
-    <property name="ignore.failing.tests" value="true" />
     <property name="ant.file.type.joana-key-refactoring" value="file" />
     <property name="dist.dir" value="dist" />
     <property name="securerandom.source" value="file:/dev/./urandom" />
@@ -274,7 +273,7 @@
     <property name="jna.platform.library.path" value="/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/lib64:/usr/lib:/lib:/usr/lib/x86_64-linux-gnu/libfakeroot:/usr/lib/x86_64-linux-gnu/mesa:/usr/lib/x86_64-linux-gnu/mesa-egl" />
     <property name="default.javac.target" value="1.8" />
     <property name="libs.junit_4.classpath" value="/home/holger/netbeans-8.2/platform/modules/ext/junit-4.12.jar" />
-    <property name="user.timezone" value="" />
+    <property name="user.timezone" value="Europe/Berlin" />
     <property name="nb.junit.single" value="false" />
     <property name="do.jar" value="true" />
     <property name="netbeans.dirs" value="/home/holger/netbeans-8.2/nb:/home/holger/netbeans-8.2/ergonomics:/home/holger/netbeans-8.2/ide:/home/holger/netbeans-8.2/extide:/home/holger/netbeans-8.2/java:/home/holger/netbeans-8.2/apisupport:/home/holger/netbeans-8.2/webcommon:/home/holger/netbeans-8.2/websvccommon:/home/holger/netbeans-8.2/enterprise:/home/holger/netbeans-8.2/mobility:/home/holger/netbeans-8.2/profiler:/home/holger/netbeans-8.2/python:/home/holger/netbeans-8.2/php:/home/holger/netbeans-8.2/identity:/home/holger/netbeans-8.2/harness:/home/holger/netbeans-8.2/cnd:/home/holger/netbeans-8.2/cndext:/home/holger/netbeans-8.2/dlight:/home/holger/netbeans-8.2/groovy:/home/holger/netbeans-8.2/extra:/home/holger/netbeans-8.2/javacard:/home/holger/netbeans-8.2/javafx:" />
@@ -283,7 +282,7 @@
     <property name="libs.absolutelayout.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/AbsoluteLayout.jar" />
     <property name="excludes" value="" />
     <property name="libs.jpa2-persistence.javadoc" value="/home/holger/netbeans-8.2/java/modules/ext/docs/javax.persistence-2.1.0-doc.zip" />
-    <property name="java.class.path" value="/home/holger/Code/hiwi/joana-key-refactoring/dep/antlr-runtime-4.5.3.jar:/home/holger/Code/hiwi/joana-key-refactoring/dep/joana.api.jar:/home/holger/Code/hiwi/joana-key-refactoring/dep/KeY.jar:/home/holger/Code/hiwi/joana-key-refactoring/json.jar:/home/holger/Code/hiwi/joana-key-refactoring/dep/javacg-0.1-SNAPSHOT-static.jar:/home/holger/Code/hiwi/joana-key-refactoring/build/classes:/home/holger/Code/hiwi/joana-key-refactoring/build/test/classes:/home/holger/netbeans-8.2/extide/ant/lib/ant-launcher.jar:/home/holger/netbeans-8.2/extide/ant/lib/ant.jar:/home/holger/netbeans-8.2/extide/ant/lib/ant-junit.jar:/home/holger/netbeans-8.2/extide/ant/lib/ant-junit4.jar" />
+    <property name="java.class.path" value="/home/holger/netbeans-8.2/platform/lib/boot.jar:/home/holger/netbeans-8.2/platform/lib/org-openide-modules.jar:/home/holger/netbeans-8.2/platform/lib/org-openide-util.jar:/home/holger/netbeans-8.2/platform/lib/org-openide-util-lookup.jar:/home/holger/netbeans-8.2/platform/lib/org-openide-util-ui.jar:/home/holger/netbeans-8.2/platform/lib/locale/boot_ja.jar:/home/holger/netbeans-8.2/platform/lib/locale/boot_pt_BR.jar:/home/holger/netbeans-8.2/platform/lib/locale/boot_ru.jar:/home/holger/netbeans-8.2/platform/lib/locale/boot_zh_CN.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-modules_ja.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-modules_pt_BR.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-modules_ru.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-modules_zh_CN.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util_ja.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-lookup_ja.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-lookup_pt_BR.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-lookup_ru.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-lookup_zh_CN.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util_pt_BR.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util_ru.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-ui_ja.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-ui_pt_BR.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-ui_ru.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util-ui_zh_CN.jar:/home/holger/netbeans-8.2/platform/lib/locale/org-openide-util_zh_CN.jar:/home/holger/jdk1.8.0_131/lib/dt.jar:/home/holger/jdk1.8.0_131/lib/tools.jar" />
     <property name="apple.laf.useScreenMenuBar" value="true" />
     <property name="addExports:java.desktop/java.awt.peer" value="ALL-UNNAMED" />
     <property name="addExports:java.desktop/com.sun.beans.editors" value="ALL-UNNAMED" />
@@ -298,11 +297,11 @@
     <property name="libs.hibernate4-persistence.src" value="" />
     <property name="libs.hibernate4-support.maven-pom" value="" />
     <property name="libs.JAXB-ENDORSED.classpath" value="/home/holger/netbeans-8.2/ide/modules/ext/jaxb/api/jaxb-api.jar" />
-    <property name="nb.internal.action.name" value="test.single" />
+    <property name="nb.internal.action.name" value="debug.test.single" />
     <property name="libs.eclipselink.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/eclipselink/eclipselink.jar:/home/holger/netbeans-8.2/java/modules/ext/eclipselink/javax.persistence_2.1.0.v201304241213.jar:/home/holger/netbeans-8.2/java/modules/ext/eclipselink/org.eclipse.persistence.jpa.jpql_2.5.2.v20140319-9ad6abd.jar" />
-    <property name="file.reference.javacg-0.1-SNAPSHOT-static.jar" value="dep/javacg-0.1-SNAPSHOT-static.jar" />
     <property name="libs.beans-binding.javadoc" value="/home/holger/netbeans-8.2/java/docs/beansbinding-1.2.1-doc.zip" />
     <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment" />
+    <property name="file.reference.javacg-0.1-SNAPSHOT-static.jar" value="dep/javacg-0.1-SNAPSHOT-static.jar" />
     <property name="file.reference.json.jar" value="json.jar" />
     <property name="java.vm.vendor" value="Oracle Corporation" />
     <property name="libs.CopyLibs.classpath" value="/home/holger/netbeans-8.2/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar" />
@@ -320,79 +319,16 @@
     <property name="libs.CopyLibs.src" value="" />
     <property name="build.dir" value="build" />
     <property name="ant.version" value="Apache Ant(TM) version 1.9.7 compiled on April 9 2016" />
-    <property name="build.classes.excludes" value="**/*.java,**/*.form" />
     <property name="file.encoding" value="UTF-8" />
+    <property name="build.classes.excludes" value="**/*.java,**/*.form" />
     <property name="jdkBug6558476" value="false" />
     <property name="javadoc.nonavbar" value="false" />
     <property name="platform.active" value="default_platform" />
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit" />
   </properties>
-  <testcase classname="joanakeyrefactoring.antlr.javacg.CgWithLibTest" name="testCreateCG" time="0.098" />
-  <testcase classname="joanakeyrefactoring.antlr.javacg.CgWithLibTest" name="testCreateCGMultipleClasses" time="0.07" />
-  <system-out><![CDATA[C:PlusMinusFalsePos PlusMinusFalsePos
-C:PlusMinusFalsePos java.lang.Object
-M:PlusMinusFalsePos:<init>() (O)java.lang.Object:<init>()
-M:PlusMinusFalsePos:main(java.lang.String[]) (O)PlusMinusFalsePos:<init>()
-M:PlusMinusFalsePos:main(java.lang.String[]) (M)PlusMinusFalsePos:testMethod(int,int)
-M:PlusMinusFalsePos:testMethod(int,int) (M)PlusMinusFalsePos:identity(int,int)
-C:multipleclassesfalsepos.ClassA multipleclassesfalsepos.ClassB
-C:multipleclassesfalsepos.ClassA multipleclassesfalsepos.ClassA
-C:multipleclassesfalsepos.ClassA java.lang.Object
-M:multipleclassesfalsepos.ClassA:<init>() (O)java.lang.Object:<init>()
-M:multipleclassesfalsepos.ClassA:<init>() (O)multipleclassesfalsepos.ClassB:<init>()
-M:multipleclassesfalsepos.ClassA:falsePos(int) (M)multipleclassesfalsepos.ClassB:putDatumInArr(int,int[])
-C:multipleclassesfalsepos.ClassB multipleclassesfalsepos.ClassB
-C:multipleclassesfalsepos.ClassB java.lang.Object
-M:multipleclassesfalsepos.ClassB:<init>() (O)java.lang.Object:<init>()
-M:multipleclassesfalsepos.ClassB:putDatumInArr(int,int[]) (O)multipleclassesfalsepos.ClassB:func()
-C:multipleclassesfalsepos.MultipleClassesFalsePos java.lang.StringBuilder
-C:multipleclassesfalsepos.MultipleClassesFalsePos multipleclassesfalsepos.ClassA
-C:multipleclassesfalsepos.MultipleClassesFalsePos multipleclassesfalsepos.MultipleClassesFalsePos
-C:multipleclassesfalsepos.MultipleClassesFalsePos java.lang.Object
-C:multipleclassesfalsepos.MultipleClassesFalsePos java.lang.System
-C:multipleclassesfalsepos.MultipleClassesFalsePos java.io.PrintStream
-M:multipleclassesfalsepos.MultipleClassesFalsePos:<init>() (O)java.lang.Object:<init>()
-M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (O)java.lang.StringBuilder:<init>()
-M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (M)java.lang.StringBuilder:append(java.lang.String)
-M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (O)multipleclassesfalsepos.ClassA:<init>()
-M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (M)multipleclassesfalsepos.ClassA:falsePos(int)
-M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (M)java.lang.StringBuilder:append(int)
-M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (M)java.lang.StringBuilder:toString()
-M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (M)java.io.PrintStream:println(java.lang.String)
-multipleclassesfalsepos.ClassA
-multipleclassesfalsepos.ClassB
-java.lang.Object
-multipleclassesfalsepos.MultipleClassesFalsePos
-java.lang.StringBuilder
-java.lang.System
-java.io.PrintStream
-
-multipleclassesfalsepos.ClassA<init>
-    java.lang.Object<init>
-    multipleclassesfalsepos.ClassB<init>
-java.lang.Object<init>
-multipleclassesfalsepos.ClassB<init>
-    java.lang.Object<init>
-multipleclassesfalsepos.ClassAfalsePos
-    multipleclassesfalsepos.ClassBputDatumInArr
-multipleclassesfalsepos.ClassBputDatumInArr
-    multipleclassesfalsepos.ClassBfunc
-multipleclassesfalsepos.ClassBfunc
-multipleclassesfalsepos.MultipleClassesFalsePos<init>
-    java.lang.Object<init>
-multipleclassesfalsepos.MultipleClassesFalsePosmain
-    java.lang.StringBuilder<init>
-    java.lang.StringBuilderappend
-    multipleclassesfalsepos.ClassA<init>
-    multipleclassesfalsepos.ClassAfalsePos
-    java.lang.StringBuilderappend
-    java.lang.StringBuildertoString
-    java.io.PrintStreamprintln
-java.lang.StringBuilder<init>
-java.lang.StringBuilderappend
-java.lang.StringBuilderappend
-java.lang.StringBuildertoString
-java.io.PrintStreamprintln
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
+  <testcase classname="joanakeyrefactoring.antlr.javacg.CgWithLibTest" name="testCreateCG" time="0.011">
+    <error message="Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit." type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit.
+	at org.netbeans.core.execution.RunClassThread.run(RunClassThread.java:153)
+</error>
+  </testcase>
 </testsuite>

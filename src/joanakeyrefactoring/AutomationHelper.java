@@ -19,8 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import joanakeyrefactoring.CustomListener.CreateSimpleCallgraphListener;
-import joanakeyrefactoring.CustomListener.ExtractJavaProjModelListener;
 import joanakeyrefactoring.CustomListener.FindFunctionCallsListener;
 import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 

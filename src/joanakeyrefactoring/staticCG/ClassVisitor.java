@@ -29,7 +29,6 @@ package joanakeyrefactoring.staticCG;
 
 import java.util.ArrayList;
 import java.util.List;
-import joanakeyrefactoring.customListener.simpleJavaModel.JavaMethod;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaClass;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
 import org.antlr.v4.runtime.misc.OrderedHashSet;
@@ -40,7 +39,6 @@ import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.MethodGen;
-import org.apache.bcel.generic.Type;
 
 /**
  * The simplest of class visitors, invokes the method visitor class for each
