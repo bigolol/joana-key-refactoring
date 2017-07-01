@@ -5,6 +5,7 @@
  */
 package joanakeyrefactoring.javaforkeycreator;
 
+import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,66 +26,59 @@ public class KeyFileCreator {
      * @param method
      */
     public static void createKeYFileIF(StaticCGJavaMethod method, String pathToSave) throws IOException {
-        PrintWriter writer;
         File proofObFile = new File(pathToSave + "/" + "proofObligationIF.key");
         if (!proofObFile.exists()) {
             proofObFile.createNewFile();
         }
 
+        String methodnameKey = getMethodnameKey(method);
+
         final String profileStr = "Java Profile";
-        final String javaSourceStr = "/";
+        final String javaSourceStr = "./";
         final String proofObligationTemplateString
                 = "#Proof Obligation Settings\n"
                 + "name=CLASSNAME[CLASSNAME\\\\:\\\\:METHODNAME].Non-interference contract.0\n"
                 + "contract=CLASSNAME[CLASSNAME\\\\:\\\\:METHODNAME].Non-interference contract.0\n"
                 + "class=de.uka.ilkd.key.informationflow.po.InfFlowContractPO\n";
         final String proofObligationString = proofObligationTemplateString
-                .replaceAll("METHODNAME", method.getId())
+                .replaceAll("METHODNAME", methodnameKey)
                 .replaceAll("CLASSNAME", method.getContainingClass().getId());
 
         generateKeyFileFrom(profileStr, javaSourceStr, proofObligationString, proofObFile);
     }
 
-    /**
-     * Creates the Functional Proof Obligation for KeY
-     *
-     * @param javaFile
-     * @param method
-     */
-    public static void createKeYFileFunctional(String javaFile, String method) throws FileNotFoundException, UnsupportedEncodingException, IOException {
-        File proofObFile = new File("proofObs/proofObFunc.key");
+    public static void createKeYFileFunctional(StaticCGJavaMethod method, String pathToSave) throws IOException {
+        File proofObFile = new File(pathToSave + "/" + "proofObligationFunctional.key");
         if (!proofObFile.exists()) {
             proofObFile.createNewFile();
         }
-        PrintWriter writer;
-        writer = new PrintWriter("proofObs/proofObFunc.key", "UTF-8");
-        String firstRow = "\\profile \"Java Profile\";";
-        writer.println(firstRow);
-        // Java Source
-        String js = "\\javaSource \"proofs\";";
-        writer.println(js);
-        // Proof Obligation
-        String p1 = "\\proofObligation \"#Proof Obligation Settings";
-        writer.println(p1);
-        String obliName = "name = " + javaFile + "[" + javaFile
-                + "\\\\:\\\\:" + method + "].JML operation contract.0";
-        writer.println(obliName);
-        String obliContract = "contract = " + javaFile + "[" + javaFile
-                + "\\\\:\\\\:" + method + "].JML operation contract.0";
-        writer.println(obliContract);
 
-        String obliClass = "class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO";
-        writer.println(obliClass);
-        String end = "\";";
-        writer.println(end);
-        writer.close();
+        final String profileStr = "Java Profile";
+        final String javaSourceStr = "./";
+
+        String methodnameKey = getMethodnameKey(method);
+
+        final String proofObligationTemplateString
+                = "#Proof Obligation Settings\n"
+                + "name=CLASSNAME[CLASSNAME\\\\:\\\\:METHODNAME].JML operation contract.0\n"
+                + "contract=CLASSNAME[CLASSNAME\\\\:\\\\:METHODNAME].JML operation contract.0\n"
+                + "class=de.uka.ilkd.key.proof.init.FunctionalOperationContractPO\n";
+        final String proofObligationString = proofObligationTemplateString
+                .replaceAll("METHODNAME", methodnameKey)
+                .replaceAll("CLASSNAME", method.getContainingClass().getId());
+
+        generateKeyFileFrom(profileStr, javaSourceStr, proofObligationString, proofObFile);
     }
+
+    private static String getMethodnameKey(StaticCGJavaMethod method) {
+        return method.getId() + "(" + method.getParameter().replaceAll("int\\[\\]", "\\[I") + ")";
+    }  
+   
 
     private static void generateKeyFileFrom(
             String profileString, String javaSourceString,
             String proofObligationString, File f) throws IOException {
 
-        
         String profileTempStr = "\\profile PROFILE;\n";
         String javaSourceTempStr = "\\javaSource JAVASRC;\n";
         String proofOblTempStr = "\\proofObligation PROOFOBL;\n";

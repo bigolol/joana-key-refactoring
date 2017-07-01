@@ -51,7 +51,7 @@ public class GetMethodBodyListenerTest {
                 + "void func(int i, String s, ClassA a) {}"
                 + "}";
         StaticCGJavaClass cGJavaClass = new StaticCGJavaClass("p.ClassA");
-        StaticCGJavaMethod cGJavaMethod = new StaticCGJavaMethod(cGJavaClass, "func", "int,String,ClassA", false);
+        StaticCGJavaMethod cGJavaMethod = new StaticCGJavaMethod(cGJavaClass, "func", "int,String,ClassA", false, "void");
         GetMethodBodyListener bodyListener = new GetMethodBodyListener();
         bodyListener.parseFile(java, cGJavaMethod);
         

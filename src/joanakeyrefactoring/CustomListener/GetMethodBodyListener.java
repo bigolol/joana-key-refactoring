@@ -27,6 +27,9 @@ public class GetMethodBodyListener extends Java8BaseListener {
     private String methodBody;
     private StaticCGJavaMethod method;
     private int methodStartLine;
+    private final String nullable = "/*@ nullable @*/ ";
+    private String methodParamsNullable;
+    private String methodDeclWithNullable;
 
     public void parseFile(String file, StaticCGJavaMethod method) {
         Java8Lexer java8Lexer = new Java8Lexer(new ANTLRInputStream(file));
@@ -49,6 +52,16 @@ public class GetMethodBodyListener extends Java8BaseListener {
     public int getMethodStartLine() {
         return methodStartLine;
     }
+
+    public String getMethodParamsNullable() {
+        return methodParamsNullable;
+    }
+
+    public String getMethodDeclWithNullable() {
+        return methodDeclWithNullable;
+    }
+
+    
     
     @Override
     public void enterMethodDeclaration(Java8Parser.MethodDeclarationContext ctx) {
@@ -56,9 +69,14 @@ public class GetMethodBodyListener extends Java8BaseListener {
             return;
         }
         parseMethodDeclarator(ctx.methodHeader().methodDeclarator());
-        if(parsedRightMethod == true) {
+        if (parsedRightMethod == true) {
             methodStartLine = ctx.getStart().getLine();
-            methodBody = ctx.methodBody().getText();
+            List<Java8Parser.MethodModifierContext> methodModifier = ctx.methodModifier();
+            String methodMods = "";
+            for (Java8Parser.MethodModifierContext mod : methodModifier) {
+                methodMods += mod.getText() + " ";
+            }
+            methodDeclWithNullable = methodMods + methodDeclWithNullable;
         }
     }
 
@@ -74,20 +92,28 @@ public class GetMethodBodyListener extends Java8BaseListener {
         if (!argTypeString.equals(method.getParameter())) {
             return;
         }
-        
+
+        methodParamsNullable = "";
+        methodDeclWithNullable = methodName + "(ARGS)";
+
         if (formalParameterList != null) {
             Java8Parser.FormalParametersContext formalParameters = formalParameterList.formalParameters();
             if (formalParameters != null) {
                 for (Java8Parser.FormalParameterContext currentFormalParam : formalParameters.formalParameter()) {
                     String variableDeclaratorId = currentFormalParam.variableDeclaratorId().getText();
                     extractedMethodParamNames.add(variableDeclaratorId);
+                    String varType = currentFormalParam.unannType().getText();
+                    methodParamsNullable += varType + nullable + variableDeclaratorId + ", ";
                 }
             }
             Java8Parser.LastFormalParameterContext lastFormalParameter = formalParameterList.lastFormalParameter();
             String variableDeclaratorId = lastFormalParameter.formalParameter().variableDeclaratorId().getText();
             extractedMethodParamNames.add(variableDeclaratorId);
+            String varType = lastFormalParameter.formalParameter().unannType().getText();
+            methodParamsNullable += varType + nullable + variableDeclaratorId;
         }
         parsedRightMethod = true;
+        methodDeclWithNullable = methodDeclWithNullable.replace("ARGS", methodParamsNullable);
     }
 
     private String getArgTypeString(Java8Parser.FormalParameterListContext ctx) {

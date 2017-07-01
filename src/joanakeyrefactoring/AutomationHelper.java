@@ -409,9 +409,9 @@ public class AutomationHelper {
         boolean result = false;
         String cmd = "";
         if (obligation.equals("functional")) {
-            cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObFunc.key";
+            cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofs/proofObligationFunctional.key";
         } else {
-            cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofObIF.key";
+            cmd = "java -Xmx512m -jar " + pathKeY + " --auto proofObs/proofs/proofObligationIF.key";
         }
         Runtime r = Runtime.getRuntime();
         Process pr;

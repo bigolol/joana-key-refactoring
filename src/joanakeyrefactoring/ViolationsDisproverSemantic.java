@@ -31,6 +31,7 @@ public class ViolationsDisproverSemantic {
     private ViolationsWrapper violationsWrapper;
     private JavaForKeyCreator javaForKeyCreator;
     private JCallGraph callGraph = new JCallGraph();
+    
 
     public ViolationsDisproverSemantic(
             AutomationHelper automationHelper,
@@ -41,6 +42,10 @@ public class ViolationsDisproverSemantic {
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
+        javaForKeyCreator = new JavaForKeyCreator(
+                checkData.getPathToJavaFile(), 
+                callGraph, checkData.getAnalysis().getProgram().getSDG(),
+                stateSaver, checkData.getAnalysis());
 
         callGraph.generateCG(new File(pathToJar));
     }
@@ -49,7 +54,6 @@ public class ViolationsDisproverSemantic {
             SDG sdg) throws IOException {
         violationsWrapper = new ViolationsWrapper(
                 violations, sdg, javaForKeyListener, automationHelper, pathToJar, analysis, callGraph);
-        javaForKeyCreator = new JavaForKeyCreator(pathToJar, callGraph, sdg, stateSaver, analysis);
 
         while (!violationsWrapper.allCheckedOrDisproved()) {
             SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
@@ -70,8 +74,7 @@ public class ViolationsDisproverSemantic {
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
             //KeyFileCreator.createKeyFiles(formalNodeTuple, sdg, automationHelper, stateSaver, javaForKeyListener);
             String pathToTestJava = javaForKeyCreator.generateJavaForFormalNodeTuple(
-                    formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));
-            
+                    formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));            
 
             boolean result = false, resultFunc = false;
             try {

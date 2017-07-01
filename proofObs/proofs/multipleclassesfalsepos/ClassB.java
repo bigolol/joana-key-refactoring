@@ -14,7 +14,7 @@ public class ClassB {
     
 	/*@ requires this != arr;
 	  @ determines this \by this, arr; */
-    public void putDatumInArr(int h, int[] arr) {
+public putDatumInArr(int/*@ nullable @*/ h, int[]/*@ nullable @*/ arr) {
         func();
         arr[4] = h;
     }

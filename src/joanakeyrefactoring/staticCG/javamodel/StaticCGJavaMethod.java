@@ -21,14 +21,21 @@ public class StaticCGJavaMethod {
     private String parameterTypes;
     private OrderedHashSet<StaticCGJavaMethod> calledMethods = new OrderedHashSet<>();
     private boolean isStatic;
+    private String returnType;
 
     public StaticCGJavaMethod(
-            StaticCGJavaClass containingClass, String id,
-            String parameterTypes, boolean isStatic) {
+            StaticCGJavaClass containingClass,
+            String id, String parameterTypes,
+            boolean isStatic, String returnType) {
         this.containingClass = containingClass;
         this.id = id;
         this.parameterTypes = parameterTypes;
         this.isStatic = isStatic;
+        this.returnType = returnType;
+    }
+
+    public String getReturnType() {
+        return returnType;
     }
 
     public boolean isStatic() {

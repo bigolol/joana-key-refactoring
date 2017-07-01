@@ -98,11 +98,12 @@ public class ClassVisitor extends EmptyVisitor {
 
     public void visitMethod(Method method) {
         MethodGen mg = new MethodGen(method, clazz.getClassName(), constants);
+        mg.getReturnType().toString();
         
         StaticCGJavaMethod visitedMethod = new StaticCGJavaMethod(
                 visitedClass, mg.getName(),
                 MethodVisitor.argumentList(mg.getArgumentTypes()),
-                mg.isStatic());
+                mg.isStatic(), mg.getReturnType().toString());
         if (alreadyFoundMethods.contains(visitedMethod)) {
             visitedMethod = findEntryInSet(alreadyFoundMethods, visitedMethod);
             visitedMethod.setIsStatic(mg.isStatic());

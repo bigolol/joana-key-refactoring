@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="1" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.antlr.javacg.CgWithLibTest" skipped="0" tests="1" time="0.0" timestamp="2017-07-01T06:02:55">
+<testsuite errors="1" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.antlr.javacg.CgWithLibTest" skipped="0" tests="1" time="0.0" timestamp="2017-07-01T08:59:47">
   <properties>
     <property name="netbeans.autoupdate.country" value="US" />
     <property name="javac.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
@@ -75,7 +75,7 @@
     <property name="javac.debug" value="true" />
     <property name="javadoc.splitindex" value="true" />
     <property name="file.separator" value="/" />
-    <property name="javac.includesfile.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/null939269204" />
+    <property name="javac.includesfile.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/null587660998" />
     <property name="libs.junit_4.maven-pom" value="" />
     <property name="mkdist.disabled" value="false" />
     <property name="javac.test.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
@@ -130,7 +130,7 @@
     <property name="https.nonProxyHosts" value="localhost|127.0.0.1|holger-ThinkPad-T430s" />
     <property name="libs.PostgreSQLDriver.maven-pom" value="" />
     <property name="java.class.version" value="52.0" />
-    <property name="jpda.address" value="localhost:44499" />
+    <property name="jpda.address" value="localhost:43979" />
     <property name="libs.hibernate4-persistencemodelgen.maven-pom" value="" />
     <property name="libs.eclipselink.javadoc" value="/home/holger/netbeans-8.2/java/modules/ext/docs/javax.persistence-2.1.0-doc.zip" />
     <property name="user.properties.file" value="/home/holger/.netbeans/8.2/build.properties" />
@@ -328,7 +328,7 @@
     <property name="platform.active" value="default_platform" />
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit" />
   </properties>
-  <testcase classname="joanakeyrefactoring.antlr.javacg.CgWithLibTest" name="testCreateCGMultipleClasses" time="0.001">
+  <testcase classname="joanakeyrefactoring.antlr.javacg.CgWithLibTest" name="testCreateCG" time="0.0">
     <error message="Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit." type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit.
 	at org.netbeans.core.execution.RunClassThread.run(RunClassThread.java:153)
 </error>

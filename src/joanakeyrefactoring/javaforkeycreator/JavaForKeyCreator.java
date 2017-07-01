@@ -63,20 +63,19 @@ public class JavaForKeyCreator {
                 sdg, sdg.getEntry(formalInNode), stateSaver);
 
         Set<StaticCGJavaClass> allNecessaryClasses = getAllNecessaryClasses(methodCorresToSE);
-        
+
         javaProjectCopyHandler = new JavaProjectCopyHandler(pathToJavaSource, pathToTestJava);
         javaProjectCopyHandler.copyClasses(allNecessaryClasses);
 
         List<String> classFileForKey = generateClassFileForKey(inputDescrExceptFormalIn, sinkDescr, pointsToDecsr, contents);
 
         javaProjectCopyHandler.addClassToTest(classFileForKey, containingClass);
-        
+
         KeyFileCreator.createKeYFileIF(methodCorresToSE, pathToTestJava);
+        KeyFileCreator.createKeYFileFunctional(methodCorresToSE, pathToTestJava);
 
         return pathToTestJava;
     }
-    
-    
 
     private List<String> generateClassFileForKey(
             String inputDescrExceptFormalIn,
@@ -88,12 +87,17 @@ public class JavaForKeyCreator {
         for (String l : classContents.split("\n")) {
             lines.add(l);
         }
+        int methodStartLine = methodBodyListener.getMethodStartLine();
+
+        //insert nullable between passed variables
+        lines.remove(methodStartLine - 1);
+        lines.add(methodStartLine - 1, methodBodyListener.getMethodDeclWithNullable() + " {");
+        
         String descriptionForKey
                 = "\t/*@ requires "
                 + pointsToDecsr
                 + ";\n\t  @ determines " + sinkDescr + " \\by "
                 + inputDescrExceptFormalIn + "; */";
-        int methodStartLine = methodBodyListener.getMethodStartLine();
 
         lines.add(methodStartLine - 1, descriptionForKey);
 
