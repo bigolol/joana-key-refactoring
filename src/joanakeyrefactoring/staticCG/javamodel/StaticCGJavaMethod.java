@@ -15,15 +15,28 @@ import org.antlr.v4.runtime.misc.OrderedHashSet;
  * @author holger
  */
 public class StaticCGJavaMethod {
+
     private StaticCGJavaClass containingClass;
     private String id;
-    private String parameter;
+    private String parameterTypes;
     private OrderedHashSet<StaticCGJavaMethod> calledMethods = new OrderedHashSet<>();
+    private boolean isStatic;
 
-    public StaticCGJavaMethod(StaticCGJavaClass containingClass, String id, String parameter) {
+    public StaticCGJavaMethod(
+            StaticCGJavaClass containingClass, String id,
+            String parameterTypes, boolean isStatic) {
         this.containingClass = containingClass;
         this.id = id;
-        this.parameter = parameter;
+        this.parameterTypes = parameterTypes;
+        this.isStatic = isStatic;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    public void setIsStatic(boolean isStatic) {
+        this.isStatic = isStatic;
     }
 
     public StaticCGJavaClass getContainingClass() {
@@ -33,15 +46,15 @@ public class StaticCGJavaMethod {
     public void setContainingClass(StaticCGJavaClass containingClass) {
         this.containingClass = containingClass;
     }
-    
+
     public String getId() {
         return id;
     }
 
     public String getParameter() {
-        return parameter;
+        return parameterTypes;
     }
-    
+
     public void addCalledMethod(StaticCGJavaMethod m) {
         calledMethods.add(m);
     }
@@ -49,15 +62,13 @@ public class StaticCGJavaMethod {
     public OrderedHashSet<StaticCGJavaMethod> getCalledMethods() {
         return calledMethods;
     }
-    
-    
 
     @Override
     public int hashCode() {
         int hash = 3;
         hash = 19 * hash + Objects.hashCode(this.containingClass);
         hash = 19 * hash + Objects.hashCode(this.id);
-        hash = 19 * hash + Objects.hashCode(this.parameter);
+        hash = 19 * hash + Objects.hashCode(this.parameterTypes);
         return hash;
     }
 
@@ -76,7 +87,7 @@ public class StaticCGJavaMethod {
         if (!Objects.equals(this.id, other.id)) {
             return false;
         }
-        if (!Objects.equals(this.parameter, other.parameter)) {
+        if (!Objects.equals(this.parameterTypes, other.parameterTypes)) {
             return false;
         }
         if (!Objects.equals(this.containingClass, other.containingClass)) {
@@ -84,6 +95,5 @@ public class StaticCGJavaMethod {
         }
         return true;
     }
-    
-    
+
 }

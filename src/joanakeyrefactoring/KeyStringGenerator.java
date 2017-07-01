@@ -88,21 +88,21 @@ public class KeyStringGenerator {
      * Currently only available for true parameter nodes (explicit parameters
      * and this). Returns null otherwise.
      *
-     * @param sourceNode source node
+     * @param formalInNode source node
      * @param sdg the SDG for our program
      * @return Description of params except source node (null if no description
      * possible)
      */
     public static String generateKeyDecsriptionForParamsExceptSourceNode(
-            SDGNode sourceNode, SDG sdg, CallGraph callGraph, ParseJavaForKeyListener listener) {
+            SDGNode formalInNode, SDG sdg, CallGraph callGraph, ParseJavaForKeyListener listener) {
 
-        String srcNodeByteCodeName = sourceNode.getBytecodeName();
-        String srcNodeKindName = sourceNode.getKind().name();
+        String srcNodeByteCodeName = formalInNode.getBytecodeName();
+        String srcNodeKindName = formalInNode.getKind().name();
         if (!srcNodeByteCodeName.startsWith("<param>")
                 && !srcNodeKindName.equals("FORMAL_IN")) {
             return null;
         }
-        SDGNode methodNodeInSDG = sdg.getEntry(sourceNode);
+        SDGNode methodNodeInSDG = sdg.getEntry(formalInNode);
         int cgNodeId = sdg.getCGNodeId(methodNodeInSDG);
 
         // get IR to get names of the parameters. Need to compile classes
@@ -118,7 +118,7 @@ public class KeyStringGenerator {
             final String param = "<param>";
             String bytecodeName = currentFormalInNode.getBytecodeName();
             String nameOfKind = currentFormalInNode.getKind().name();
-            if (currentFormalInNode == sourceNode
+            if (currentFormalInNode == formalInNode
                     || (!nameOfKind.startsWith(param) && !nameOfKind.equals("FORMAL_IN"))) {
                 continue;
             }
@@ -128,7 +128,7 @@ public class KeyStringGenerator {
                 SSAInstruction[] instructions = intermedRep.getInstructions();
                 String[] localNames = intermedRep.getLocalNames(0, valueNumber);
                 if (localNames == null) {
-                    return generateKeyDescrForParamsViaListener(sourceNode, sdg, listener);
+                    return generateKeyDescrForParamsViaListener(formalInNode, sdg, listener);
                 }
                 String nameOfParameter = localNames[0];
                 stringBuilder.append(delim).append(nameOfParameter);

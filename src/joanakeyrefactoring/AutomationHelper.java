@@ -12,14 +12,12 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import joanakeyrefactoring.CustomListener.FindFunctionCallsListener;
 import joanakeyrefactoring.CustomListener.ParseJavaForKeyListener;
 
 /**
@@ -35,9 +33,8 @@ public class AutomationHelper {
     private ArrayList<String> classNames = new ArrayList<>();
     final static String LINE_SEP = System.getProperty("line.separator");
     private ParseJavaForKeyListener javaForKeyListener;
-    private FindFunctionCallsListener callsListener = new FindFunctionCallsListener();
     private HashMap<String, String> classes = new HashMap<>();
-   
+
     public AutomationHelper(String pathToJavaFile) {
         this.pathToJavaFile = pathToJavaFile;
     }
@@ -59,7 +56,7 @@ public class AutomationHelper {
     public ParseJavaForKeyListener generateParseJavaForKeyListener() {
         if (this.javaForKeyListener == null) {
             String allSourcesInOneString = readAllSourceFilesIntoOneStringAndFillClassMap();
-            this.javaForKeyListener = new ParseJavaForKeyListener(allSourcesInOneString);        
+            this.javaForKeyListener = new ParseJavaForKeyListener(allSourcesInOneString);
         }
         return this.javaForKeyListener;
     }
@@ -204,28 +201,6 @@ public class AutomationHelper {
         return methodName.contains("<init>");
     }
 
-    public void createJavaFileForKeyToDisproveMethod2(
-            String pointsTo, String methodName, String descSink,
-            String descOtherParams) {
-        String completeMethod = javaForKeyListener.getCompleteMethod(methodName);
-        String classContainingMethod = javaForKeyListener.getClass(methodName);
-        //find all needed classes by finding all used methods and containing classes. Then find all methods used by those and so on
-        Set<String> usedClasses = new HashSet<>();
-        usedClasses.add(classContainingMethod);
-        Set<String> checkedMethods = new HashSet<>();
-        checkedMethods.add(methodName);
-
-        Set<String> calledFunctions = callsListener.getCalledFunctions(extractOnlyMethodBody(completeMethod));
-
-    }
-
-    private void addNeededClassesRec(Set<String> checkedMethods, Set<String> neededClasses, String currentMethodName) {
-        if (checkedMethods.contains(currentMethodName)) {
-            return;
-        }
-        neededClasses.add(javaForKeyListener.getClass(currentMethodName));
-        Set<String> allCalledFunctions = callsListener.getCalledFunctions(getBodyForMethodByName(currentMethodName));
-    }
 
     private String getBodyForMethodByName(String methodName) {
         return extractOnlyMethodBody(javaForKeyListener.getCompleteMethod(methodName));
@@ -235,7 +210,8 @@ public class AutomationHelper {
         completeMethod = completeMethod.trim();
         int openCurlyIndex = completeMethod.indexOf("{");
         return completeMethod.substring(openCurlyIndex);
-    }
+    }    
+    
 
     /**
      * Generates the Java file for which Key will disprove the information flow.
@@ -251,7 +227,6 @@ public class AutomationHelper {
     public String[] createJavaFileForKeyToDisproveMEthod(
             String pointsTo, String methodName, String descSink,
             String descOtherParams) throws FileNotFoundException, UnsupportedEncodingException, IOException {
-        createJavaFileForKeyToDisproveMethod2(pointsTo, methodName, descSink, descOtherParams);
         String descriptionForKey
                 = "\t/*@ requires "
                 + pointsTo

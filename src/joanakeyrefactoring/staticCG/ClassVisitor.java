@@ -83,12 +83,12 @@ public class ClassVisitor extends EmptyVisitor {
                 System.out.println(String.format(classReferenceFormat,
                         referencedClass));
                 StaticCGJavaClass staticCGRefJavaClass = new StaticCGJavaClass(referencedClass);
-                if(!alreadyFoundClasses.contains(staticCGRefJavaClass)) {
+                if (!alreadyFoundClasses.contains(staticCGRefJavaClass)) {
                     alreadyFoundClasses.add(staticCGRefJavaClass);
                     visitedClass.addReferencedClass(staticCGRefJavaClass);
                 } else {
-                    StaticCGJavaClass alreadyExistingRefClass = 
-                            findEntryInSet(alreadyFoundClasses, staticCGRefJavaClass);
+                    StaticCGJavaClass alreadyExistingRefClass
+                            = findEntryInSet(alreadyFoundClasses, staticCGRefJavaClass);
                     visitedClass.addReferencedClass(alreadyExistingRefClass);
                 }
                 referencedClasses.add(staticCGRefJavaClass);
@@ -98,21 +98,24 @@ public class ClassVisitor extends EmptyVisitor {
 
     public void visitMethod(Method method) {
         MethodGen mg = new MethodGen(method, clazz.getClassName(), constants);
+        
         StaticCGJavaMethod visitedMethod = new StaticCGJavaMethod(
                 visitedClass, mg.getName(),
-                MethodVisitor.argumentList(mg.getArgumentTypes()));
-        if(alreadyFoundMethods.contains(visitedMethod)) {
+                MethodVisitor.argumentList(mg.getArgumentTypes()),
+                mg.isStatic());
+        if (alreadyFoundMethods.contains(visitedMethod)) {
             visitedMethod = findEntryInSet(alreadyFoundMethods, visitedMethod);
+            visitedMethod.setIsStatic(mg.isStatic());
         } else {
             alreadyFoundMethods.add(visitedMethod);
         }
         visitedClass.addContainedMethod(visitedMethod);
         MethodVisitor visitor = new MethodVisitor(mg, clazz);
         visitor.start();
-        for(StaticCGJavaMethod m : visitor.getReferencedMethods()) {
+        for (StaticCGJavaMethod m : visitor.getReferencedMethods()) {
             if (!alreadyFoundMethods.contains(m)) {
                 StaticCGJavaClass containingClass = m.getContainingClass();
-                if(!alreadyFoundClasses.contains(containingClass)) {
+                if (!alreadyFoundClasses.contains(containingClass)) {
                     alreadyFoundClasses.add(containingClass);
                 } else {
                     containingClass = findEntryInSet(alreadyFoundClasses, containingClass);
@@ -140,12 +143,13 @@ public class ClassVisitor extends EmptyVisitor {
         }
         visitJavaClass(clazz);
     }
-    
+
     private <A> A findEntryInSet(OrderedHashSet<A> set, A searchedEntry) {
-        for(A a : set) {
-            if(a.equals(searchedEntry))
+        for (A a : set) {
+            if (a.equals(searchedEntry)) {
                 return a;
+            }
         }
         return null;
-    } 
+    }
 }

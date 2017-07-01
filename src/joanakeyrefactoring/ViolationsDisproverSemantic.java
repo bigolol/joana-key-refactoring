@@ -13,8 +13,11 @@ import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import joanakeyrefactoring.javaforkeycreator.JavaForKeyCreator;
+import joanakeyrefactoring.staticCG.JCallGraph;
 
 public class ViolationsDisproverSemantic {
 
@@ -26,21 +29,28 @@ public class ViolationsDisproverSemantic {
     private String pathToKeyJar;
     private ParseJavaForKeyListener javaForKeyListener;
     private ViolationsWrapper violationsWrapper;
+    private JavaForKeyCreator javaForKeyCreator;
+    private JCallGraph callGraph = new JCallGraph();
 
     public ViolationsDisproverSemantic(
             AutomationHelper automationHelper,
-            JoanaAndKeyCheckData checkData) {
+            JoanaAndKeyCheckData checkData) throws IOException {
         this.automationHelper = automationHelper;
         this.javaForKeyListener = automationHelper.generateParseJavaForKeyListener();
         this.pathToJar = checkData.getPathToJar();
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
+
+        callGraph.generateCG(new File(pathToJar));
     }
 
     public void disproveViaKey(IFCAnalysis analysis, Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg) throws IOException {
-        violationsWrapper = new ViolationsWrapper(violations, sdg, javaForKeyListener, automationHelper, pathToJar, analysis);
+        violationsWrapper = new ViolationsWrapper(
+                violations, sdg, javaForKeyListener, automationHelper, pathToJar, analysis, callGraph);
+        javaForKeyCreator = new JavaForKeyCreator(pathToJar, callGraph, sdg, stateSaver, analysis);
+
         while (!violationsWrapper.allCheckedOrDisproved()) {
             SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
             if (canDisproveSummaryEdge(nextSummaryEdge, sdg)) {
@@ -54,11 +64,15 @@ public class ViolationsDisproverSemantic {
     private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {
         SDGNode actualInNode = se.getSource();
         SDGNode actualOutNode = se.getTarget();
-        
+
         Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
-        
+
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
-            KeyFileCreator.createKeyFiles(formalNodeTuple, sdg, automationHelper, stateSaver, javaForKeyListener);
+            //KeyFileCreator.createKeyFiles(formalNodeTuple, sdg, automationHelper, stateSaver, javaForKeyListener);
+            String pathToTestJava = javaForKeyCreator.generateJavaForFormalNodeTuple(
+                    formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));
+            
+
             boolean result = false, resultFunc = false;
             try {
                 result = automationHelper.runKeY(pathToKeyJar, "information flow");

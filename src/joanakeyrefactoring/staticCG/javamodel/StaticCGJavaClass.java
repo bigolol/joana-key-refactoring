@@ -18,7 +18,7 @@ public class StaticCGJavaClass {
     private String id;
     private OrderedHashSet<StaticCGJavaMethod> containedMethods = new OrderedHashSet<>();
     private OrderedHashSet<StaticCGJavaClass> referencedClasses = new OrderedHashSet<>();
-
+   
     public StaticCGJavaClass(String id) {
         this.id = id;
     }
@@ -42,6 +42,22 @@ public class StaticCGJavaClass {
     public OrderedHashSet<StaticCGJavaClass> getReferencedClasses() {
         return referencedClasses;
     } 
+    
+    public String getOnlyClassName() {
+        int packageDeclIndex = id.lastIndexOf(".");
+        if(packageDeclIndex == -1) {
+            return id;
+        }
+        return id.substring(packageDeclIndex + 1, id.length());
+    }
+    
+    public String getPackageString() {
+        int packageDeclIndex = id.lastIndexOf(".");
+        if(packageDeclIndex == -1) {
+            return null;
+        }
+        return id.substring(0, packageDeclIndex);
+    }
 
     @Override
     public int hashCode() {

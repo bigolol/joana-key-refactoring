@@ -41,13 +41,16 @@ public class ViolationsWrapper {
     private Collection<SDGEdge> checkedEdges = new ArrayList<>();
     private Map<SDGEdge, ArrayList<ViolationChop>> summaryEdgesAndContainingChops = new HashMap<>();
     private Map<SDGEdge, StaticCGJavaMethod> summaryEdgesAndCorresJavaMethods = new HashMap<>();
+    private JCallGraph callGraph = new JCallGraph();
+        
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg, ParseJavaForKeyListener forKeyListener, AutomationHelper automationHelper,
-            String pathToJar, IFCAnalysis ana) throws IOException {
+            String pathToJar, IFCAnalysis ana, JCallGraph callGraph) throws IOException {
         this.javaForKeyListener = forKeyListener;
         this.violations = violations;
         this.sdg = sdg;
+        this.callGraph = callGraph;
 
         violations.forEach((v) -> {
             violationChops.add(createViolationChop(v, sdg));
@@ -55,8 +58,6 @@ public class ViolationsWrapper {
 
         putEdgesAndChopsInMap();
 
-        JCallGraph callGraph = new JCallGraph();
-        callGraph.generateCG(new File(pathToJar));
 
         findCGMethodsForSummaryEdges(sdg, ana, callGraph);
     }

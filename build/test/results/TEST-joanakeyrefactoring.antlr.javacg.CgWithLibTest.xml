@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="1" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.antlr.javacg.CgWithLibTest" skipped="0" tests="1" time="0.0" timestamp="2017-06-27T11:12:47">
+<testsuite errors="1" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.antlr.javacg.CgWithLibTest" skipped="0" tests="1" time="0.0" timestamp="2017-07-01T06:02:55">
   <properties>
     <property name="netbeans.autoupdate.country" value="US" />
-    <property name="javac.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes" />
+    <property name="javac.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
     <property name="javac.includes" value="joanakeyrefactoring/antlr/javacg/CgWithLibTest.java" />
     <property name="ant.core.lib" value="/home/holger/netbeans-8.2/extide/ant/lib/ant.jar" />
     <property name="javadoc.windowtitle" value="" />
@@ -54,7 +54,7 @@
     <property name="manifest.file" value="manifest.mf" />
     <property name="addExports:java.desktop/sun.awt" value="ALL-UNNAMED" />
     <property name="javadoc.encoding" value="UTF-8" />
-    <property name="javac.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar" />
+    <property name="javac.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar" />
     <property name="libs.spring-framework400.classpath" value="/home/holger/netbeans-8.2/ide/modules/org-apache-commons-logging.jar:/home/holger/netbeans-8.2/java/modules/ext/cglib-2.2.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-aop-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-aspects-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-beans-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-build-src-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-context-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-context-support-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-core-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-expression-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-framework-bom-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-instrument-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-instrument-tomcat-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-jdbc-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-jms-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-messaging-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-orm-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-oxm-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-test-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-tx-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-web-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-webmvc-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-webmvc-portlet-4.0.1.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-4/spring-websocket-4.0.1.RELEASE.jar" />
     <property name="debug-transport" value="dt_socket" />
     <property name="netbeans.home" value="/home/holger/netbeans-8.2/platform" />
@@ -75,10 +75,10 @@
     <property name="javac.debug" value="true" />
     <property name="javadoc.splitindex" value="true" />
     <property name="file.separator" value="/" />
-    <property name="javac.includesfile.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/null1882275440" />
+    <property name="javac.includesfile.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/null939269204" />
     <property name="libs.junit_4.maven-pom" value="" />
     <property name="mkdist.disabled" value="false" />
-    <property name="javac.test.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes" />
+    <property name="javac.test.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
     <property name="netbeans.buildnumber" value="201609300101" />
     <property name="libs.JWSAntTasks.javadoc" value="" />
     <property name="build.generated.sources.dir" value="build/generated-sources" />
@@ -86,6 +86,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD" />
     <property name="libs.hibernate4-persistencemodelgen.javadoc" value="" />
     <property name="libs.jaxb.javadoc" value="/home/holger/netbeans-8.2/ide/docs/jaxb-api-doc.zip" />
+    <property name="org.openide.awt.SwingBrowserImpl.do-not-block-awt" value="false" />
     <property name="javac.includes.binary" value="/home/holger/Code/hiwi/joana-key-refactoring/build/test/classes/joanakeyrefactoring/antlr/javacg/CgWithLibTest.class" />
     <property name="ant.home" value="/home/holger/netbeans-8.2/extide/ant" />
     <property name="libs.junit_4.src" value="/home/holger/netbeans-8.2/platform/docs/junit-4.12-sources.jar" />
@@ -118,7 +119,7 @@
     <property name="test.binaryincludes" value="&lt;nothing&gt;" />
     <property name="manifest.available" value="true" />
     <property name="libs.spring-framework300.maven-pom" value="" />
-    <property name="run.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes:build/test/classes" />
+    <property name="run.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes:build/test/classes" />
     <property name="ant.project.invoked-targets" value="debug-test" />
     <property name="test.binaryexcludes" value="" />
     <property name="libs.swing-layout.javadoc" value="/home/holger/netbeans-8.2/platform/docs/swing-layout-1.0.4-doc.zip" />
@@ -129,7 +130,7 @@
     <property name="https.nonProxyHosts" value="localhost|127.0.0.1|holger-ThinkPad-T430s" />
     <property name="libs.PostgreSQLDriver.maven-pom" value="" />
     <property name="java.class.version" value="52.0" />
-    <property name="jpda.address" value="localhost:45337" />
+    <property name="jpda.address" value="localhost:44499" />
     <property name="libs.hibernate4-persistencemodelgen.maven-pom" value="" />
     <property name="libs.eclipselink.javadoc" value="/home/holger/netbeans-8.2/java/modules/ext/docs/javax.persistence-2.1.0-doc.zip" />
     <property name="user.properties.file" value="/home/holger/.netbeans/8.2/build.properties" />
@@ -147,7 +148,7 @@
     <property name="javadoc.preview" value="true" />
     <property name="libs.jpa20-persistence.javadoc" value="/home/holger/netbeans-8.2/java/modules/ext/docs/javax.persistence-2.1.0-doc.zip" />
     <property name="java.home" value="/home/holger/jdk1.8.0_131/jre" />
-    <property name="debug.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes:build/test/classes" />
+    <property name="debug.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes:build/test/classes" />
     <property name="netbeans.importclass" value="org.netbeans.upgrade.AutoUpgrade" />
     <property name="ant.project.default-target" value="default" />
     <property name="annotation.processing.run.all.processors" value="true" />
@@ -156,7 +157,7 @@
     <property name="libs.hibernate4-persistence.javadoc" value="/home/holger/netbeans-8.2/java/modules/ext/docs/javax.persistence-2.1.0-doc.zip" />
     <property name="http.nonProxyHosts" value="localhost|127.0.0.1|holger-ThinkPad-T430s" />
     <property name="libs.junit_4.javadoc" value="/home/holger/netbeans-8.2/platform/docs/junit-4.12-javadoc.jar" />
-    <property name="run.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes" />
+    <property name="run.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
     <property name="jna.boot.library.name" value="jnidispatch-422" />
     <property name="sun.awt.datatransfer.timeout" value="1000" />
     <property name="libs.jpa2-persistence.maven-pom" value="" />
@@ -168,7 +169,7 @@
     <property name="javac.deprecation" value="false" />
     <property name="javadoc.use" value="true" />
     <property name="sun.java2d.noddraw" value="true" />
-    <property name="javac.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar" />
+    <property name="javac.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar" />
     <property name="libs.hamcrest.maven-pom" value="" />
     <property name="javac.compilerargs" value="" />
     <property name="ant.file" value="/home/holger/Code/hiwi/joana-key-refactoring/build.xml" />
@@ -190,7 +191,7 @@
     <property name="sun.boot.library.path" value="/home/holger/jdk1.8.0_131/jre/lib/amd64" />
     <property name="have.sources" value="true" />
     <property name="libs.hamcrest.javadoc" value="" />
-    <property name="debug.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:build/classes" />
+    <property name="debug.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
     <property name="javac.external.vm" value="true" />
     <property name="javadoc.private" value="false" />
     <property name="test.src.dir" value="test" />
@@ -257,6 +258,7 @@
     <property name="src.dir" value="src" />
     <property name="annotation.processing.enabled" value="true" />
     <property name="libs.jpa2-persistence.src" value="" />
+    <property name="file.reference.commons-io-2.5.jar" value="dep/commons-io-2.5/commons-io-2.5.jar" />
     <property name="libs.jpa20-persistence.src" value="" />
     <property name="ant.file.type.joana-key-refactoring" value="file" />
     <property name="dist.dir" value="dist" />
@@ -289,7 +291,7 @@
     <property name="do.mkdist" value="true" />
     <property name="libs.absolutelayout.src" value="" />
     <property name="libs.jpa20-persistence.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/eclipselink/javax.persistence_2.1.0.v201304241213.jar" />
-    <property name="os.version" value="4.8.0-56-generic" />
+    <property name="os.version" value="4.8.0-58-generic" />
     <property name="application.args" value="" />
     <property name="main.class.available" value="true" />
     <property name="sun.awt.enableExtraMouseButtons" value="true" />
@@ -299,9 +301,9 @@
     <property name="libs.JAXB-ENDORSED.classpath" value="/home/holger/netbeans-8.2/ide/modules/ext/jaxb/api/jaxb-api.jar" />
     <property name="nb.internal.action.name" value="debug.test.single" />
     <property name="libs.eclipselink.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/eclipselink/eclipselink.jar:/home/holger/netbeans-8.2/java/modules/ext/eclipselink/javax.persistence_2.1.0.v201304241213.jar:/home/holger/netbeans-8.2/java/modules/ext/eclipselink/org.eclipse.persistence.jpa.jpql_2.5.2.v20140319-9ad6abd.jar" />
+    <property name="file.reference.javacg-0.1-SNAPSHOT-static.jar" value="dep/javacg-0.1-SNAPSHOT-static.jar" />
     <property name="libs.beans-binding.javadoc" value="/home/holger/netbeans-8.2/java/docs/beansbinding-1.2.1-doc.zip" />
     <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment" />
-    <property name="file.reference.javacg-0.1-SNAPSHOT-static.jar" value="dep/javacg-0.1-SNAPSHOT-static.jar" />
     <property name="file.reference.json.jar" value="json.jar" />
     <property name="java.vm.vendor" value="Oracle Corporation" />
     <property name="libs.CopyLibs.classpath" value="/home/holger/netbeans-8.2/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar" />
@@ -316,17 +318,17 @@
     <property name="libs.hibernate4-persistencemodelgen.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-jpamodelgen-4.3.1.Final.jar" />
     <property name="annotation.processing.source.output" value="build/generated-sources/ap-source-output" />
     <property name="main.class" value="joanakeyrefactoring.CombinedApproach" />
-    <property name="libs.CopyLibs.src" value="" />
     <property name="build.dir" value="build" />
+    <property name="libs.CopyLibs.src" value="" />
     <property name="ant.version" value="Apache Ant(TM) version 1.9.7 compiled on April 9 2016" />
     <property name="file.encoding" value="UTF-8" />
     <property name="build.classes.excludes" value="**/*.java,**/*.form" />
-    <property name="jdkBug6558476" value="false" />
     <property name="javadoc.nonavbar" value="false" />
+    <property name="jdkBug6558476" value="false" />
     <property name="platform.active" value="default_platform" />
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit" />
   </properties>
-  <testcase classname="joanakeyrefactoring.antlr.javacg.CgWithLibTest" name="testCreateCG" time="0.011">
+  <testcase classname="joanakeyrefactoring.antlr.javacg.CgWithLibTest" name="testCreateCGMultipleClasses" time="0.001">
     <error message="Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit." type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit.
 	at org.netbeans.core.execution.RunClassThread.run(RunClassThread.java:153)
 </error>

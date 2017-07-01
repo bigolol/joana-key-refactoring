@@ -20,10 +20,13 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class AntlrHelperMainMethod {
 
     public static void main(String[] args) {
-        String java = "foo(new int[]{1,2,3});";
+        String java = "package p;"
+                + "class ClassA {"
+                + "void func(int i, String s, ClassA a) {}"
+                + "}";
         Java8Lexer java8Lexer = new Java8Lexer(new ANTLRInputStream(java));
         Java8Parser java8Parser = new Java8Parser(new CommonTokenStream(java8Lexer));
-        ParseTree tree = java8Parser.methodInvocation();
+        ParseTree tree = java8Parser.compilationUnit();
         System.out.println(tree.toStringTree(java8Parser));
     }
 }

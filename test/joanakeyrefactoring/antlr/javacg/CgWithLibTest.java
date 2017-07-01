@@ -55,6 +55,7 @@ public class CgWithLibTest {
             });
         });
         StaticCGJavaClass classA = alreadyFoundClasses.get(0);
+        String packageString = classA.getPackageString();
         StaticCGJavaMethod classAFalsePos = classA.getContainedMethods().get(1);
         Assert.assertTrue(classA == classAFalsePos.getContainingClass());
         OrderedHashSet<StaticCGJavaMethod> calledMethods = classAFalsePos.getCalledMethods();
