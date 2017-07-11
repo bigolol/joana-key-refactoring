@@ -3,7 +3,7 @@
 pathKeY : "dep/KeY.jar",
 javaClass : "",
 pathToJar : "JZipWithException.jar",
-pathToJavaFile : "JZipWithException/jzip",
+pathToJavaFile : "JZipWithException",
 entryMethod : "jzip/JZip",
 annotationPath : "",
 fullyAutomatic : true,

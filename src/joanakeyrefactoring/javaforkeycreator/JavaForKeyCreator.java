@@ -10,6 +10,7 @@ import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -54,6 +55,11 @@ public class JavaForKeyCreator {
         String relPathForJavaClass
                 = JavaProjectCopyHandler.getRelPathForJavaClass(containingClass);
         File javaClassFile = new File(pathToJavaSource + relPathForJavaClass + containingClass.getOnlyClassName() + ".java");
+
+        if (!javaClassFile.exists()) { //it is a library class since it doesnt exist in the project
+            throw new FileNotFoundException();
+        }
+
         String contents = new String(Files.readAllBytes(javaClassFile.toPath()));
         methodBodyListener.parseFile(contents, methodCorresToSE);
 
@@ -92,7 +98,7 @@ public class JavaForKeyCreator {
         //insert nullable between passed variables
         lines.remove(methodStartLine - 1);
         lines.add(methodStartLine - 1, methodBodyListener.getMethodDeclWithNullable() + " {");
-        
+
         String descriptionForKey
                 = "\t/*@ requires "
                 + pointsToDecsr
@@ -150,7 +156,9 @@ public class JavaForKeyCreator {
             } else {
                 String[] forInNames = bytecodeName.split("\\.");
                 String forInName = forInNames[forInNames.length - 1];
-                created += forInName + ", ";
+                if (!bytecodeName.equals("<[]>")) {
+                    created += forInName + ", ";
+                }
             }
         }
         if (created.isEmpty()) {

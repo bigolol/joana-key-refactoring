@@ -13,6 +13,7 @@ import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import edu.kit.joana.ifc.sdg.graph.chopper.RepsRosayChopper;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import joanakeyrefactoring.javaforkeycreator.JavaForKeyCreator;
@@ -29,7 +30,6 @@ public class ViolationsDisproverSemantic {
     private ViolationsWrapper violationsWrapper;
     private JavaForKeyCreator javaForKeyCreator;
     private JCallGraph callGraph = new JCallGraph();
-    
 
     public ViolationsDisproverSemantic(
             AutomationHelper automationHelper,
@@ -40,7 +40,7 @@ public class ViolationsDisproverSemantic {
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
         javaForKeyCreator = new JavaForKeyCreator(
-                checkData.getPathToJavaFile(), 
+                checkData.getPathToJavaFile(),
                 callGraph, checkData.getAnalysis().getProgram().getSDG(),
                 stateSaver, checkData.getAnalysis());
 
@@ -69,16 +69,17 @@ public class ViolationsDisproverSemantic {
         Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
 
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
-            String pathToTestJava = javaForKeyCreator.generateJavaForFormalNodeTuple(
-                    formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));            
-
             boolean result = false, resultFunc = false;
             try {
+                String pathToTestJava = javaForKeyCreator.generateJavaForFormalNodeTuple(
+                        formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));
                 result = automationHelper.runKeY(pathToKeyJar, "information flow");
                 resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(ViolationsDisproverSemantic.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(ViolationsDisproverSemantic.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            }             
             if (!result || !resultFunc) {
                 return false;
             }

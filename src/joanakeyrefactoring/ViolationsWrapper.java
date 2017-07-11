@@ -44,11 +44,6 @@ public class ViolationsWrapper {
     private List<SDGEdge> sortedEdgesToCheck = new ArrayList<>();
     private JCallGraph callGraph = new JCallGraph();
     private IFCAnalysis ana;
-    private Comparator<SDGEdge> summaryEdgeComparator = (e1, e2) -> {
-        ArrayList<ViolationChop> e1Chop = summaryEdgesAndContainingChops.get(e1);
-        ArrayList<ViolationChop> e2Chop = summaryEdgesAndContainingChops.get(e2);
-        return Comparator.<Integer>naturalOrder().compare(e1Chop.size(), e2Chop.size());
-    };
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg, AutomationHelper automationHelper,
@@ -73,7 +68,7 @@ public class ViolationsWrapper {
                 sortedEdgesToCheck.add(e);
             }
         }
-        sortedEdgesToCheck.sort(summaryEdgeComparator);
+        sortedEdgesToCheck.sort(new SummaryEdgeComparator(this));
     }
 
     private Collection<IViolation<SecurityNode>> getNextViolationsToHandle() {
@@ -192,9 +187,16 @@ public class ViolationsWrapper {
         checkedEdges.add(e);
         edgesToCheck.remove(e);
         sortedEdgesToCheck.remove(e);
+        if (sortedEdgesToCheck.isEmpty()) {
+            prepareNextSummaryEdges();
+        }
     }
 
     public SDGEdge nextSummaryEdge() {
         return sortedEdgesToCheck.get(0);
+    }
+
+    ArrayList<ViolationChop> getChopsContaining(SDGEdge e) {
+        return summaryEdgesAndContainingChops.get(e);
     }
 }
