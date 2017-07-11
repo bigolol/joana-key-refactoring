@@ -14,6 +14,7 @@ import edu.kit.joana.api.sdg.SDGProgram;
 import edu.kit.joana.api.sdg.SDGProgramPart;
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
+import edu.kit.joana.ifc.sdg.graph.SDGSerializer;
 import edu.kit.joana.ifc.sdg.mhpoptimization.MHPType;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
 import edu.kit.joana.util.Stubs;
@@ -23,6 +24,7 @@ import edu.kit.joana.wala.core.SDGBuilder.PointsToPrecision;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +42,7 @@ public class CombinedApproach {
 
     public static void main(String[] args) {
         try {
-            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/multipleClassesArrFalsePos.joak");
+            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/jzip.joak");
             CombinedApproach.runTestFromCheckData(parsedCheckData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -198,6 +200,7 @@ public class CombinedApproach {
         SDGProgram program = SDGProgram.createSDGProgram(config, System.out,
                 new NullProgressMonitor());
         IFCAnalysis ana = new IFCAnalysis(program);
+        SDGSerializer.toPDGFormat(program.getSDG(), new FileOutputStream("./theamazinggraph.pdg")); 
         return ana;
     }
 }

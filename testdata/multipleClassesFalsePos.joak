@@ -1,0 +1,9 @@
+pathKeY : "dep/KeY.jar",
+javaClass : "",
+pathToJar : "/home/holger/Code/hiwi/JoanaKeyGui/JoanaKeyGui/testdata/multipleClassesFalsePos/MultipleClassesFalsePos/dist/MultipleClassesFalsePos.jar",
+pathToJavaFile : "/home/holger/Code/hiwi/JoanaKeyGui/JoanaKeyGui/testdata/multipleClassesFalsePos/MultipleClassesFalsePos/src",
+entryMethod : "multipleclassesfalsepos.MultipleClassesFalsePos",
+annotationPath : "",
+fullyAutomatic : true,
+sources : [{securityLevel : "high", description : {from : "callsToMethod", method : "multipleclassesfalsepos.ClassA.falsePos(I)I", paramPos : 1}}],
+sinks : [{securityLevel : "low", description : {from : "programPart", programPart : "(void multipleclassesfalsepos.MultipleClassesFalsePos.main(java.lang.String[]):23) v13 = v9.falsePos(#(4))->ret"}}]

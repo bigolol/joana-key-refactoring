@@ -19,7 +19,9 @@ import edu.kit.joana.ifc.sdg.util.JavaType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,32 +34,67 @@ import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
  */
 public class ViolationsWrapper {
 
-    private Collection<? extends IViolation<SecurityNode>> violations;
+    private Collection<? extends IViolation<SecurityNode>> uncheckedViolations;
     private SDG sdg;
     private Collection<ViolationChop> violationChops = new ArrayList<>();
-    private Collection<SDGEdge> checkedEdges = new ArrayList<>();
+    private HashSet<SDGEdge> checkedEdges = new HashSet<>();
+    private HashSet<SDGEdge> edgesToCheck = new HashSet<>();
     private Map<SDGEdge, ArrayList<ViolationChop>> summaryEdgesAndContainingChops = new HashMap<>();
     private Map<SDGEdge, StaticCGJavaMethod> summaryEdgesAndCorresJavaMethods = new HashMap<>();
+    private List<SDGEdge> sortedEdgesToCheck = new ArrayList<>();
     private JCallGraph callGraph = new JCallGraph();
-        
+    private IFCAnalysis ana;
+    private Comparator<SDGEdge> summaryEdgeComparator = (e1, e2) -> {
+        ArrayList<ViolationChop> e1Chop = summaryEdgesAndContainingChops.get(e1);
+        ArrayList<ViolationChop> e2Chop = summaryEdgesAndContainingChops.get(e2);
+        return Comparator.<Integer>naturalOrder().compare(e1Chop.size(), e2Chop.size());
+    };
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg, AutomationHelper automationHelper,
             String pathToJar, IFCAnalysis ana, JCallGraph callGraph) throws IOException {
-        this.violations = violations;
+        this.uncheckedViolations = violations;
         this.sdg = sdg;
         this.callGraph = callGraph;
+        this.ana = ana;
 
-        violations.forEach((v) -> {
+        prepareNextSummaryEdges();
+    }
+
+    private void prepareNextSummaryEdges() {
+        Collection<? extends IViolation<SecurityNode>> nextViolationsToHandle = getNextViolationsToHandle();
+        nextViolationsToHandle.forEach((v) -> {
             violationChops.add(createViolationChop(v, sdg));
         });
-
         putEdgesAndChopsInMap();
         findCGMethodsForSummaryEdges(sdg, ana, callGraph);
+        for (SDGEdge e : edgesToCheck) {
+            if (summaryEdgesAndCorresJavaMethods.get(e) != null) {
+                sortedEdgesToCheck.add(e);
+            }
+        }
+        sortedEdgesToCheck.sort(summaryEdgeComparator);
+    }
+
+    private Collection<IViolation<SecurityNode>> getNextViolationsToHandle() {
+        int amt_viols = 1;
+        List<IViolation<SecurityNode>> created = new ArrayList<>();
+        int i = 0;
+        for (IViolation<SecurityNode> v : uncheckedViolations) {
+            if (i == amt_viols) {
+                break;
+            }
+            created.add(v);
+            ++i;
+        }
+        for (IViolation<SecurityNode> v : created) {
+            uncheckedViolations.remove(v);
+        }
+        return created;
     }
 
     private void findCGMethodsForSummaryEdges(SDG sdg1, IFCAnalysis ana, JCallGraph callGraph) {
-        for (SDGEdge summaryEdge : summaryEdgesAndContainingChops.keySet()) {
+        for (SDGEdge summaryEdge : edgesToCheck) {
             Collection<SDGNodeTuple> allFormalPairs = sdg1.getAllFormalPairs(summaryEdge.getSource(), summaryEdge.getTarget());
             SDGNodeTuple firstPair = allFormalPairs.iterator().next();
             SDGNode methodNode = sdg1.getEntry(firstPair.getFirstNode());
@@ -68,8 +105,8 @@ public class ViolationsWrapper {
             for (JavaType currType : argumentTypes) {
                 types += currType.toHRString() + ",";
             }
-            if(!types.isEmpty()) {
-                types = types.substring(0,types.length() - 1);
+            if (!types.isEmpty()) {
+                types = types.substring(0, types.length() - 1);
             }
             String methodName = method.getSignature().getMethodName();
             String fullyQualifiedMethodName = method.getSignature().getFullyQualifiedMethodName();
@@ -83,18 +120,18 @@ public class ViolationsWrapper {
     public StaticCGJavaMethod getMethodCorresToSummaryEdge(SDGEdge e) {
         return summaryEdgesAndCorresJavaMethods.get(e);
     }
-    
+
     private void putEdgesAndChopsInMap() {
         summaryEdgesAndContainingChops = new HashMap<>();
         violationChops.forEach((vc) -> {
             vc.getSummaryEdges().forEach((se) -> {
-                Collection<ViolationChop> chopList = summaryEdgesAndContainingChops.get(se);
-                if (chopList == null) {
+                if (edgesToCheck.contains(se)) {
+                    summaryEdgesAndContainingChops.get(se).add(vc);
+                } else {
+                    edgesToCheck.add(se);
                     ArrayList<ViolationChop> arrayList = new ArrayList<>();
                     arrayList.add(vc);
                     summaryEdgesAndContainingChops.put(se, arrayList);
-                } else {
-                    chopList.add(vc);
                 }
             });
         });
@@ -136,20 +173,28 @@ public class ViolationsWrapper {
 
     public void removeEdge(SDGEdge e) {
         sdg.removeEdge(e);
+        edgesToCheck.remove(e);
+        sortedEdgesToCheck.remove(e);
         summaryEdgesAndContainingChops.get(e).forEach((vc) -> {
-            vc.findSummaryEdges();
+            vc.findSummaryEdges(sdg);
             if (vc.isEmpty()) {
                 violationChops.remove(vc);
             }
         });
+        summaryEdgesAndContainingChops.remove(e);
+        summaryEdgesAndCorresJavaMethods.remove(e);
+        if (sortedEdgesToCheck.isEmpty()) {
+            prepareNextSummaryEdges();
+        }
     }
 
     public void checkedEdge(SDGEdge e) {
         checkedEdges.add(e);
+        edgesToCheck.remove(e);
+        sortedEdgesToCheck.remove(e);
     }
 
     public SDGEdge nextSummaryEdge() {
-        SDGEdge next = summaryEdgesAndContainingChops.keySet().iterator().next();
-        return next;
+        return sortedEdgesToCheck.get(0);
     }
 }

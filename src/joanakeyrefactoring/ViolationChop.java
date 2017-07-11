@@ -22,17 +22,14 @@ public class ViolationChop {
     private final SDGNode violationSource;
     private final SDGNode violationSink;
     private Collection<SDGNode> violationChop;
-    private SDG sdg;
     private SDG inducedSubgraph;
     private Chopper chopper;
     private Collection<SDGEdge> summaryEdges = new ArrayList<>();
 
     public ViolationChop(SDGNode violationSource, SDGNode violationSink, SDG sdg) {
-        this.sdg = sdg;
         this.violationSource = violationSource;
         this.violationSink = violationSink;
-        this.chopper = new RepsRosayChopper(sdg);
-        findSummaryEdges();
+        findSummaryEdges(sdg);
     }
 
     public SDGNode getViolationSource() {
@@ -51,9 +48,12 @@ public class ViolationChop {
         return summaryEdges;
     }
 
-    public void findSummaryEdges() {
+    public void findSummaryEdges(SDG sdg) {
+        this.chopper = new RepsRosayChopper(sdg);
         violationChop = chopper.chop(violationSource, violationSink);
-        if(violationChop.size() == 0) return;
+        if (violationChop.isEmpty()) {
+            return;
+        }
         inducedSubgraph = sdg.subgraph(violationChop);
 
         inducedSubgraph.edgeSet().forEach((e) -> {
