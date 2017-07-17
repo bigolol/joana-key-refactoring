@@ -58,8 +58,17 @@ public class StaticCGJavaMethod {
         return id;
     }
 
-    public String getParameter() {
-        return parameterTypes;
+    public String getParameterWithoutPackage() {
+        String[] seperatedByComma = parameterTypes.split(",");
+        String created = "";
+        for (int i = 0; i < seperatedByComma.length; ++i) {
+            int lastIndexOfDot = seperatedByComma[i].lastIndexOf(".");
+            created += seperatedByComma[i].substring(lastIndexOfDot + 1, seperatedByComma[i].length()) + ",";
+        }
+        if(!created.isEmpty()) {
+            created = created.substring(0, created.length() - 1);
+        }
+        return created;
     }
 
     public void addCalledMethod(StaticCGJavaMethod m) {

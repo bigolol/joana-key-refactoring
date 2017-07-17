@@ -29,10 +29,8 @@ package joanakeyrefactoring.staticCG;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -50,8 +48,10 @@ import org.apache.bcel.classfile.ClassParser;
  *
  */
 public class JCallGraph {
+
     private OrderedHashSet<StaticCGJavaClass> alreadyFoundClasses;
     private OrderedHashSet<StaticCGJavaMethod> alreadyFoundMethods;
+    private String packageName;
 
     public OrderedHashSet<StaticCGJavaClass> getAlreadyFoundClasses() {
         return alreadyFoundClasses;
@@ -60,29 +60,29 @@ public class JCallGraph {
     public OrderedHashSet<StaticCGJavaMethod> getAlreadyFoundMethods() {
         return alreadyFoundMethods;
     }
-    
+
     public Set<StaticCGJavaMethod> getAllMethodsCalledByMethodRec(StaticCGJavaMethod m) {
         Set<StaticCGJavaMethod> created = new HashSet<>();
         addCalledToSetRec(m, created);
         return created;
     }
-    
+
     private void addCalledToSetRec(StaticCGJavaMethod m, Set<StaticCGJavaMethod> created) {
-        for(StaticCGJavaMethod called : m.getCalledMethods()) {
-            if(!created.contains(called)) {
+        for (StaticCGJavaMethod called : m.getCalledMethods()) {
+            if (!created.contains(called)) {
                 created.add(called);
                 addCalledToSetRec(called, created);
             }
-        } 
+        }
     }
-    
+
     public void generateCG(File jarFile) throws IOException {
         ClassParser cp;
         JarFile jar = new JarFile(jarFile);
         Enumeration<JarEntry> entries = jar.entries();
         alreadyFoundClasses = new OrderedHashSet<>();
-        alreadyFoundMethods = new OrderedHashSet<>();       
-        
+        alreadyFoundMethods = new OrderedHashSet<>();
+
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
             if (entry.isDirectory()) {
@@ -95,18 +95,27 @@ public class JCallGraph {
 
             cp = new ClassParser(jarFile.getAbsolutePath(), entry.getName());
             ClassVisitor visitor = new ClassVisitor(cp.parse());
-            visitor.start(alreadyFoundClasses, alreadyFoundMethods);             
+            visitor.start(alreadyFoundClasses, alreadyFoundMethods);
+            if(packageName == null) {
+                packageName = visitor.getVisitedClass().getPackageString().split("\\.")[0];
+            }
         }
     }
-    
+
     public StaticCGJavaMethod getMethodFor(String className, String methodName, String argList) {
-        for(StaticCGJavaMethod method : alreadyFoundMethods) {
-            if(method.getContainingClass().getId().equals(className) && method.getId().equals(methodName)
-                     && method.getParameter().equals(argList)) {
+        for (StaticCGJavaMethod method : alreadyFoundMethods) {
+            if (method.getContainingClass().getId().equals(className) && method.getId().equals(methodName)
+                    && method.getParameterWithoutPackage().equals(argList)) {
                 return method;
             }
         }
         return null;
     }
+
+    public String getPackageName() {
+        return packageName;
+    }
     
+    
+
 }

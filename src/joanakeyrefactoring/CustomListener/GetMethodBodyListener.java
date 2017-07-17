@@ -30,8 +30,13 @@ public class GetMethodBodyListener extends Java8BaseListener {
     private final String nullable = "/*@ nullable @*/ ";
     private String methodParamsNullable;
     private String methodDeclWithNullable;
+    private int startLine;
+    private int stopLine;
 
     public void parseFile(String file, StaticCGJavaMethod method) {
+        if(method.getId().equals("unZipItExtract")) {
+            int i = 0;
+        }
         Java8Lexer java8Lexer = new Java8Lexer(new ANTLRInputStream(file));
         Java8Parser java8Parser = new Java8Parser(new CommonTokenStream(java8Lexer));
         ParseTreeWalker walker = new ParseTreeWalker();
@@ -45,9 +50,15 @@ public class GetMethodBodyListener extends Java8BaseListener {
         return extractedMethodParamNames;
     }
 
-    public String getMethodBody() {
-        return methodBody;
+    public int getStartLine() {
+        return startLine;
     }
+
+    public int getStopLine() {
+        return stopLine;
+    }
+    
+    
 
     public int getMethodStartLine() {
         return methodStartLine;
@@ -90,9 +101,14 @@ public class GetMethodBodyListener extends Java8BaseListener {
         Java8Parser.FormalParameterListContext formalParameterList = ctx.formalParameterList();
         String argTypeString = getArgTypeString(formalParameterList);
 
-        if (!argTypeString.equals(method.getParameter())) {
+        //Problem: The method has the params with the package decl, the listener however does not
+        //current workaround: compare to params wo package decl
+        if (!argTypeString.equals(method.getParameterWithoutPackage())) {
             return;
         }
+        
+        startLine = ctx.getStart().getLine();
+        stopLine = ctx.getStop().getLine();
 
         methodParamsNullable = "";
         methodDeclWithNullable = methodName + "(ARGS)";

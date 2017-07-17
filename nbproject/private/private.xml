@@ -30,11 +30,13 @@
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/PointsToGenerator.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/LoopInvariantGenerator.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/AutomationHelper.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/javaforkeycreator/CopyKeyCompatibleListenerTest.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/ViolationsDisproverSemantic.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/antlr/java8/Java8Listener.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/staticCG/javamodel/StaticCGJavaMethod.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/CombinedApproach.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/staticCG/MethodVisitor.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/CopyKeyCompatibleListener.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/antlr/java8/Java8Parser.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/antlr/java8/Java8BaseListener.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/antlr/javacg/CgWithLibTest.java</file>

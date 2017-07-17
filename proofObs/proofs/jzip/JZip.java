@@ -1,14 +1,5 @@
 package jzip;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -273,47 +264,7 @@ public class JZip {
 		}
 	}
 
-	public void zipIt(String zipFile, String sourceFolder) {
-		this.fileList = new LinkedList<String>();
-		this.generateFileList(new File(sourceFolder), sourceFolder);
-
-		byte[] buffer = new byte[32768];
-
-		try {
-
-			FileOutputStream fos = new FileOutputStream(zipFile);
-			BufferedOutputStream bos = new BufferedOutputStream(fos, 16384);
-			ZipOutputStream zos = new ZipOutputStream(bos);
-
-			System.out.println("Output to Zip : " + zipFile);
-
-			for (String file : this.fileList) {
-
-				System.out.println("File Added : " + file);
-				ZipEntry ze = new ZipEntry(file);
-				zos.putNextEntry(ze);
-
-				FileInputStream in = new FileInputStream(sourceFolder
-						+ File.separator + file);
-				BufferedInputStream bin = new BufferedInputStream(in, 32768);
-
-				int len;
-				while ((len = bin.read(buffer)) > 0) {
-					zos.write(buffer, 0, len);
-				}
-
-				in.close();
-			}
-
-			zos.closeEntry();
-			// remember close it
-			zos.close();
-
-			System.out.println("Done");
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
+	
 
 	/**
 	 * Traverse a directory and get all files, and add the file into fileList
@@ -415,8 +366,9 @@ public class JZip {
 
 	// determines buffer[256...512] by location, ...
 	// determines buffer[0..255] by content
-	private void unZipItExtract(byte[] outputFolder, MyZipInputStream myZis,
-			MyFileOutputStream fos) {
+	/*@ requires this != outputFolder && this != myZis && this != fos && outputFolder != myZis && outputFolder != fos && myZis != fos;
+	  @ determines this \by myZis, fos, zipFile, content, location, this; */
+private void unZipItExtract(byte[]/*@ nullable @*/ outputFolder, MyZipInputStream/*@ nullable @*/ myZis, MyFileOutputStream/*@ nullable @*/ fos) {
 		byte[] buffer = new byte[1024];
 		byte[] content = new byte[512];
 		content = myZis.read();
@@ -445,9 +397,7 @@ public class JZip {
 		}
 	}
 
-	/*@ requires true;
-	  @ determines this \by rootGroup, this, out, hashcode, lineSeparator, nextChar, language, keySet, country, hash, se, se, detailMessage, positivePrefix, textOut, nChars, maximumIntegerDigits, autoFlush, out, CONFIGURATION, c, fileName, cause, stackTrace, lock, key, variant, declaringClass, next, methodName, modCount, count, this$0, cb, out, maxFractionDigits, lineNumber, charOut, value, value, defaults, table, table, security; */
-private void showConfig() {
+	private void showConfig() {
 		if (this.CONFIGURATION != null) {
 			Iterator<Object> it = this.CONFIGURATION.keySet().iterator();
 			while (it.hasNext()) {

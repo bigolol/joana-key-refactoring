@@ -153,4 +153,10 @@ public class ClassVisitor extends EmptyVisitor {
         }
         return null;
     }
+
+    public StaticCGJavaClass getVisitedClass() {
+        return visitedClass;
+    }
+    
+    
 }

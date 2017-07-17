@@ -24,6 +24,7 @@ public class ViolationsDisproverSemantic {
     public String pathToJar;
     public RepsRosayChopper chopper;
     public StateSaver stateSaver;
+    private String pathToJava;
     private AutomationHelper automationHelper;
     private boolean fullyAutomatic;
     private String pathToKeyJar;
@@ -39,6 +40,7 @@ public class ViolationsDisproverSemantic {
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
+        this.pathToJava = checkData.getPathToJavaFile();
         javaForKeyCreator = new JavaForKeyCreator(
                 checkData.getPathToJavaFile(),
                 callGraph, checkData.getAnalysis().getProgram().getSDG(),
@@ -49,8 +51,7 @@ public class ViolationsDisproverSemantic {
 
     public void disproveViaKey(IFCAnalysis analysis, Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg) throws IOException {
-        violationsWrapper = new ViolationsWrapper(
-                violations, sdg, automationHelper, pathToJar, analysis, callGraph);
+        violationsWrapper = new ViolationsWrapper(violations, sdg, automationHelper, analysis, callGraph);
 
         while (!violationsWrapper.allCheckedOrDisproved()) {
             SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
@@ -65,7 +66,7 @@ public class ViolationsDisproverSemantic {
     private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {
         SDGNode actualInNode = se.getSource();
         SDGNode actualOutNode = se.getTarget();
-
+ 
         Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
 
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {

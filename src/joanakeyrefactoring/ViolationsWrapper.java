@@ -19,12 +19,12 @@ import edu.kit.joana.ifc.sdg.util.JavaType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import joanakeyrefactoring.staticCG.JCallGraph;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
 
@@ -47,7 +47,7 @@ public class ViolationsWrapper {
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg, AutomationHelper automationHelper,
-            String pathToJar, IFCAnalysis ana, JCallGraph callGraph) throws IOException {
+            IFCAnalysis ana, JCallGraph callGraph) throws IOException {
         this.uncheckedViolations = violations;
         this.sdg = sdg;
         this.callGraph = callGraph;
@@ -65,7 +65,9 @@ public class ViolationsWrapper {
         findCGMethodsForSummaryEdges(sdg, ana, callGraph);
         for (SDGEdge e : edgesToCheck) {
             if (summaryEdgesAndCorresJavaMethods.get(e) != null) {
-                sortedEdgesToCheck.add(e);
+                if (isIndepOfLibs(summaryEdgesAndCorresJavaMethods.get(e))) {
+                    sortedEdgesToCheck.add(e);
+                }
             }
         }
         sortedEdgesToCheck.sort(new SummaryEdgeComparator(this));
@@ -98,7 +100,10 @@ public class ViolationsWrapper {
             List<JavaType> argumentTypes = method.getSignature().getArgumentTypes();
             String types = "";
             for (JavaType currType : argumentTypes) {
-                types += currType.toHRString() + ",";
+                String toHRString = currType.toHRString();
+                int lastIndexOfDot = toHRString.lastIndexOf(".");
+                toHRString = toHRString.substring(lastIndexOfDot + 1, toHRString.length());
+                types += toHRString + ",";
             }
             if (!types.isEmpty()) {
                 types = types.substring(0, types.length() - 1);
@@ -198,5 +203,24 @@ public class ViolationsWrapper {
 
     ArrayList<ViolationChop> getChopsContaining(SDGEdge e) {
         return summaryEdgesAndContainingChops.get(e);
+    }
+
+    private boolean isIndepOfLibs(StaticCGJavaMethod m) {
+        String packageName = callGraph.getPackageName();
+        try {
+            String classPackageName = m.getContainingClass().getPackageString();
+            if (!classPackageName.startsWith(packageName)) {
+                return false;
+            }
+            Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = callGraph.getAllMethodsCalledByMethodRec(m);
+            for (StaticCGJavaMethod calledM : allMethodsCalledByMethodRec) {
+                if (!calledM.getContainingClass().getPackageString().startsWith(packageName)) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

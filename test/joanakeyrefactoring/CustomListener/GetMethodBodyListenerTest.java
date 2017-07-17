@@ -20,22 +20,22 @@ import static org.junit.Assert.*;
  * @author holger
  */
 public class GetMethodBodyListenerTest {
-    
+
     public GetMethodBodyListenerTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -45,8 +45,8 @@ public class GetMethodBodyListenerTest {
      */
     @Test
     public void testParseFile() {
-        String java = 
-                "package p;"
+        String java
+                = "package p;"
                 + "class ClassA {"
                 + "void func(int i, String s, ClassA a) {}"
                 + "}";
@@ -54,13 +54,41 @@ public class GetMethodBodyListenerTest {
         StaticCGJavaMethod cGJavaMethod = new StaticCGJavaMethod(cGJavaClass, "func", "int,String,ClassA", false, "void");
         GetMethodBodyListener bodyListener = new GetMethodBodyListener();
         bodyListener.parseFile(java, cGJavaMethod);
-        
+
         assertEquals(3, bodyListener.getExtractedMethodParamNames().size());
         assertEquals("i", bodyListener.getExtractedMethodParamNames().get(0));
         assertEquals("s", bodyListener.getExtractedMethodParamNames().get(1));
         assertEquals("a", bodyListener.getExtractedMethodParamNames().get(2));
     }
 
-   
-    
+    @Test
+    public void testParseProblemFunc() {
+        String java
+                = "package p;"
+                + "class ClassA {"
+                + "private void unZipItExtract(byte[] outputFolder, MyZipInputStream myZis,\n"
+                + "			MyFileOutputStream fos) {\n"
+                + "		byte[] buffer = new byte[1024];\n"
+                + "		byte[] content = new byte[512];\n"
+                + "		content = myZis.read();\n"
+                + "		for (int i = 0; i < buffer.length / 2; i++) {\n"
+                + "				buffer[i] = content[i];\n"
+                + "				buffer[i + buffer.length / 2] = outputFolder[i];\n"
+                + "		}\n"
+                + "		fos.write(buffer);\n"
+                + "	}"
+                + "}";
+        StaticCGJavaClass cGJavaClass = new StaticCGJavaClass("p.ClassA");
+        StaticCGJavaMethod cGJavaMethod = 
+                new StaticCGJavaMethod(
+                        cGJavaClass, "unZipItExtract", "byte[],MyZipInputStream,MyFileOutputStream", false, "void");
+        GetMethodBodyListener bodyListener = new GetMethodBodyListener();
+        bodyListener.parseFile(java, cGJavaMethod);
+
+        assertEquals(3, bodyListener.getExtractedMethodParamNames().size());
+        assertEquals("outputFolder", bodyListener.getExtractedMethodParamNames().get(0));
+        assertEquals("myZis", bodyListener.getExtractedMethodParamNames().get(1));
+        assertEquals("fos", bodyListener.getExtractedMethodParamNames().get(2));
+    }
+
 }

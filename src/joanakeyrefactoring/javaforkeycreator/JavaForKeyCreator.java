@@ -93,11 +93,15 @@ public class JavaForKeyCreator {
         for (String l : classContents.split("\n")) {
             lines.add(l);
         }
-        int methodStartLine = methodBodyListener.getMethodStartLine();
+        
+        int startLine = methodBodyListener.getStartLine();
+        int stopLine = methodBodyListener.getStopLine();
 
         //insert nullable between passed variables
-        lines.remove(methodStartLine - 1);
-        lines.add(methodStartLine - 1, methodBodyListener.getMethodDeclWithNullable() + " {");
+        lines.add(startLine - 1, methodBodyListener.getMethodDeclWithNullable() + " {");
+        for(int i = 0; i <= stopLine - startLine; ++i) {
+            lines.remove(startLine);
+        }
 
         String descriptionForKey
                 = "\t/*@ requires "
@@ -105,7 +109,7 @@ public class JavaForKeyCreator {
                 + ";\n\t  @ determines " + sinkDescr + " \\by "
                 + inputDescrExceptFormalIn + "; */";
 
-        lines.add(methodStartLine - 1, descriptionForKey);
+        lines.add(startLine - 1, descriptionForKey);
 
         return lines;
     }
@@ -143,15 +147,19 @@ public class JavaForKeyCreator {
             }
             String bytecodeName = currentFormalInNode.getBytecodeName();
             if (bytecodeName.startsWith(param)) {
-                int p_number = Integer.parseInt(bytecodeName.substring(param.length() + 1)); //+ 1 for the trailing space
-                if (!methodCorresToSE.isStatic()) {
-                    if (p_number == 0) {
-                        created += "this, ";
+                try {
+                    int p_number = Integer.parseInt(bytecodeName.substring(param.length() + 1)); //+ 1 for the trailing space
+                    if (!methodCorresToSE.isStatic()) {
+                        if (p_number == 0) {
+                            created += "this, ";
+                        } else {
+                            created += methodBodyListener.getExtractedMethodParamNames().get(p_number - 1) + ", ";
+                        }
                     } else {
-                        created += methodBodyListener.getExtractedMethodParamNames().get(p_number - 1) + ", ";
+                        created += methodBodyListener.getExtractedMethodParamNames().get(p_number) + ", ";
                     }
-                } else {
-                    created += methodBodyListener.getExtractedMethodParamNames().get(p_number) + ", ";
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } else {
                 String[] forInNames = bytecodeName.split("\\.");
