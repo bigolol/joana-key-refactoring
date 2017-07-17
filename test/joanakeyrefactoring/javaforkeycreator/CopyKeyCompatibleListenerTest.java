@@ -45,6 +45,7 @@ public class CopyKeyCompatibleListenerTest {
     public void testGenerateKeyCompatible() throws IOException {
         final String classCode = "package jzip;\n"
                 + "\n"
+                + "import jzip.data.test;\n"            
                 + "import java.util.ArrayList;\n"
                 + "import java.util.Iterator;\n"
                 + "import java.util.LinkedList;\n"
@@ -184,7 +185,7 @@ public class CopyKeyCompatibleListenerTest {
                 + "	}\n"
                 + "\n"            
                 + "}";
-        CopyKeyCompatibleListener l = new CopyKeyCompatibleListener();
+        CopyKeyCompatibleListener l = new CopyKeyCompatibleListener("jzip");
         
         System.out.println(l.generateKeyCompatible(classCode));
     }

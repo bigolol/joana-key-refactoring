@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Set;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaClass;
+import org.apache.bcel.generic.F2D;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -24,10 +25,12 @@ public class JavaProjectCopyHandler {
     private String pathToSource;
     private String pathToNew;
     private File newFile;
+    private CopyKeyCompatibleListener copyKeyCompatibleListener;
 
-    public JavaProjectCopyHandler(String pathToSource, String pathToNew) throws IOException {
+    public JavaProjectCopyHandler(String pathToSource, String pathToNew, CopyKeyCompatibleListener copyKeyCompatibleListener) throws IOException {
         this.pathToSource = pathToSource;
         this.pathToNew = pathToNew;
+        this.copyKeyCompatibleListener = copyKeyCompatibleListener;
         newFile = new File(pathToNew);
         clearFolder();
         if (!newFile.exists()) {
@@ -74,7 +77,14 @@ public class JavaProjectCopyHandler {
             try {
                 File classFileToCopyTo = new File(pathToNew + relPathForJavaClass + className + ".java");
                 File classFileToCopyFrom = new File(pathToSource + relPathForJavaClass + className + ".java");
-                Files.copy(classFileToCopyFrom, classFileToCopyTo);
+
+                String contents = new String(java.nio.file.Files.readAllBytes(classFileToCopyFrom.toPath()));
+                String keyCompatibleContents = copyKeyCompatibleListener.generateKeyCompatible(contents);
+
+                PrintWriter out = new PrintWriter(classFileToCopyTo);
+                out.println(keyCompatibleContents);
+                out.close();
+                
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

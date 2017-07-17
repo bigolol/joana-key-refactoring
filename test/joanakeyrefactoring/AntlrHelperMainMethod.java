@@ -24,6 +24,7 @@ public class AntlrHelperMainMethod {
                 + "class ClassA {"
                 + "int x;"
                 + "private List<String> b;"
+                + "public ClassA() {}"
                 
                 + "void func(int i, String s, ClassA a) {}"
                 + "}";

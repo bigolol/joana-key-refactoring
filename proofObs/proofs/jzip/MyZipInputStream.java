@@ -1,14 +1,14 @@
 package jzip;
+public class MyZipInputStream{
+private byte[] zipFile;
+	public MyZipInputStream(byte[] zipFile) {
+		this.zipFile = zipFile;
+	}
 
-public class MyZipInputStream {
+	/*@ requires true;
+	  @ determines \result \by zipFile; */
+public byte[] read() {
+		return zipFile;
+	}
 
-	private byte[] zipFile;
-
-	public MyZipInputStream(byte[] zipFile) {
-		this.zipFile = zipFile;
-	}
-
-	public byte[] read() {
-		return zipFile;
-	}
 }

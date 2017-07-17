@@ -70,12 +70,7 @@ public class JavaForKeyCreatorTest {
                 parsedCheckData.getAnalysis());
 
         Collection<? extends IViolation<SecurityNode>> violations = parsedCheckData.getAnalysis().doIFC();
-        ViolationsWrapper violationsWrapper = new ViolationsWrapper(
-                violations, sdg,             
-                automationHelper,
-                parsedCheckData.getPathToJar(),
-                parsedCheckData.getAnalysis(),
-                callGraph);
+        ViolationsWrapper violationsWrapper = new ViolationsWrapper(violations, sdg, automationHelper, parsedCheckData.getAnalysis(), callGraph);
         SDGEdge se = violationsWrapper.nextSummaryEdge();
         SDGNode actualInNode = se.getSource();
         SDGNode actualOutNode = se.getTarget();
