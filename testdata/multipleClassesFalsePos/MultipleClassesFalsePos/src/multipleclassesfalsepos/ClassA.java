@@ -17,7 +17,6 @@ public class ClassA {
     }
 
     public int falsePos(int high) {
-        this.b = new ClassB();
         int arr[] = new int[5];
         arr[0] = 1;
         return b.putDataInArr(high, arr)[0];

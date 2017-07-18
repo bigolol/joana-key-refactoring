@@ -82,7 +82,7 @@ public class ViolationsWrapper {
     }
 
     private Collection<IViolation<SecurityNode>> getNextViolationsToHandle() {
-        int amt_viols = 1;
+        int amt_viols = 5;
         List<IViolation<SecurityNode>> created = new ArrayList<>();
         int i = 0;
         for (IViolation<SecurityNode> v : uncheckedViolations) {
