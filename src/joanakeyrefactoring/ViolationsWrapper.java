@@ -16,7 +16,11 @@ import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import edu.kit.joana.ifc.sdg.util.JavaType;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,6 +48,7 @@ public class ViolationsWrapper {
     private List<SDGEdge> sortedEdgesToCheck = new ArrayList<>();
     private JCallGraph callGraph = new JCallGraph();
     private IFCAnalysis ana;
+    private List<String> keyCompatibleJavaFeatures = new ArrayList<>();
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg, AutomationHelper automationHelper,
@@ -52,6 +57,15 @@ public class ViolationsWrapper {
         this.sdg = sdg;
         this.callGraph = callGraph;
         this.ana = ana;
+
+        InputStream is = new FileInputStream("dep/JAVALANG.txt");
+        BufferedReader buf = new BufferedReader(new InputStreamReader(is));
+        String line = buf.readLine();
+        while (line != null) {
+            keyCompatibleJavaFeatures.add(line);
+            line = buf.readLine();
+        }
+        buf.close();
 
         prepareNextSummaryEdges();
     }
@@ -226,12 +240,24 @@ public class ViolationsWrapper {
             Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = callGraph.getAllMethodsCalledByMethodRec(m);
             for (StaticCGJavaMethod calledM : allMethodsCalledByMethodRec) {
                 if (!calledM.getContainingClass().getPackageString().startsWith(packageName)) {
-                    return false;
+                    if (!isKeyFeature(calledM)) {
+                        return false;
+                    }
                 }
             }
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+    private boolean isKeyFeature(StaticCGJavaMethod calledM) {
+        String onlyClassName = calledM.getContainingClass().getOnlyClassName();
+        for (String compatible : keyCompatibleJavaFeatures) {
+            if (compatible.endsWith(onlyClassName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
