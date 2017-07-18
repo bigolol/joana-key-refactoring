@@ -10,11 +10,16 @@ package multipleclassesfalsepos;
  * @author holgerklein
  */
 public class ClassA {
+
     ClassB b = new ClassB();
-    
+
+    ClassA() {
+    }
+
     public int falsePos(int high) {
+        this.b = new ClassB();
         int arr[] = new int[5];
         arr[0] = 1;
-        return b.putDataInArr(high, arr)[0];         
+        return b.putDataInArr(high, arr)[0];
     }
 }

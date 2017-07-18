@@ -30,7 +30,9 @@ package joanakeyrefactoring.staticCG;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -96,7 +98,7 @@ public class JCallGraph {
             cp = new ClassParser(jarFile.getAbsolutePath(), entry.getName());
             ClassVisitor visitor = new ClassVisitor(cp.parse());
             visitor.start(alreadyFoundClasses, alreadyFoundMethods);
-            if(packageName == null) {
+            if (packageName == null) {
                 packageName = visitor.getVisitedClass().getPackageString().split("\\.")[0];
             }
         }
@@ -115,7 +117,23 @@ public class JCallGraph {
     public String getPackageName() {
         return packageName;
     }
-    
-    
+
+    public Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> getAllNecessaryClasses(StaticCGJavaMethod method) {
+        Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = getAllMethodsCalledByMethodRec(method);
+        Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> created = new HashMap<>();
+        Set<StaticCGJavaMethod> initialMethodSet = new HashSet<>();
+        initialMethodSet.add(method);
+        created.put(method.getContainingClass(), initialMethodSet);
+        for (StaticCGJavaMethod m : allMethodsCalledByMethodRec) {
+            if (created.containsKey(m.getContainingClass())) {
+                created.get(m.getContainingClass()).add(m);
+            } else {
+                Set<StaticCGJavaMethod> set = new HashSet<>();
+                set.add(m);
+                created.put(m.getContainingClass(), set);
+            }
+        }
+        return created;
+    }
 
 }

@@ -11,8 +11,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaClass;
+import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
 import org.apache.bcel.generic.F2D;
 import org.apache.commons.io.FileUtils;
 
@@ -65,8 +67,8 @@ public class JavaProjectCopyHandler {
         out.close();
     }
 
-    public void copyClasses(Set<StaticCGJavaClass> classesToCopy) throws IOException {
-        for (StaticCGJavaClass currentClassToCopy : classesToCopy) {
+    public void copyClasses(Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> classesToCopy) throws IOException {
+        for (StaticCGJavaClass currentClassToCopy : classesToCopy.keySet()) {
             String relPathForJavaClass = getRelPathForJavaClass(currentClassToCopy);
             String className = currentClassToCopy.getOnlyClassName();
 
@@ -79,11 +81,10 @@ public class JavaProjectCopyHandler {
                 File classFileToCopyFrom = new File(pathToSource + relPathForJavaClass + className + ".java");
 
                 String contents = new String(java.nio.file.Files.readAllBytes(classFileToCopyFrom.toPath()));
-                String keyCompatibleContents = copyKeyCompatibleListener.generateKeyCompatible(contents);
+                
+                String keyCompatibleContents = copyKeyCompatibleListener.generateKeyCompatible(contents, classesToCopy.get(currentClassToCopy));
 
-                PrintWriter out = new PrintWriter(classFileToCopyTo);
-                out.println(keyCompatibleContents);
-                out.close();
+                FileUtils.writeStringToFile(newFile, keyCompatibleContents);
                 
             } catch (Exception ex) {
                 ex.printStackTrace();

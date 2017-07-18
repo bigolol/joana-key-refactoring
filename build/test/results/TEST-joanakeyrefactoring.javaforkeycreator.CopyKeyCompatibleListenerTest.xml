@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="0" hostname="DESKTOP-3VGPMPH" name="joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest" skipped="0" tests="1" time="1.5" timestamp="2017-07-17T08:55:38">
+<testsuite errors="0" failures="0" hostname="DESKTOP-3VGPMPH" name="joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest" skipped="0" tests="2" time="0.641" timestamp="2017-07-18T12:31:30">
   <properties>
     <property name="netbeans.autoupdate.country" value="DE" />
     <property name="javac.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
@@ -39,7 +39,7 @@
     <property name="user.name" value="Holger Klein" />
     <property name="copylibs.rebase" value="true" />
     <property name="libs.swing-layout.maven-pom" value="" />
-    <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=true formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,E:\Code\Java\hiwi\joana-key-refactoring\build\test\results\TEST-joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest.xml crashfile=E:\Code\Java\hiwi\joana-key-refactoring\build\junitvmwatcher7470166563300881260.properties propsfile=E:\Code\Java\hiwi\joana-key-refactoring\build\junit4524613432284925011.properties" />
+    <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=true formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,E:\Code\Java\hiwi\joana-key-refactoring\build\test\results\TEST-joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest.xml crashfile=E:\Code\Java\hiwi\joana-key-refactoring\build\junitvmwatcher3618054102604815815.properties propsfile=E:\Code\Java\hiwi\joana-key-refactoring\build\junit5255518326402705517.properties" />
     <property name="build.classes.dir" value="build/classes" />
     <property name="netbeans.accept_license_class" value="org.netbeans.license.AcceptLicense" />
     <property name="build.sysclasspath" value="ignore" />
@@ -71,7 +71,7 @@
     <property name="javac.debug" value="true" />
     <property name="javadoc.splitindex" value="true" />
     <property name="file.separator" value="\" />
-    <property name="javac.includesfile.binary" value="E:\Code\Java\hiwi\joana-key-refactoring\null1224210211" />
+    <property name="javac.includesfile.binary" value="E:\Code\Java\hiwi\joana-key-refactoring\null1703503312" />
     <property name="libs.junit_4.maven-pom" value="" />
     <property name="mkdist.disabled" value="false" />
     <property name="javac.test.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
@@ -325,110 +325,33 @@
     <property name="platform.active" value="default_platform" />
     <property name="awt.toolkit" value="sun.awt.windows.WToolkit" />
   </properties>
-  <testcase classname="joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest" name="testGenerateKeyCompatible" time="1.453" />
-  <system-out><![CDATA[package jzip;
-import jzip.data.test;
-import java.util.Iterator;
-import java.util.List;
-public class JZip{
-List<String> fileList;
-private boolean run;
-private String[] args;
-private String commandline = "";
-	public JZip(String[] args) {
-		this.args = args;
-		if (args != null && args.length > 0) {
-			StringBuilder sb = new StringBuilder();
-			for (String s : args) {
-				sb.append(s);
-			}
-			this.commandline = sb.toString();
-		}
-	}
-;
-	public JZip() {
-	}
-;
-	public static void main(String[] args) {
-
-		JZip zipper = new JZip();
-		zipper.start();
-	}
-
-	private void init() {
-		this.run = true;
-
-		this.opt = new Options();
-		Option help = new Option("help", "Print help");
-		try {
-			opt.addOption(help);
-		} catch (Throwable thb) {
-		}
-
-		Option exit = new Option("exit", "Exit JZip");
-		try {
-			opt.addOption(exit);
-		} catch (Throwable thb) {
-		}
-
-		Option loadconfig = OptionBuilder
-				.withArgName("file")
-				.hasArg()
-				.withDescription(
-						"Load the configuration file <file>. All existing configuration properties will be overwritten afterwards.")
-				.create("loadconfig");
-		try {
-			opt.addOption(loadconfig);
-		} catch (Throwable thb) {
-		}
-		Option storeconfig = OptionBuilder
-				.withArgName("file")
-				.hasArg()
-				.withDescription(
-						"Store the current configuration in file <file>")
-				.create("storeconfig");
-		try {
-			opt.addOption(storeconfig);
-		} catch (Throwable thb) {
-		}
-		Option setconfig = OptionBuilder
-				.withArgName("name=value")
-				.hasOptionalArgs(2)
-				.withValueSeparator('=')
-				.withDescription(
-						"Assign the value <value> to configuration property <name>")
-				.create("setconfig");
-		try {
-			opt.addOption(setconfig);
-		} catch (Throwable thb) {
-		}
-		Option showConfig = new Option("showconfig", "List all properties");
-		try {
-			opt.addOption(showConfig);
-		} catch (Throwable thb) {
-		}
-		Option zip = OptionBuilder
-				.withArgName("file> <source")
-				.hasOptionalArgs(2)
-				.withDescription(
-						"Zip all files from directory <source> to archive file <file>. If <source> is not declared then this property is read from the configuration file. <source>'s default is '.'")
-				.create("zip");
-		try {
-			opt.addOption(zip);
-		} catch (Throwable thb) {
-		}
-		Option unzip = OptionBuilder
-				.withArgName("file> <destination")
-				.hasOptionalArgs(2)
-				.withDescription(
-						"Unzip all files from zip <file> into destination folder <destination>. If <destination> is not declared then this propery is read from the configuration file. <destination>'s default is '.'")
-				.create("unzip");
-		try {
-			opt.addOption(unzip);
-		} catch (Throwable thb) {
-		}
-		this.cmdParser = new GnuParser();
-	}
+  <testcase classname="joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest" name="testGenerateKeyCompatible" time="0.016" />
+  <testcase classname="joanakeyrefactoring.javaforkeycreator.CopyKeyCompatibleListenerTest" name="testCopyOnlyNeededMethods" time="0.578" />
+  <system-out><![CDATA[C:multipleclassesfalsepos.ClassA multipleclassesfalsepos.ClassB
+C:multipleclassesfalsepos.ClassA multipleclassesfalsepos.ClassA
+C:multipleclassesfalsepos.ClassA java.lang.Object
+M:multipleclassesfalsepos.ClassA:<init>() (O)java.lang.Object:<init>()
+M:multipleclassesfalsepos.ClassA:<init>() (O)multipleclassesfalsepos.ClassB:<init>()
+M:multipleclassesfalsepos.ClassA:falsePos(int) (O)multipleclassesfalsepos.ClassB:<init>()
+M:multipleclassesfalsepos.ClassA:falsePos(int) (M)multipleclassesfalsepos.ClassB:putDataInArr(int,int[])
+C:multipleclassesfalsepos.ClassB multipleclassesfalsepos.ClassB
+C:multipleclassesfalsepos.ClassB java.lang.Object
+M:multipleclassesfalsepos.ClassB:<init>() (O)java.lang.Object:<init>()
+C:multipleclassesfalsepos.MultipleClassesFalsePos multipleclassesfalsepos.ClassA
+C:multipleclassesfalsepos.MultipleClassesFalsePos multipleclassesfalsepos.MultipleClassesFalsePos
+C:multipleclassesfalsepos.MultipleClassesFalsePos java.lang.Object
+M:multipleclassesfalsepos.MultipleClassesFalsePos:<init>() (O)java.lang.Object:<init>()
+M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (O)multipleclassesfalsepos.ClassA:<init>()
+M:multipleclassesfalsepos.MultipleClassesFalsePos:main(java.lang.String[]) (M)multipleclassesfalsepos.ClassA:falsePos(int)
+package multipleclassesfalsepos;
+public class ClassA{
+ClassB b = new ClassB();
+    public int falsePos(int high) {
+     this.b = new ClassB();
+        int arr[] = new int[5];
+        arr[0] = 1;
+        return b.putDataInArr(high, arr)[0];
+    }
 
 }
 

@@ -5,13 +5,20 @@
  */
 package joanakeyrefactoring.javaforkeycreator;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import joanakeyrefactoring.staticCG.JCallGraph;
+import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaClass;
+import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
+import org.antlr.v4.runtime.misc.OrderedHashSet;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -45,7 +52,7 @@ public class CopyKeyCompatibleListenerTest {
     public void testGenerateKeyCompatible() throws IOException {
         final String classCode = "package jzip;\n"
                 + "\n"
-                + "import jzip.data.test;\n"            
+                + "import jzip.data.test;\n"
                 + "import java.util.ArrayList;\n"
                 + "import java.util.Iterator;\n"
                 + "import java.util.LinkedList;\n"
@@ -183,11 +190,46 @@ public class CopyKeyCompatibleListenerTest {
                 + "		}\n"
                 + "		this.cmdParser = new GnuParser();\n"
                 + "	}\n"
-                + "\n"            
+                + "\n"
                 + "}";
         CopyKeyCompatibleListener l = new CopyKeyCompatibleListener("jzip");
-        
-        System.out.println(l.generateKeyCompatible(classCode));
+        Set<StaticCGJavaMethod> methods = new HashSet<>();
+        methods.add(new StaticCGJavaMethod(new StaticCGJavaClass("JZip"), "init", "", false, "void"));
+       // System.out.println(l.generateKeyCompatible(classCode, methods));
     }
+
+    @Test
+    public void testCopyOnlyNeededMethods() throws IOException {
+        String code = 
+                "package multipleclassesfalsepos;\n"
+                + "\n"
+                + "/**\n"
+                + " *\n"
+                + " * @author holgerklein\n"
+                + " */\n"
+                + "public class ClassA {\n"
+                + "\n"
+                + "    ClassB b = new ClassB();\n"
+                + "\n"
+                + "    ClassA() {\n"
+                + "    }\n"
+                + "\n"
+                + "    public int falsePos(int high) {\n"
+                + "        this.b = new ClassB();\n"
+                + "        int arr[] = new int[5];\n"
+                + "        arr[0] = 1;\n"
+                + "        return b.putDataInArr(high, arr)[0];\n"
+                + "    }\n"
+                + "}";
+        JCallGraph callGraph = new JCallGraph();
+        callGraph.generateCG(new File("testdata/multipleClassesFalsePos/MultipleClassesFalsePos/dist/MultipleClassesFalsePos.jar"));
+        OrderedHashSet<StaticCGJavaMethod> alreadyFoundMethods = callGraph.getAlreadyFoundMethods();
+        StaticCGJavaMethod falsePosMethod = alreadyFoundMethods.get(3);
+        Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> allNecessaryClasses = callGraph.getAllNecessaryClasses(falsePosMethod);
+        CopyKeyCompatibleListener listener = new CopyKeyCompatibleListener("multipleclassesfalsepos");
+        String keyCompatible = listener.generateKeyCompatible(code, allNecessaryClasses.get(falsePosMethod.getContainingClass()));       
+    }
+    
+    
 
 }
