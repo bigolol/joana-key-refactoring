@@ -11,7 +11,6 @@ import joanakeyrefactoring.antlr.java8.Java8BaseListener;
 import joanakeyrefactoring.antlr.java8.Java8Lexer;
 import joanakeyrefactoring.antlr.java8.Java8Parser;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
-import org.antlr.runtime.tree.TreeVisitor;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -34,7 +33,7 @@ public class GetMethodBodyListener extends Java8BaseListener {
     private int stopLine;
 
     public void parseFile(String file, StaticCGJavaMethod method) {
-        if(method.getId().equals("unZipItExtract")) {
+        if (method.getId().equals("unZipItExtract")) {
             int i = 0;
         }
         Java8Lexer java8Lexer = new Java8Lexer(new ANTLRInputStream(file));
@@ -57,8 +56,6 @@ public class GetMethodBodyListener extends Java8BaseListener {
     public int getStopLine() {
         return stopLine;
     }
-    
-    
 
     public int getMethodStartLine() {
         return methodStartLine;
@@ -72,8 +69,6 @@ public class GetMethodBodyListener extends Java8BaseListener {
         return methodDeclWithNullable;
     }
 
-    
-    
     @Override
     public void enterMethodDeclaration(Java8Parser.MethodDeclarationContext ctx) {
         if (parsedRightMethod == true) {
@@ -106,7 +101,7 @@ public class GetMethodBodyListener extends Java8BaseListener {
         if (!argTypeString.equals(method.getParameterWithoutPackage())) {
             return;
         }
-        
+
         startLine = ctx.getStart().getLine();
         stopLine = ctx.getStop().getLine();
 
@@ -133,7 +128,7 @@ public class GetMethodBodyListener extends Java8BaseListener {
         methodDeclWithNullable = methodDeclWithNullable.replace("ARGS", methodParamsNullable);
     }
 
-    private String getArgTypeString(Java8Parser.FormalParameterListContext ctx) {
+    public static String getArgTypeString(Java8Parser.FormalParameterListContext ctx) {
         if (ctx == null) {
             return "";
         }

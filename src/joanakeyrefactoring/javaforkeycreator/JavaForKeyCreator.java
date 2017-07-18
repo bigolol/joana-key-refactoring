@@ -14,8 +14,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import joanakeyrefactoring.CustomListener.GetMethodBodyListener;
 import joanakeyrefactoring.StateSaver;
@@ -53,7 +55,7 @@ public class JavaForKeyCreator {
             SDGNodeTuple formalNodeTuple,
             StaticCGJavaMethod methodCorresToSE) throws IOException {
         this.keyCompatibleListener = new CopyKeyCompatibleListener(callGraph.getPackageName());
-        
+
         SDGNode formalInNode = formalNodeTuple.getFirstNode();
         StaticCGJavaClass containingClass = methodCorresToSE.getContainingClass();
         String relPathForJavaClass
@@ -66,7 +68,10 @@ public class JavaForKeyCreator {
 
         String contents = new String(Files.readAllBytes(javaClassFile.toPath()));
 
-        String keyCompatibleContents = keyCompatibleListener.generateKeyCompatible(contents);
+        Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> allNecessaryClasses = callGraph.getAllNecessaryClasses(methodCorresToSE);
+
+        String keyCompatibleContents = keyCompatibleListener.generateKeyCompatible(
+                contents, allNecessaryClasses.get(methodCorresToSE.getContainingClass()));
 
         methodBodyListener.parseFile(keyCompatibleContents, methodCorresToSE);
 
@@ -74,8 +79,6 @@ public class JavaForKeyCreator {
         String sinkDescr = generateSinkDescr(formalNodeTuple.getSecondNode());
         String pointsToDecsr = PointsToGenerator.generatePreconditionFromPointsToSet(
                 sdg, sdg.getEntry(formalInNode), stateSaver);
-
-        Set<StaticCGJavaClass> allNecessaryClasses = getAllNecessaryClasses(methodCorresToSE);
 
         javaProjectCopyHandler = new JavaProjectCopyHandler(pathToJavaSource, pathToTestJava, keyCompatibleListener);
         javaProjectCopyHandler.copyClasses(allNecessaryClasses);
@@ -121,17 +124,7 @@ public class JavaForKeyCreator {
         return lines;
     }
 
-    private Set<StaticCGJavaClass> getAllNecessaryClasses(StaticCGJavaMethod method) {
-        Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = callGraph.getAllMethodsCalledByMethodRec(method);
-        Set<StaticCGJavaClass> created = new HashSet<>();
-        for (StaticCGJavaMethod m : allMethodsCalledByMethodRec) {
-            if (m.getContainingClass() != method.getContainingClass()
-                    && !created.contains(m.getContainingClass())) {
-                created.add(m.getContainingClass());
-            }
-        }
-        return created;
-    }
+    
 
     private String generateSinkDescr(SDGNode sinkNode) {
         if (sinkNode.getKind() == SDGNode.Kind.EXIT) {

@@ -13,9 +13,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import joanakeyrefactoring.CustomListener.GetMethodBodyListener;
 import joanakeyrefactoring.antlr.java8.Java8BaseListener;
 import joanakeyrefactoring.antlr.java8.Java8Lexer;
 import joanakeyrefactoring.antlr.java8.Java8Parser;
+import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -34,6 +37,7 @@ public class CopyKeyCompatibleListener extends Java8BaseListener {
     private List<String> importStatements = new ArrayList<>();
     private String mainPackageName;
     private String packageOfClass;
+    Set<StaticCGJavaMethod> neededMethods;
 
     public CopyKeyCompatibleListener(String mainPackageName) throws FileNotFoundException, IOException {
         InputStream is = new FileInputStream("dep/JAVALANG.txt");
@@ -103,7 +107,24 @@ public class CopyKeyCompatibleListener extends Java8BaseListener {
 
     @Override
     public void enterConstructorDeclaration(Java8Parser.ConstructorDeclarationContext ctx) {
-        currentlyGenerated.append(extractStringInBetween(ctx)).append("\n");
+        if (isCtorNecessary(ctx)) {
+            currentlyGenerated.append(extractStringInBetween(ctx)).append("\n");
+        }
+    }
+
+    private boolean isCtorNecessary(Java8Parser.ConstructorDeclarationContext ctx) {
+        String id = "<init>";
+        String args = GetMethodBodyListener.getArgTypeString(ctx.constructorDeclarator().formalParameterList());
+        return isMethodNeeded(id, args);
+    }
+
+    private boolean isMethodNeeded(String methodId, String args) {
+        for (StaticCGJavaMethod m : neededMethods) {
+            if (m.getId().equals(methodId) && m.getParameterWithoutPackage().equals(args)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -181,13 +202,22 @@ public class CopyKeyCompatibleListener extends Java8BaseListener {
 
     @Override
     public void enterMethodDeclaration(Java8Parser.MethodDeclarationContext ctx) {
-        currentlyGenerated.append(extractStringInBetween(ctx)).append('\n');
+        if (methodIsNeeded(ctx)) {
+            currentlyGenerated.append(extractStringInBetween(ctx)).append('\n');
+        }
     }
 
-    String generateKeyCompatible(String classCode) {
+    private boolean methodIsNeeded(Java8Parser.MethodDeclarationContext ctx) {
+        String id = ctx.methodHeader().methodDeclarator().Identifier().getText();
+        String args = GetMethodBodyListener.getArgTypeString(ctx.methodHeader().methodDeclarator().formalParameterList());
+        return isMethodNeeded(id, args);
+    }
+
+    String generateKeyCompatible(String classCode, Set<StaticCGJavaMethod> neededMethods) {
         currentlyGenerated = new StringBuilder();
         classCodeAsLines = new ArrayList<>();
         importStatements = new ArrayList<>();
+        this.neededMethods = neededMethods;
 
         String[] split = classCode.split("\n");
         for (int i = 0; i < split.length; i++) {
@@ -202,4 +232,5 @@ public class CopyKeyCompatibleListener extends Java8BaseListener {
 
         return currentlyGenerated.toString();
     }
+
 }

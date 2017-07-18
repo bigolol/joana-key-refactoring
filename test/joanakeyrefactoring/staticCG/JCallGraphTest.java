@@ -6,6 +6,8 @@
 package joanakeyrefactoring.staticCG;
 
 import java.io.File;
+import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
+import org.antlr.v4.runtime.misc.OrderedHashSet;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -45,6 +47,7 @@ public class JCallGraphTest {
     public void testGenerateCG() throws Exception {
         JCallGraph jCallGraph = new JCallGraph();
         jCallGraph.generateCG(new File("testdata/multipleClassesFalsePos/MultipleClassesFalsePos/dist/MultipleClassesFalsePos.jar"));
+        OrderedHashSet<StaticCGJavaMethod> alreadyFoundMethods = jCallGraph.getAlreadyFoundMethods();
     }
     
 }
