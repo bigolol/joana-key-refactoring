@@ -84,7 +84,7 @@ public class JavaProjectCopyHandler {
                 
                 String keyCompatibleContents = copyKeyCompatibleListener.generateKeyCompatible(contents, classesToCopy.get(currentClassToCopy));
 
-                FileUtils.writeStringToFile(newFile, keyCompatibleContents);
+                FileUtils.writeStringToFile(classFileToCopyTo, keyCompatibleContents);
                 
             } catch (Exception ex) {
                 ex.printStackTrace();
