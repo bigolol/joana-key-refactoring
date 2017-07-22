@@ -5,12 +5,9 @@
  */
 package joanakeyrefactoring.javaforkeycreator;
 
-import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
 
 /**
@@ -73,8 +70,7 @@ public class KeyFileCreator {
     private static String getMethodnameKey(StaticCGJavaMethod method) {
         String params = method.getParameterWithoutPackage().replaceAll("int\\[\\]", "\\[I").replaceAll("byte\\[\\]", "\\[B");
         return method.getId() + "(" + params + ")";
-    }  
-   
+    }
 
     private static void generateKeyFileFrom(
             String profileString, String javaSourceString,

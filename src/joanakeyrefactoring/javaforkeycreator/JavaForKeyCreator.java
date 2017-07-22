@@ -7,6 +7,7 @@ package joanakeyrefactoring.javaforkeycreator;
 
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.ifc.sdg.graph.SDG;
+import edu.kit.joana.ifc.sdg.graph.SDGEdge;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import edu.kit.joana.ifc.sdg.graph.SDGNodeTuple;
 import java.io.File;
@@ -73,7 +74,7 @@ public class JavaForKeyCreator {
 
         methodBodyListener.parseFile(keyCompatibleContents, methodCorresToSE);
 
-        String inputDescrExceptFormalIn = getInputExceptFormalIn(formalInNode, methodCorresToSE);
+        String inputDescrExceptFormalIn = getInputExceptFormalIn(formalInNode, methodCorresToSE, sdg);
         String sinkDescr = generateSinkDescr(formalNodeTuple.getSecondNode());
         String pointsToDecsr = PointsToGenerator.generatePreconditionFromPointsToSet(
                 sdg, sdg.getEntry(formalInNode), stateSaver);
@@ -122,9 +123,8 @@ public class JavaForKeyCreator {
         return lines;
     }
 
-    
-
     private String generateSinkDescr(SDGNode sinkNode) {
+        String bytecodeName = sinkNode.getBytecodeName();
         if (sinkNode.getKind() == SDGNode.Kind.EXIT) {
             return "\\result";
         } else {
@@ -132,7 +132,43 @@ public class JavaForKeyCreator {
         }
     }
 
-    private String getInputExceptFormalIn(SDGNode formalInNode, StaticCGJavaMethod methodCorresToSE) {
+    private String getCompleteNameOfOtherThanParam(SDGNode n, StaticCGJavaMethod methodCorresToSE) {
+        String bytecodeName = n.getBytecodeName();
+        String[] forInNames = bytecodeName.split("\\.");
+        String inputNameForKey = forInNames[forInNames.length - 1];
+
+        List<SDGEdge> incomingParamStructEdges = sdg.getIncomingEdgesOfKind(n, SDGEdge.Kind.PARAMETER_STRUCTURE);
+
+        SDGNode currentStructSource = incomingParamStructEdges.get(0).getSource();
+        String sourceBC = incomingParamStructEdges.get(0).getSource().getBytecodeName();
+        while (!sourceBC.startsWith("<param>")) {
+            String[] sourceBCSplit = sourceBC.split("\\.");
+            inputNameForKey = sourceBCSplit[sourceBCSplit.length - 1] + "." + inputNameForKey;
+            incomingParamStructEdges = sdg.getIncomingEdgesOfKind(currentStructSource, SDGEdge.Kind.PARAMETER_STRUCTURE);
+            currentStructSource = incomingParamStructEdges.get(0).getSource();
+            sourceBC = currentStructSource.getBytecodeName();
+        }
+        String nameForParam = getNameForParam(sourceBC, methodCorresToSE);
+        return nameForParam + "." + inputNameForKey;
+    }
+
+    private String getNameForParam(String byteCodeName, StaticCGJavaMethod methodCorresToSE) {
+        int p_number = Integer.parseInt(byteCodeName.substring("<param>".length() + 1)); //+ 1 for the trailing space
+        if (!methodCorresToSE.isStatic()) {
+            if (p_number == 0) {
+                return "this";
+            } else {
+                return methodBodyListener.getExtractedMethodParamNames().get(p_number - 1);
+            }
+        } else {
+            return methodBodyListener.getExtractedMethodParamNames().get(p_number);
+        }
+    }
+
+    private String getInputExceptFormalIn(
+            SDGNode formalInNode,
+            StaticCGJavaMethod methodCorresToSE,
+            SDG sdg) {
         SDGNode methodNodeInSDG = sdg.getEntry(formalInNode);
         Set<SDGNode> formalInNodesOfProcedure = sdg.getFormalInsOfProcedure(methodNodeInSDG);
         String created = "";
@@ -144,27 +180,18 @@ public class JavaForKeyCreator {
                 continue;
             }
             String bytecodeName = currentFormalInNode.getBytecodeName();
+            String inputNameForKey = "";
             if (bytecodeName.startsWith(param)) {
                 try {
-                    int p_number = Integer.parseInt(bytecodeName.substring(param.length() + 1)); //+ 1 for the trailing space
-                    if (!methodCorresToSE.isStatic()) {
-                        if (p_number == 0) {
-                            created += "this, ";
-                        } else {
-                            created += methodBodyListener.getExtractedMethodParamNames().get(p_number - 1) + ", ";
-                        }
-                    } else {
-                        created += methodBodyListener.getExtractedMethodParamNames().get(p_number) + ", ";
-                    }
+                    inputNameForKey = getNameForParam(bytecodeName, methodCorresToSE);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
-                String[] forInNames = bytecodeName.split("\\.");
-                String forInName = forInNames[forInNames.length - 1];
-                if (!bytecodeName.equals("<[]>")) {
-                    created += forInName + ", ";
-                }
+                inputNameForKey = getCompleteNameOfOtherThanParam(currentFormalInNode, methodCorresToSE);
+            }
+            if (!inputNameForKey.endsWith("<[]>")) {
+                created += inputNameForKey + ", ";
             }
         }
         if (created.isEmpty()) {

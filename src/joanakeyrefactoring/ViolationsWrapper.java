@@ -237,7 +237,7 @@ public class ViolationsWrapper {
             if (!classPackageName.startsWith(packageName)) {
                 return false;
             }
-            Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = callGraph.getAllMethodsCalledByMethodRec(m);
+            Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = m.getCalledFunctionsRec();
             for (StaticCGJavaMethod calledM : allMethodsCalledByMethodRec) {
                 if (!calledM.getContainingClass().getPackageString().startsWith(packageName)) {
                     if (!isKeyFeature(calledM)) {

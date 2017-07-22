@@ -12,13 +12,17 @@ package multipleclassesfalsepos;
 public class ClassA {
 
     ClassB b = new ClassB();
+    ClassB c = new ClassB();
 
     ClassA() {
     }
 
     public int falsePos(int high) {
-        int arr[] = new int[5];
-        arr[0] = 1;
-        return b.putDataInArr(high, arr)[0];
+        b.arr = new int[5];
+        b.arr[0] = 1;
+        c.arr = new int[3];
+        c.arr[0] = 2;
+        b.arr[1] = c.arr[0];
+        return b.putDataInArr(high)[0];
     }
 }

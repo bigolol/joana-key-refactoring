@@ -102,6 +102,11 @@ public class JCallGraph {
                 packageName = visitor.getVisitedClass().getPackageString().split("\\.")[0];
             }
         }
+        
+        for(StaticCGJavaMethod m : alreadyFoundMethods) {
+            m.setCalledFunctionsRec(getAllMethodsCalledByMethodRec(m));
+        }
+        
     }
 
     public StaticCGJavaMethod getMethodFor(String className, String methodName, String argList) {
@@ -119,7 +124,7 @@ public class JCallGraph {
     }
 
     public Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> getAllNecessaryClasses(StaticCGJavaMethod method) {
-        Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = getAllMethodsCalledByMethodRec(method);
+        Set<StaticCGJavaMethod> allMethodsCalledByMethodRec = method.getCalledFunctionsRec();
         Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> created = new HashMap<>();
         Set<StaticCGJavaMethod> initialMethodSet = new HashSet<>();
         initialMethodSet.add(method);

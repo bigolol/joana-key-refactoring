@@ -10,10 +10,10 @@ package multipleclassesfalsepos;
  * @author holger
  */
 public class ClassB {
-    
+    public int[] arr;   
     ClassB() {}
     
-    int[] putDataInArr(int high, int[] arr) {
+    int[] putDataInArr(int high) {
         arr[4] = high;
         return arr;
     }

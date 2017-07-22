@@ -77,7 +77,7 @@ public class ViolationsDisproverSemantic {
                         formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));
                 result = automationHelper.runKeY(pathToKeyJar, "information flow");
                 resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
-            } catch (FileNotFoundException ex) {
+            } catch (FileNotFoundException ex) {    
                 Logger.getLogger(ViolationsDisproverSemantic.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(ViolationsDisproverSemantic.class.getName()).log(Level.SEVERE, null, ex);

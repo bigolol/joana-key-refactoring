@@ -60,10 +60,12 @@ public class JavaProjectCopyHandler {
         relPathFile.mkdirs();
         File javaFile = new File(pathToNew + relPathForJavaClass + "/" + className + ".java");
         javaFile.createNewFile();
-        PrintWriter out = new PrintWriter(javaFile);
+        String classFileAsOneString = "";
         for (String l : classContent) {
-            out.println(l);
+            classFileAsOneString += l + System.lineSeparator();
         }
+        PrintWriter out = new PrintWriter(javaFile);
+        out.print(classFileAsOneString);
         out.close();
     }
 
@@ -81,11 +83,11 @@ public class JavaProjectCopyHandler {
                 File classFileToCopyFrom = new File(pathToSource + relPathForJavaClass + className + ".java");
 
                 String contents = new String(java.nio.file.Files.readAllBytes(classFileToCopyFrom.toPath()));
-                
+
                 String keyCompatibleContents = copyKeyCompatibleListener.generateKeyCompatible(contents, classesToCopy.get(currentClassToCopy));
 
                 FileUtils.writeStringToFile(classFileToCopyTo, keyCompatibleContents);
-                
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

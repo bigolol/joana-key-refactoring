@@ -8,6 +8,7 @@ package joanakeyrefactoring.staticCG.javamodel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import org.antlr.v4.runtime.misc.OrderedHashSet;
 
 /**
@@ -22,7 +23,8 @@ public class StaticCGJavaMethod {
     private OrderedHashSet<StaticCGJavaMethod> calledMethods = new OrderedHashSet<>();
     private boolean isStatic;
     private String returnType;
-
+    private Set<StaticCGJavaMethod> calledFunctionsRec;
+    
     public StaticCGJavaMethod(
             StaticCGJavaClass containingClass,
             String id, String parameterTypes,
@@ -33,6 +35,19 @@ public class StaticCGJavaMethod {
         this.isStatic = isStatic;
         this.returnType = returnType;
     }
+
+    public void setCalledFunctionsRec(Set<StaticCGJavaMethod> calledFunctionsRec) {
+        this.calledFunctionsRec = calledFunctionsRec;
+    }
+    
+    public boolean callsFunction(StaticCGJavaMethod m) {
+        return calledFunctionsRec.contains(m);  
+    }
+
+    public Set<StaticCGJavaMethod> getCalledFunctionsRec() {
+        return calledFunctionsRec;
+    }
+      
 
     public String getReturnType() {
         return returnType;
