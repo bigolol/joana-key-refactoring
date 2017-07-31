@@ -14,12 +14,24 @@ import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 public class PersistentLocalPointerKey {
     
     private int valueNumber;
+    private PersistentCGNode persistentCGNode;
+    private boolean parameter;
     
-    public PersistentLocalPointerKey(LocalPointerKey localPointerKey) {
+    public PersistentLocalPointerKey(LocalPointerKey localPointerKey, PersistentCGNode persistentCGNode) {
         valueNumber = localPointerKey.getValueNumber();
+        parameter = localPointerKey.isParameter();
+        this.persistentCGNode = persistentCGNode;
     }
     
     public int getValueNumber() {
         return valueNumber;
+    }
+    
+    public PersistentCGNode getNode() {
+        return persistentCGNode;
+    }
+
+    public boolean isParameter() {
+        return parameter;
     }
 }

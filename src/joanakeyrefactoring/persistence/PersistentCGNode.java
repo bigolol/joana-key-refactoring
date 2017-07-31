@@ -5,6 +5,10 @@
  */
 package joanakeyrefactoring.persistence;
 
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
+import java.util.List;
+
 /**
  *
  * @author hklein
@@ -12,6 +16,14 @@ package joanakeyrefactoring.persistence;
 public class PersistentCGNode {
     private PersistentIR persistentIR;
     
+    
+    public PersistentCGNode() {
+    }
+    
+    public void createPersistentIR(CGNode n, List<LocalPointerKey> localPointerKeys) {
+        persistentIR = new PersistentIR(localPointerKeys, n.getIR());
+    }
+        
     public PersistentIR getIR() {
         return persistentIR;
     }

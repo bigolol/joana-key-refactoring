@@ -42,7 +42,7 @@ public class CombinedApproach {
 
     public static void main(String[] args) {
         try {
-            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/jzip.joak");
+            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/multipleClassesArrFalsePos.joak");
             CombinedApproach.runTestFromCheckData(parsedCheckData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,6 +109,8 @@ public class CombinedApproach {
         StateSaver stateSaver = new StateSaver();
 
         IFCAnalysis analysis = runJoanaCreateSDGAndIFCAnalyis(pathToJar, entryMethod, stateSaver);
+        
+        stateSaver.generatePersistenseStructures(analysis.getProgram().getSDG());
 
         JSONArray sources = jsonObj.getJSONArray("sources");
         JSONArray sinks = jsonObj.getJSONArray("sinks");

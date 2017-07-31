@@ -15,14 +15,19 @@ import com.ibm.wala.util.intset.OrdinalSet;
 import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.SDGNode;
 import java.util.ArrayList;
+import java.util.List;
 import joanakeyrefactoring.StateSaver;
+import joanakeyrefactoring.persistence.PersistentCGNode;
+import joanakeyrefactoring.persistence.PersistentIR;
+import joanakeyrefactoring.persistence.PersistentLocalPointerKey;
 
 /**
  *
  * @author holger
  */
 public class PointsToGenerator {
-     /**
+
+    /**
      * Calculates non-aliasing information for parameters of a method node using
      * JOANA's points-to information. From the paper: Definition 9 (Generation
      * of preconditions). Let o be a reference and P_o its points-to set. We
@@ -35,21 +40,14 @@ public class PointsToGenerator {
      */
     public static String generatePreconditionFromPointsToSet(SDG sdg, SDGNode methodNode, StateSaver stateSaver) {
         //get the call graph node corresponding to the SDG method node
-        CGNode methodNodeInCallGraph = stateSaver.getNode(sdg.getCGNodeId(methodNode));
+        PersistentCGNode persistentCGNode = stateSaver.getNode(sdg.getCGNodeId(methodNode));
         // get IR for parameter names
-        IR ir = methodNodeInCallGraph.getIR();
-        Iterable<PointerKey> pointerKeys = stateSaver.getPointerKeys();
-        ArrayList<LocalPointerKey> localPointerKeys = new ArrayList<LocalPointerKey>();
-        for (PointerKey currentPointerKey : pointerKeys) {
-            if (currentPointerKey instanceof LocalPointerKey) {
-                LocalPointerKey localPointerKey = (LocalPointerKey) currentPointerKey;
-                if (localPointerKey.getNode() == methodNodeInCallGraph && localPointerKey.isParameter()) {
-                    localPointerKeys.add(localPointerKey);
-                }
-            }
-        }
+        PersistentIR persistentIR = persistentCGNode.getIR();
+
+        List<PersistentLocalPointerKey> persistentLocalPointerKeys = stateSaver.getPersistentLocalPointerKeys(persistentCGNode);
+
         // calculate individual non-alias clauses
-        ArrayList<String> pointsToResult = calculateNonAliases(localPointerKeys, stateSaver, ir);
+        ArrayList<String> pointsToResult = calculateNonAliases(persistentLocalPointerKeys, stateSaver, persistentIR);
         StringBuilder stringBuilder = new StringBuilder();
         String delim = "";
         //chain clauses together by conjunction
@@ -69,19 +67,16 @@ public class PointsToGenerator {
     }
 
     private static ArrayList<String> calculateNonAliases(
-            ArrayList<LocalPointerKey> localPointerKeys,
-            StateSaver stateSaver, IR ir) {
-        int amountLocalPointerKeys = localPointerKeys.size();
+            List<PersistentLocalPointerKey> localPointerKeys,
+            StateSaver stateSaver, PersistentIR ir) {
         ArrayList<String> result = new ArrayList<String>();
         // enumerate all two element subsets of pointer keys and check if those two have disjunct points-to sets
-        for (int i = 0; i < amountLocalPointerKeys; i++) {
-            OrdinalSet<? extends InstanceKey> pointsToSet = stateSaver.getPointsToSet(localPointerKeys.get(i));
-            for (int j = i + 1; j < amountLocalPointerKeys; j++) {
-                if (disjunct(pointsToSet, stateSaver.getPointsToSet(localPointerKeys.get(j)))) {
-                    // get the names of the parameters associated with the pointer keys                     
-                    String o1 = ir.getLocalNames(0, localPointerKeys.get(i).getValueNumber())[0];
-                    String o2 = ir.getLocalNames(0, localPointerKeys.get(j).getValueNumber())[0];
-                    // if points-to sets are disjunct, o1 and o2 cannot alias
+        for (PersistentLocalPointerKey persistentLocalPointerKey : localPointerKeys) {
+            String o1 = ir.getLocalName(persistentLocalPointerKey.getValueNumber());
+            for (PersistentLocalPointerKey currentDisjunctOtherPk : stateSaver.getDisjunctLPKs(persistentLocalPointerKey)) {
+                String o2 = ir.getLocalName(currentDisjunctOtherPk.getValueNumber());
+                // if points-to sets are disjunct, o1 and o2 cannot alias
+                if (o1 != null && o2 != null && !o1.equals(o2) && !result.contains(o1 + " != " + o2)) {
                     result.add(o1 + " != " + o2);
                 }
             }
@@ -89,19 +84,4 @@ public class PointsToGenerator {
         return result;
     }
 
-    /**
-     * calculates whether two Ordinal sets are disjunct.
-     */
-    private static boolean disjunct(OrdinalSet<?> s1, OrdinalSet<?> s2) {
-        for (Object e1 : s1) {
-            for (Object e2 : s2) {
-                if (e1.equals(e2)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    
-    
 }

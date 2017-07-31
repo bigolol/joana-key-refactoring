@@ -205,7 +205,7 @@ public class CopyKeyCompatibleListener extends Java8BaseListener implements Java
                 }
             }
             currentlyGenerated
-                    .append("/*@spec_pub@*/")
+                    //.append("/*@spec_pub@*/")
                     .append(extractStringInBetween(ctx)).append(";\n");
         }
     }
