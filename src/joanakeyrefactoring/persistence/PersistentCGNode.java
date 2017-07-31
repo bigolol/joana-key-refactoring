@@ -15,9 +15,10 @@ import java.util.List;
  */
 public class PersistentCGNode {
     private PersistentIR persistentIR;
+    private int uniqueId;    
     
-    
-    public PersistentCGNode() {
+    public PersistentCGNode(int id) {
+        this.uniqueId = id;
     }
     
     public void createPersistentIR(CGNode n, List<LocalPointerKey> localPointerKeys) {
@@ -27,4 +28,5 @@ public class PersistentCGNode {
     public PersistentIR getIR() {
         return persistentIR;
     }
+    
 }

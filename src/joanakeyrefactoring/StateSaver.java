@@ -29,6 +29,7 @@ public class StateSaver implements CGConsumer {
     private CallGraph callGraph;
     private PointerAnalysis<? extends InstanceKey> pointerAnalyis;
     private List<PersistentLocalPointerKey> persistentLocalPointerKeys = new ArrayList<>();
+    private List<PersistentCGNode> persistentCGNodes = new ArrayList<>();
     private Map<Integer, PersistentCGNode> cgNodeIdToPersistentCGNodes = new HashMap<>();
     private Map<CGNode, PersistentCGNode> cgNodesToPersistentCGNodes = new HashMap<>();
     private Map<PersistentLocalPointerKey, List<PersistentLocalPointerKey>> disjunctPointsToSets
@@ -41,8 +42,7 @@ public class StateSaver implements CGConsumer {
     }
 
     public String getSaveString() {
-        StringBuilder created = new StringBuilder();
-        
+        StringBuilder created = new StringBuilder();        
         return created.toString();
     }
 
@@ -64,16 +64,20 @@ public class StateSaver implements CGConsumer {
         ArrayList<Integer> cgNodeIds = new ArrayList<>();
 
         //after this loop: all localpointerkeys in corr arr, all cgNodeids in corr arr, cgNode -> PersistentCGNode map filled
+        int id = 0;
         for (PointerKey pk : pointerAnalyis.getPointerKeys()) {
             if (pk instanceof LocalPointerKey) {
                 LocalPointerKey localPointerKey = (LocalPointerKey) pk;
                 CGNode corresCgNode = localPointerKey.getNode();
                 if (!cgNodesToPersistentCGNodes.containsKey(corresCgNode)) {
-                    cgNodesToPersistentCGNodes.put(corresCgNode, new PersistentCGNode());
+                    PersistentCGNode persistentCGNode = new PersistentCGNode(id);
+                    cgNodesToPersistentCGNodes.put(corresCgNode, persistentCGNode);
+                    persistentCGNodes.add(persistentCGNode);
                 }
-                int cgNodeId = callGraph.getNumber(corresCgNode);
                 localPointerKeys.add(localPointerKey);
+                int cgNodeId = callGraph.getNumber(corresCgNode);
                 cgNodeIds.add(cgNodeId);
+                id++;
             }
         }
 

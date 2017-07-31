@@ -34,4 +34,8 @@ public class PersistentLocalPointerKey {
     public boolean isParameter() {
         return parameter;
     }
+    
+    public String generateSaveString() {
+        return String.valueOf(valueNumber + '\n');
+    }
 }

@@ -27,6 +27,14 @@ public class PersistentIR {
             }
         }
     }
+    
+    public String generateSaveString() {
+        StringBuilder sb = new StringBuilder();
+        vnsToLocalNames.forEach((i, s) -> {
+            sb.append(i.toString()).append(" -> ").append(s).append('\n');
+        });
+        return sb.toString();
+    }
 
     public String getLocalName(int vn) {
         return vnsToLocalNames.get(vn);
