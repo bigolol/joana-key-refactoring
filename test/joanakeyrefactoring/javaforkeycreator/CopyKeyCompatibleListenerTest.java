@@ -228,7 +228,7 @@ public class CopyKeyCompatibleListenerTest {
         StaticCGJavaMethod falsePosMethod = alreadyFoundMethods.get(3);
         Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> allNecessaryClasses = callGraph.getAllNecessaryClasses(falsePosMethod);
         CopyKeyCompatibleListener listener = new CopyKeyCompatibleListener("multipleclassesfalsepos");
-        String keyCompatible = listener.generateKeyCompatible(code, allNecessaryClasses.get(falsePosMethod.getContainingClass()));       
+        String keyCompatible = listener.transformCode(code, allNecessaryClasses.get(falsePosMethod.getContainingClass()));       
     }
     
     

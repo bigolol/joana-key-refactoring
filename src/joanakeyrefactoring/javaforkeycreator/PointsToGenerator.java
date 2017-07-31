@@ -34,12 +34,11 @@ public class PointsToGenerator {
      * precondition
      */
     public static String generatePreconditionFromPointsToSet(SDG sdg, SDGNode methodNode, StateSaver stateSaver) {
-        PointerAnalysis<? extends InstanceKey> pointerAnalyis = stateSaver.pointerAnalyis;
         //get the call graph node corresponding to the SDG method node
-        CGNode methodNodeInCallGraph = stateSaver.callGraph.getNode(sdg.getCGNodeId(methodNode));
+        CGNode methodNodeInCallGraph = stateSaver.getNode(sdg.getCGNodeId(methodNode));
         // get IR for parameter names
         IR ir = methodNodeInCallGraph.getIR();
-        Iterable<PointerKey> pointerKeys = pointerAnalyis.getPointerKeys();
+        Iterable<PointerKey> pointerKeys = stateSaver.getPointerKeys();
         ArrayList<LocalPointerKey> localPointerKeys = new ArrayList<LocalPointerKey>();
         for (PointerKey currentPointerKey : pointerKeys) {
             if (currentPointerKey instanceof LocalPointerKey) {
@@ -50,7 +49,7 @@ public class PointsToGenerator {
             }
         }
         // calculate individual non-alias clauses
-        ArrayList<String> pointsToResult = calculateNonAliases(localPointerKeys, pointerAnalyis, ir);
+        ArrayList<String> pointsToResult = calculateNonAliases(localPointerKeys, stateSaver, ir);
         StringBuilder stringBuilder = new StringBuilder();
         String delim = "";
         //chain clauses together by conjunction
@@ -71,14 +70,14 @@ public class PointsToGenerator {
 
     private static ArrayList<String> calculateNonAliases(
             ArrayList<LocalPointerKey> localPointerKeys,
-            PointerAnalysis<? extends InstanceKey> pointerAnalysis, IR ir) {
+            StateSaver stateSaver, IR ir) {
         int amountLocalPointerKeys = localPointerKeys.size();
         ArrayList<String> result = new ArrayList<String>();
         // enumerate all two element subsets of pointer keys and check if those two have disjunct points-to sets
         for (int i = 0; i < amountLocalPointerKeys; i++) {
-            OrdinalSet<? extends InstanceKey> pointsToSet = pointerAnalysis.getPointsToSet(localPointerKeys.get(i));
+            OrdinalSet<? extends InstanceKey> pointsToSet = stateSaver.getPointsToSet(localPointerKeys.get(i));
             for (int j = i + 1; j < amountLocalPointerKeys; j++) {
-                if (disjunct(pointsToSet, pointerAnalysis.getPointsToSet(localPointerKeys.get(j)))) {
+                if (disjunct(pointsToSet, stateSaver.getPointsToSet(localPointerKeys.get(j)))) {
                     // get the names of the parameters associated with the pointer keys                     
                     String o1 = ir.getLocalNames(0, localPointerKeys.get(i).getValueNumber())[0];
                     String o2 = ir.getLocalNames(0, localPointerKeys.get(j).getValueNumber())[0];
