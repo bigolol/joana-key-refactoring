@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import joanakeyrefactoring.javaforkeycreator.JavaForKeyCreator;
 import joanakeyrefactoring.staticCG.JCallGraph;
+import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
 
 public class ViolationsDisproverSemantic {
 
@@ -67,23 +68,29 @@ public class ViolationsDisproverSemantic {
     private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {
         SDGNode actualInNode = se.getSource();
         SDGNode actualOutNode = se.getTarget();
- 
+
         Collection<SDGNodeTuple> formalNodePairs = sdg.getAllFormalPairs(actualInNode, actualOutNode);
 
         for (SDGNodeTuple formalNodeTuple : formalNodePairs) {
             boolean result = false, resultFunc = false;
             try {
+                StaticCGJavaMethod methodCorresToSummaryEdge = violationsWrapper.getMethodCorresToSummaryEdge(se);
                 String pathToTestJava = javaForKeyCreator.generateJavaForFormalNodeTuple(
-                        formalNodeTuple, violationsWrapper.getMethodCorresToSummaryEdge(se));
+                        formalNodeTuple, methodCorresToSummaryEdge);
                 result = automationHelper.runKeY(pathToKeyJar, "information flow");
                 resultFunc = automationHelper.runKeY(pathToKeyJar, "functional");
-            } catch (FileNotFoundException ex) {    
+            } catch (FileNotFoundException ex) {
                 Logger.getLogger(ViolationsDisproverSemantic.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
             } catch (IOException ex) {
                 Logger.getLogger(ViolationsDisproverSemantic.class.getName()).log(Level.SEVERE, null, ex);
-            }             
-            if (!result || !resultFunc) {
                 return false;
+            } catch (Exception ex) {
+                Logger.getLogger(ViolationsDisproverSemantic.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
+            if (!result || !resultFunc) {
+                    return false;
             }
         }
         return true;

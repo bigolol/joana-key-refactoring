@@ -27,9 +27,9 @@ public class SummaryEdgeComparator implements Comparator<SDGEdge> {
         StaticCGJavaMethod e1Method = violationsWrapper.getMethodCorresToSummaryEdge(e1);
         StaticCGJavaMethod e2Method = violationsWrapper.getMethodCorresToSummaryEdge(e2);
         if (e1Method.callsFunction(e2Method)) {
-            return 1;
-        } else if (e2Method.callsFunction(e1Method)) {
             return -1;
+        } else if (e2Method.callsFunction(e1Method)) {
+            return 1;
         }
         if (e1Method.getCalledFunctionsRec().size() != e2Method.getCalledFunctionsRec().size()) {
             return Comparator.<Integer>naturalOrder().compare(

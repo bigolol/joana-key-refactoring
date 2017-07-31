@@ -5,17 +5,22 @@
  */
 package joanakeyrefactoring.javaforkeycreator;
 
-import com.google.common.io.Files;
+import joanakeyrefactoring.javaforkeycreator.javatokeypipeline.CopyKeyCompatibleListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.scene.Scene;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaClass;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
-import org.apache.bcel.generic.F2D;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -28,6 +33,7 @@ public class JavaProjectCopyHandler {
     private String pathToNew;
     private File newFile;
     private CopyKeyCompatibleListener copyKeyCompatibleListener;
+    private Map<StaticCGJavaClass, ArrayList<LoopInvariant>> loopInvariants = new HashMap<>();
 
     public JavaProjectCopyHandler(String pathToSource, String pathToNew, CopyKeyCompatibleListener copyKeyCompatibleListener) throws IOException {
         this.pathToSource = pathToSource;
@@ -84,9 +90,11 @@ public class JavaProjectCopyHandler {
 
                 String contents = new String(java.nio.file.Files.readAllBytes(classFileToCopyFrom.toPath()));
 
-                String keyCompatibleContents = copyKeyCompatibleListener.generateKeyCompatible(contents, classesToCopy.get(currentClassToCopy));
+                String keyCompatibleContents = copyKeyCompatibleListener.transformCode(contents, classesToCopy.get(currentClassToCopy));
 
-                FileUtils.writeStringToFile(classFileToCopyTo, keyCompatibleContents);
+                String keyCompWithLoopInvariants = addLoopInvariantsIfNeeded(keyCompatibleContents, currentClassToCopy);
+
+                FileUtils.writeStringToFile(classFileToCopyTo, keyCompWithLoopInvariants);
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -94,4 +102,32 @@ public class JavaProjectCopyHandler {
 
         }
     }
+
+    private String addLoopInvariantsIfNeeded(String code, StaticCGJavaClass c) {      
+        if (!loopInvariants.containsKey(c)) {
+            createLoopInvarsFor(code, c);
+        }
+        int amtCharsAdded = 0;
+        for (LoopInvariant loopInvariant : loopInvariants.get(c)) {
+            code = code.substring(0, loopInvariant.getStartChar() + amtCharsAdded)
+                    + loopInvariant.getInvariant()
+                    + code.substring(loopInvariant.getStartChar() + amtCharsAdded, code.length());
+            amtCharsAdded+= loopInvariant.getInvariant().length();
+        }        
+        return code;
+    }
+
+    private void createLoopInvarsFor(String code, StaticCGJavaClass c) {
+        LoopListener loopListener = new LoopListener();
+        List<Integer> loopLines = loopListener.findLoopLines(code);
+        ArrayList<LoopInvariant> created = new ArrayList<>();
+        for (int i = 0; i < loopLines.size(); i += 2) {
+            int currLoopStart = loopLines.get(i);
+            int currLoopEnd = loopLines.get(i + 1);
+            String currLoopStr = code.substring(currLoopStart, currLoopEnd);
+            
+        }
+        loopInvariants.put(c, created);
+    }
+
 }

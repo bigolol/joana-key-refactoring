@@ -17,11 +17,14 @@
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/JoanaAndKeyCheckData.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/CustomListener/GetMethodBodyListenerTest.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/staticCG/javamodel/StaticCGJavaClass.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/LoopInvGetter.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/CombinedApproachTest.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/AntlrHelperMainMethod.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/KeyFileCreator.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/SummaryEdgeComparator.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/test/joanakeyrefactoring/staticCG/JCallGraphTest.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/JavaForKeyCreator.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/LoopListener.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/antlr/java8/Java8Lexer.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/JavaProjectCopyHandler.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/ViolationChop.java</file>
@@ -42,6 +45,7 @@
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/staticCG/ClassVisitor.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/SingleAnnotationAdder.java</file>
             <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/staticCG/JCallGraph.java</file>
+            <file>file:/home/holger/Code/hiwi/joana-key-refactoring/src/joanakeyrefactoring/javaforkeycreator/LoopInvariant.java</file>
         </group>
     </open-files>
 </project-private>

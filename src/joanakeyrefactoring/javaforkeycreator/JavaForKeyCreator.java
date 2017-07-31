@@ -5,6 +5,7 @@
  */
 package joanakeyrefactoring.javaforkeycreator;
 
+import joanakeyrefactoring.javaforkeycreator.javatokeypipeline.CopyKeyCompatibleListener;
 import edu.kit.joana.api.IFCAnalysis;
 import edu.kit.joana.ifc.sdg.graph.SDG;
 import edu.kit.joana.ifc.sdg.graph.SDGEdge;
@@ -69,7 +70,7 @@ public class JavaForKeyCreator {
 
         Map<StaticCGJavaClass, Set<StaticCGJavaMethod>> allNecessaryClasses = callGraph.getAllNecessaryClasses(methodCorresToSE);
 
-        String keyCompatibleContents = keyCompatibleListener.generateKeyCompatible(
+        String keyCompatibleContents = keyCompatibleListener.transformCode(
                 contents, allNecessaryClasses.get(methodCorresToSE.getContainingClass()));
 
         methodBodyListener.parseFile(keyCompatibleContents, methodCorresToSE);
@@ -137,19 +138,34 @@ public class JavaForKeyCreator {
         String[] forInNames = bytecodeName.split("\\.");
         String inputNameForKey = forInNames[forInNames.length - 1];
 
-        List<SDGEdge> incomingParamStructEdges = sdg.getIncomingEdgesOfKind(n, SDGEdge.Kind.PARAMETER_STRUCTURE);
+        List<SDGEdge> incomingParamStructEdges = sdg.getIncomingEdgesOfKind(
+                n, SDGEdge.Kind.PARAMETER_STRUCTURE);
 
         SDGNode currentStructSource = incomingParamStructEdges.get(0).getSource();
-        String sourceBC = incomingParamStructEdges.get(0).getSource().getBytecodeName();
+        for (SDGEdge e : incomingParamStructEdges) {
+            if (!e.getSource().getBytecodeName().startsWith("<") || 
+                    e.getSource().getBytecodeName().startsWith("<param>")) {
+                currentStructSource = e.getSource();
+                break;
+            }
+        }
+        String sourceBC = currentStructSource.getBytecodeName();
         while (!sourceBC.startsWith("<param>")) {
             String[] sourceBCSplit = sourceBC.split("\\.");
             inputNameForKey = sourceBCSplit[sourceBCSplit.length - 1] + "." + inputNameForKey;
             incomingParamStructEdges = sdg.getIncomingEdgesOfKind(currentStructSource, SDGEdge.Kind.PARAMETER_STRUCTURE);
             currentStructSource = incomingParamStructEdges.get(0).getSource();
+            for (SDGEdge e : incomingParamStructEdges) {
+                if (!e.getSource().getBytecodeName().startsWith("<") || e.getSource().getBytecodeName().startsWith("<param>")) {
+                    currentStructSource = e.getSource();
+                    break;
+                }
+            }
             sourceBC = currentStructSource.getBytecodeName();
         }
         String nameForParam = getNameForParam(sourceBC, methodCorresToSE);
         return nameForParam + "." + inputNameForKey;
+
     }
 
     private String getNameForParam(String byteCodeName, StaticCGJavaMethod methodCorresToSE) {

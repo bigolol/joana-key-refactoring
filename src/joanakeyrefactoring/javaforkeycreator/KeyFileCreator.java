@@ -69,7 +69,11 @@ public class KeyFileCreator {
 
     private static String getMethodnameKey(StaticCGJavaMethod method) {
         String params = method.getParameterWithoutPackage().replaceAll("int\\[\\]", "\\[I").replaceAll("byte\\[\\]", "\\[B");
-        return method.getId() + "(" + params + ")";
+        if (method.getId().equals("<init>")) {
+            return method.getContainingClass().getOnlyClassName() + "(" + params + ")";
+        } else {
+            return method.getId() + "(" + params + ")";
+        }
     }
 
     private static void generateKeyFileFrom(

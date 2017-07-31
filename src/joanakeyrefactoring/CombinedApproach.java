@@ -35,6 +35,12 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -159,7 +165,7 @@ public class CombinedApproach {
                         List<SDGProgramPart> collectedParts = allCallsToMethod.stream().map((SDGCall call) -> {
                             return (SDGProgramPart) call.getActualParameter(paramPos);
                         }).collect(Collectors.toList());
-                        
+
                         return collectedParts;
                     };
         } else if (from.equals("programPart")) {
@@ -200,7 +206,7 @@ public class CombinedApproach {
         SDGProgram program = SDGProgram.createSDGProgram(config, System.out,
                 new NullProgressMonitor());
         IFCAnalysis ana = new IFCAnalysis(program);
-        SDGSerializer.toPDGFormat(program.getSDG(), new FileOutputStream("./theamazinggraph.pdg")); 
+        SDGSerializer.toPDGFormat(program.getSDG(), new FileOutputStream("./theamazinggraph.pdg"));
         return ana;
     }
 }

@@ -85,6 +85,7 @@ public class ViolationsWrapper {
         }
         sortedEdgesToCheck.sort(new SummaryEdgeComparator(this));
     }
+    
 
     private void putEdgesInSet() {
         for (ViolationChop vc : violationChops) {

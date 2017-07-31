@@ -11,6 +11,11 @@ package multipleclassesfalsepos;
  */
 public class ClassB {
     public int[] arr;   
+    ClassB(int x) {
+        this.arr = new int[3];
+        this.arr[2] = x;
+    }
+    
     ClassB() {}
     
     int[] putDataInArr(int high) {

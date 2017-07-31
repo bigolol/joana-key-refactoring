@@ -21,6 +21,7 @@ import joanakeyrefactoring.AutomationHelper;
 import joanakeyrefactoring.CombinedApproach;
 import joanakeyrefactoring.JoanaAndKeyCheckData;
 import joanakeyrefactoring.ViolationsWrapper;
+import joanakeyrefactoring.javaforkeycreator.JavaForKeyCreator;
 import joanakeyrefactoring.staticCG.JCallGraph;
 import org.junit.After;
 import org.junit.AfterClass;

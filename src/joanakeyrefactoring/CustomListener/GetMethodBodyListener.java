@@ -33,9 +33,6 @@ public class GetMethodBodyListener extends Java8BaseListener {
     private int stopLine;
 
     public void parseFile(String file, StaticCGJavaMethod method) {
-        if (method.getId().equals("unZipItExtract")) {
-            int i = 0;
-        }
         Java8Lexer java8Lexer = new Java8Lexer(new ANTLRInputStream(file));
         Java8Parser java8Parser = new Java8Parser(new CommonTokenStream(java8Lexer));
         ParseTreeWalker walker = new ParseTreeWalker();
@@ -67,6 +64,37 @@ public class GetMethodBodyListener extends Java8BaseListener {
 
     public String getMethodDeclWithNullable() {
         return methodDeclWithNullable;
+    }
+
+    @Override
+    public void enterConstructorDeclaration(Java8Parser.ConstructorDeclarationContext ctx) {
+        if (parsedRightMethod == true || !method.getId().equals("<init>")) {
+            return;
+        }
+        String argTypeString = getArgTypeString(ctx.constructorDeclarator().formalParameterList());
+        if (!argTypeString.equals(method.getParameterWithoutPackage())) {
+            return;
+        }
+
+        startLine = ctx.constructorDeclarator().getStart().getLine();
+        stopLine = ctx.constructorDeclarator().getStop().getLine();
+
+        methodParamsNullable = "";
+        methodDeclWithNullable = method.getContainingClass().getOnlyClassName() + "(ARGS)";
+
+        getArgTypeStringWithNullable(ctx.constructorDeclarator().formalParameterList());
+
+        parsedRightMethod = true;
+        methodDeclWithNullable = methodDeclWithNullable.replace("ARGS", methodParamsNullable);
+        if (parsedRightMethod == true) {
+            methodStartLine = ctx.getStart().getLine();
+            List<Java8Parser.ConstructorModifierContext> ctorModifier = ctx.constructorModifier();
+            String methodMods = "";
+            for (Java8Parser.ConstructorModifierContext mod : ctorModifier) {
+                methodMods += mod.getText() + " ";
+            }
+            methodDeclWithNullable = methodMods + " " + methodDeclWithNullable;
+        }
     }
 
     @Override
@@ -108,8 +136,15 @@ public class GetMethodBodyListener extends Java8BaseListener {
         methodParamsNullable = "";
         methodDeclWithNullable = methodName + "(ARGS)";
 
-        if (formalParameterList != null) {
-            Java8Parser.FormalParametersContext formalParameters = formalParameterList.formalParameters();
+        getArgTypeStringWithNullable(formalParameterList);
+
+        parsedRightMethod = true;
+        methodDeclWithNullable = methodDeclWithNullable.replace("ARGS", methodParamsNullable);
+    }
+
+    private void getArgTypeStringWithNullable(Java8Parser.FormalParameterListContext ctx) {
+        if (ctx != null) {
+            Java8Parser.FormalParametersContext formalParameters = ctx.formalParameters();
             if (formalParameters != null) {
                 for (Java8Parser.FormalParameterContext currentFormalParam : formalParameters.formalParameter()) {
                     String variableDeclaratorId = currentFormalParam.variableDeclaratorId().getText();
@@ -118,14 +153,12 @@ public class GetMethodBodyListener extends Java8BaseListener {
                     methodParamsNullable += varType + nullable + variableDeclaratorId + ", ";
                 }
             }
-            Java8Parser.LastFormalParameterContext lastFormalParameter = formalParameterList.lastFormalParameter();
+            Java8Parser.LastFormalParameterContext lastFormalParameter = ctx.lastFormalParameter();
             String variableDeclaratorId = lastFormalParameter.formalParameter().variableDeclaratorId().getText();
             extractedMethodParamNames.add(variableDeclaratorId);
             String varType = lastFormalParameter.formalParameter().unannType().getText();
             methodParamsNullable += varType + nullable + variableDeclaratorId;
         }
-        parsedRightMethod = true;
-        methodDeclWithNullable = methodDeclWithNullable.replace("ARGS", methodParamsNullable);
     }
 
     public static String getArgTypeString(Java8Parser.FormalParameterListContext ctx) {

@@ -79,8 +79,8 @@ public class GetMethodBodyListenerTest {
                 + "	}"
                 + "}";
         StaticCGJavaClass cGJavaClass = new StaticCGJavaClass("p.ClassA");
-        StaticCGJavaMethod cGJavaMethod = 
-                new StaticCGJavaMethod(
+        StaticCGJavaMethod cGJavaMethod
+                = new StaticCGJavaMethod(
                         cGJavaClass, "unZipItExtract", "byte[],MyZipInputStream,MyFileOutputStream", false, "void");
         GetMethodBodyListener bodyListener = new GetMethodBodyListener();
         bodyListener.parseFile(java, cGJavaMethod);
@@ -89,6 +89,36 @@ public class GetMethodBodyListenerTest {
         assertEquals("outputFolder", bodyListener.getExtractedMethodParamNames().get(0));
         assertEquals("myZis", bodyListener.getExtractedMethodParamNames().get(1));
         assertEquals("fos", bodyListener.getExtractedMethodParamNames().get(2));
+    }
+
+    @Test
+    public void testCtor() {
+        String java = "package multipleclassesfalsepos;\n"
+                + "\n"
+                + "/**\n"
+                + " *\n"
+                + " * @author holger\n"
+                + " */\n"
+                + "public class ClassB {\n"
+                + "    public int[] arr;   \n"
+                + "    ClassB(int x) {\n"
+                + "        this.arr = new int[3];\n"
+                + "        this.arr[2] = x;\n"
+                + "    }\n"
+                + "    \n"
+                + "    ClassB() {}\n"
+                + "    \n"
+                + "    int[] putDataInArr(int high) {\n"
+                + "        arr[4] = high;\n"
+                + "        return arr;\n"
+                + "    }\n"
+                + "    \n"
+                + "}";
+        StaticCGJavaClass c = new StaticCGJavaClass("multipleclassesfalsepos.ClassB");
+        StaticCGJavaMethod m = new StaticCGJavaMethod(c, "<init>", "int", false, "void");
+        GetMethodBodyListener bodyListener = new GetMethodBodyListener();
+        bodyListener.parseFile(java, m);
+        String methodDeclWithNullable = bodyListener.getMethodDeclWithNullable();
     }
 
 }

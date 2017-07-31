@@ -22,11 +22,7 @@ public class AntlrHelperMainMethod {
     public static void main(String[] args) {
         String java = "package p;"
                 + "class ClassA {"
-                + "int x;"
-                + "private List<String> b;"
-                + "public ClassA() {}"
-                
-                + "void func(int i, String s, ClassA a) {}"
+                + "private int x;"   
                 + "}";
         Java8Lexer java8Lexer = new Java8Lexer(new ANTLRInputStream(java));
         Java8Parser java8Parser = new Java8Parser(new CommonTokenStream(java8Lexer));

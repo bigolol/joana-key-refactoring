@@ -24,6 +24,7 @@ public class StaticCGJavaMethod {
     private boolean isStatic;
     private String returnType;
     private Set<StaticCGJavaMethod> calledFunctionsRec;
+    private String mostGeneralContract;
     
     public StaticCGJavaMethod(
             StaticCGJavaClass containingClass,
@@ -34,6 +35,10 @@ public class StaticCGJavaMethod {
         this.parameterTypes = parameterTypes;
         this.isStatic = isStatic;
         this.returnType = returnType;
+    }
+
+    public void setMostGeneralContract(String mostGeneralContract) {
+        this.mostGeneralContract = mostGeneralContract;
     }
 
     public void setCalledFunctionsRec(Set<StaticCGJavaMethod> calledFunctionsRec) {
@@ -126,5 +131,6 @@ public class StaticCGJavaMethod {
         }
         return true;
     }
+    
 
 }
