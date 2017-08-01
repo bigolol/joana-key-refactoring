@@ -50,9 +50,9 @@ public class ViolationsWrapper {
     private IFCAnalysis ana;
     private List<String> keyCompatibleJavaFeatures = new ArrayList<>();
 
-    public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
-            SDG sdg, AutomationHelper automationHelper,
-            IFCAnalysis ana, JCallGraph callGraph) throws IOException {
+    public ViolationsWrapper(
+            Collection<? extends IViolation<SecurityNode>> violations,
+            SDG sdg, IFCAnalysis ana, JCallGraph callGraph) throws IOException {
         this.uncheckedViolations = violations;
         this.sdg = sdg;
         this.callGraph = callGraph;

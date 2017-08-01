@@ -53,7 +53,7 @@ public class ViolationsDisproverSemantic {
     public void disproveViaKey(IFCAnalysis analysis, Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg) throws IOException {
         violationsWrapper = new ViolationsWrapper(
-                violations, sdg, automationHelper, analysis, callGraph);
+                violations, sdg, analysis, callGraph);
 
         while (!violationsWrapper.allCheckedOrDisproved()) {
             SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
@@ -90,7 +90,7 @@ public class ViolationsDisproverSemantic {
                 return false;
             }
             if (!result || !resultFunc) {
-                    return false;
+                return false;
             }
         }
         return true;

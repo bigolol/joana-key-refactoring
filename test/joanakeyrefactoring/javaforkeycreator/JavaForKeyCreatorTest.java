@@ -21,14 +21,12 @@ import joanakeyrefactoring.AutomationHelper;
 import joanakeyrefactoring.CombinedApproach;
 import joanakeyrefactoring.JoanaAndKeyCheckData;
 import joanakeyrefactoring.ViolationsWrapper;
-import joanakeyrefactoring.javaforkeycreator.JavaForKeyCreator;
 import joanakeyrefactoring.staticCG.JCallGraph;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -71,7 +69,7 @@ public class JavaForKeyCreatorTest {
                 parsedCheckData.getAnalysis());
 
         Collection<? extends IViolation<SecurityNode>> violations = parsedCheckData.getAnalysis().doIFC();
-        ViolationsWrapper violationsWrapper = new ViolationsWrapper(violations, sdg, automationHelper, parsedCheckData.getAnalysis(), callGraph);
+        ViolationsWrapper violationsWrapper = new ViolationsWrapper(violations, sdg, parsedCheckData.getAnalysis(), callGraph);
         SDGEdge se = violationsWrapper.nextSummaryEdge();
         SDGNode actualInNode = se.getSource();
         SDGNode actualOutNode = se.getTarget();
