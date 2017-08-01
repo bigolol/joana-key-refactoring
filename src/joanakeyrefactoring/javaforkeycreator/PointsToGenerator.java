@@ -76,7 +76,7 @@ public class PointsToGenerator {
             for (PersistentLocalPointerKey currentDisjunctOtherPk : stateSaver.getDisjunctLPKs(persistentLocalPointerKey)) {
                 String o2 = ir.getLocalName(currentDisjunctOtherPk.getValueNumber());
                 // if points-to sets are disjunct, o1 and o2 cannot alias
-                if (o1 != null && o2 != null && !o1.equals(o2) && !result.contains(o1 + " != " + o2)) {
+                if (o1 != null && o2 != null) {
                     result.add(o1 + " != " + o2);
                 }
             }
