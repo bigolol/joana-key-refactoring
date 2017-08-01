@@ -18,19 +18,16 @@ public class PersistentLocalPointerKey {
 
     private int valueNumber;
     private PersistentCGNode persistentCGNode;
-    private boolean parameter;
     private int id;
 
     public static PersistentLocalPointerKey generateFromJsonObj(JSONObject jsonObj, List<PersistentCGNode> cgNodes) {
         int nodeIndex = jsonObj.getInt("node");
         PersistentCGNode cgNode = cgNodes.get(nodeIndex);
-        boolean param = jsonObj.getBoolean("parameter");
         int valueNumber = jsonObj.getInt("value_number");
         int id = jsonObj.getInt("id");
         PersistentLocalPointerKey persistentLocalPointerKey = new PersistentLocalPointerKey();
         persistentLocalPointerKey.valueNumber = valueNumber;
         persistentLocalPointerKey.id = id;
-        persistentLocalPointerKey.parameter = param;
         persistentLocalPointerKey.persistentCGNode = cgNode;
         return persistentLocalPointerKey;
     }
@@ -40,7 +37,6 @@ public class PersistentLocalPointerKey {
 
     public PersistentLocalPointerKey(LocalPointerKey localPointerKey, PersistentCGNode persistentCGNode, int uniqueId) {
         valueNumber = localPointerKey.getValueNumber();
-        parameter = localPointerKey.isParameter();
         this.persistentCGNode = persistentCGNode;
         this.id = uniqueId;
     }
@@ -53,10 +49,6 @@ public class PersistentLocalPointerKey {
         return persistentCGNode;
     }
 
-    public boolean isParameter() {
-        return parameter;
-    }
-
     public int getId() {
         return id;
     }
@@ -64,7 +56,6 @@ public class PersistentLocalPointerKey {
     public String generateSaveString() {
         return "\"id\" : " + id
                 + ", \"value_number\" : " + String.valueOf(valueNumber)
-                + ", \"parameter\" : " + String.valueOf(parameter)
                 + ", \"node\" : " + persistentCGNode.getUniqueId();
     }
 
@@ -87,9 +78,6 @@ public class PersistentLocalPointerKey {
         }
         final PersistentLocalPointerKey other = (PersistentLocalPointerKey) obj;
         if (this.valueNumber != other.valueNumber) {
-            return false;
-        }
-        if (this.parameter != other.parameter) {
             return false;
         }
         if (this.id != other.id) {

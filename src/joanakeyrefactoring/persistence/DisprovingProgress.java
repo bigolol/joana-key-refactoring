@@ -5,10 +5,11 @@
  */
 package joanakeyrefactoring.persistence;
 
+import edu.kit.joana.api.IFCAnalysis;
+
 /**
  *
  * @author hklein
  */
 public class DisprovingProgress {
-    
 }

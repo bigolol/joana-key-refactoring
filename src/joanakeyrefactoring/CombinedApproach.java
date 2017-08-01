@@ -202,7 +202,6 @@ public class CombinedApproach {
         SDGProgram program = SDGProgram.createSDGProgram(config, System.out,
                 new NullProgressMonitor());
         IFCAnalysis ana = new IFCAnalysis(program);
-        SDGSerializer.toPDGFormat(program.getSDG(), new FileOutputStream("./theamazinggraph.pdg"));
         return ana;
     }
 }

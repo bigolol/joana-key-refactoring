@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="0" hostname="ids-sin" name="joanakeyrefactoring.StateSaverTest" skipped="0" tests="2" time="1.146" timestamp="2017-08-01T09:25:37">
+<testsuite errors="0" failures="0" hostname="ids-sin" name="joanakeyrefactoring.persistence.ViolationsSaverLoaderTest" skipped="0" tests="2" time="1.037" timestamp="2017-08-01T10:16:42">
   <properties>
     <property name="netbeans.autoupdate.country" value="DE" />
     <property name="javac.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
-    <property name="javac.includes" value="joanakeyrefactoring/StateSaverTest.java" />
+    <property name="javac.includes" value="joanakeyrefactoring/persistence/ViolationsSaverLoaderTest.java" />
     <property name="ant.core.lib" value="/disk/no_backup/hklein/netbeans-8.2/extide/ant/lib/ant.jar" />
     <property name="javadoc.windowtitle" value="" />
     <property name="user.dir" value="/disk/users/hklein/Code/joana-key-refactoring" />
@@ -29,7 +29,7 @@
     <property name="libs.hamcrest.classpath" value="/disk/no_backup/hklein/netbeans-8.2/platform/modules/ext/hamcrest-core-1.3.jar" />
     <property name="libs.javac-api.javadoc" value="" />
     <property name="os.name" value="Linux" />
-    <property name="test.class" value="joanakeyrefactoring.StateSaverTest" />
+    <property name="test.class" value="joanakeyrefactoring.persistence.ViolationsSaverLoaderTest" />
     <property name="libs.beans-binding.classpath" value="/disk/no_backup/hklein/netbeans-8.2/java/modules/ext/beansbinding-1.2.1.jar" />
     <property name="ap.proc.none.internal" value="" />
     <property name="libs.JWSAntTasks.maven-pom" value="" />
@@ -41,7 +41,7 @@
     <property name="user.name" value="hklein" />
     <property name="copylibs.rebase" value="true" />
     <property name="libs.swing-layout.maven-pom" value="" />
-    <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner joanakeyrefactoring.StateSaverTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=true formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,/fzi/ids/hklein/Code/joana-key-refactoring/build/test/results/TEST-joanakeyrefactoring.StateSaverTest.xml crashfile=/fzi/ids/hklein/Code/joana-key-refactoring/build/junitvmwatcher2031290080294139504.properties propsfile=/fzi/ids/hklein/Code/joana-key-refactoring/build/junit4378215658747668110.properties" />
+    <property name="sun.java.command" value="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner joanakeyrefactoring.persistence.ViolationsSaverLoaderTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=true formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,/fzi/ids/hklein/Code/joana-key-refactoring/build/test/results/TEST-joanakeyrefactoring.persistence.ViolationsSaverLoaderTest.xml crashfile=/fzi/ids/hklein/Code/joana-key-refactoring/build/junitvmwatcher7430254778602902851.properties propsfile=/fzi/ids/hklein/Code/joana-key-refactoring/build/junit7198386778684229484.properties" />
     <property name="build.classes.dir" value="build/classes" />
     <property name="netbeans.accept_license_class" value="org.netbeans.license.AcceptLicense" />
     <property name="build.sysclasspath" value="ignore" />
@@ -60,7 +60,7 @@
     <property name="netbeans.home" value="/disk/no_backup/hklein/netbeans-8.2/platform" />
     <property name="build.compiler.emacs" value="true" />
     <property name="java.endorsed.dirs" value="/disk/no_backup/hklein/jdk1.8.0_141/jre/lib/endorsed" />
-    <property name="test.includes" value="joanakeyrefactoring/StateSaverTest.java" />
+    <property name="test.includes" value="joanakeyrefactoring/persistence/ViolationsSaverLoaderTest.java" />
     <property name="netbeans.dynamic.classpath" value="/disk/no_backup/hklein/netbeans-8.2/platform/core/org-netbeans-libs-asm.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/org-openide-filesystems-compat8.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/asm-all-5.0.1.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/core.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/org-openide-filesystems.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/core-base.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems_ru.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_pt_BR.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core-base_zh_CN.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core-base_ja.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core_ru.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_ja.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core-base_pt_BR.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems_pt_BR.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core-base_ru.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_ja.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core_pt_BR.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems_ja.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_ru.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_zh_CN.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_zh_CN.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems_zh_CN.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_pt_BR.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core_ja.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/core_zh_CN.jar:/disk/no_backup/hklein/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_ru.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/org-netbeans-upgrader.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/core_nb_ja.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_ja.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_ru.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/core_nb_pt_BR.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_pt_BR.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_zh_CN.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/core_nb.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/core_nb_ru.jar:/disk/no_backup/hklein/netbeans-8.2/nb/core/locale/core_nb_zh_CN.jar" />
     <property name="java.vm.specification.version" value="1.8" />
     <property name="libs.hibernate4-support.src" value="" />
@@ -75,7 +75,7 @@
     <property name="javac.debug" value="true" />
     <property name="javadoc.splitindex" value="true" />
     <property name="file.separator" value="/" />
-    <property name="javac.includesfile.binary" value="/fzi/ids/hklein/Code/joana-key-refactoring/null389213272" />
+    <property name="javac.includesfile.binary" value="/fzi/ids/hklein/Code/joana-key-refactoring/null1792583286" />
     <property name="libs.junit_4.maven-pom" value="" />
     <property name="mkdist.disabled" value="false" />
     <property name="javac.test.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
@@ -87,7 +87,7 @@
     <property name="libs.hibernate4-persistencemodelgen.javadoc" value="" />
     <property name="libs.jaxb.javadoc" value="/disk/no_backup/hklein/netbeans-8.2/ide/docs/jaxb-api-doc.zip" />
     <property name="org.openide.awt.SwingBrowserImpl.do-not-block-awt" value="false" />
-    <property name="javac.includes.binary" value="/fzi/ids/hklein/Code/joana-key-refactoring/build/test/classes/joanakeyrefactoring/StateSaverTest.class" />
+    <property name="javac.includes.binary" value="/fzi/ids/hklein/Code/joana-key-refactoring/build/test/classes/joanakeyrefactoring/persistence/ViolationsSaverLoaderTest.class" />
     <property name="ant.home" value="/disk/no_backup/hklein/netbeans-8.2/extide/ant" />
     <property name="libs.junit_4.src" value="/disk/no_backup/hklein/netbeans-8.2/platform/docs/junit-4.12-sources.jar" />
     <property name="file.reference.joana.api.jar-1" value="dep\joana.api.jar" />
@@ -325,8 +325,8 @@
     <property name="platform.active" value="default_platform" />
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit" />
   </properties>
-  <testcase classname="joanakeyrefactoring.StateSaverTest" name="testGenerateSaveStringMulClassesFalsePos" time="0.878" />
-  <testcase classname="joanakeyrefactoring.StateSaverTest" name="testGenerateFromSaveFile" time="0.226" />
+  <testcase classname="joanakeyrefactoring.persistence.ViolationsSaverLoaderTest" name="testGenerateSaveString" time="0.801" />
+  <testcase classname="joanakeyrefactoring.persistence.ViolationsSaverLoaderTest" name="testLoadFromSaveString" time="0.195" />
   <system-out><![CDATA[Setting up analysis scope... (from jar stream stubs/jSDG-stubs-jre1.4.jar) done.
 Creating class hierarchy... (555 classes) done.
 Setting up entrypoint multipleclassesfalsepos.MultipleClassesFalsePos.main([Ljava/lang/String;)V... done.
@@ -335,7 +335,8 @@ Building system dependence graph...
 6 nodes and 6 edges
 	interproc exception analysis... 	intraproc: calls.mergeable..clinit.statics.heap(if,adj,df,reg).misc.killdef.interference.convert.summary..
 done.
-Time needed: 620ms - Memory: 26M used.
+Time needed: 603ms - Memory: 27M used.
+"violations" : [{"source_id" : 11, "sink_id" : 12, "attacker_level" : "low", "violpaths" : [{"node_ids" : [11, 12]}]}]
 Setting up analysis scope... (from jar stream stubs/jSDG-stubs-jre1.4.jar) done.
 Creating class hierarchy... (555 classes) done.
 Setting up entrypoint multipleclassesfalsepos.MultipleClassesFalsePos.main([Ljava/lang/String;)V... done.
@@ -344,7 +345,9 @@ Building system dependence graph...
 6 nodes and 6 edges
 	interproc exception analysis... 	intraproc: calls.mergeable..clinit.statics.heap(if,adj,df,reg).misc.killdef.interference.convert.summary..
 done.
-Time needed: 170ms - Memory: 54M used.
+Time needed: 141ms - Memory: 53M used.
+"violations" : [{"source_id" : 11, "sink_id" : 12, "attacker_level" : "low", "violpaths" : [{"node_ids" : [11, 12]}]}]
+"violations" : [{"source_id" : 11, "sink_id" : 12, "attacker_level" : "low", "violpaths" : [{"node_ids" : [11, 12]}]}]
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

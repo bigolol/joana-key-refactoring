@@ -105,7 +105,9 @@ public class StateSaver implements CGConsumer {
             created.append(persistentCGNode.generateSaveString());
             created.append("},\n");
         }
-        created.replace(created.length() - 2, created.length(), "");
+        if (created.lastIndexOf("[") != created.length() - 1) {
+            created.replace(created.length() - 2, created.length(), "");
+        }
         created.append("],\n");
 
         created.append("\"localPointerKeys\" : [");
@@ -114,7 +116,9 @@ public class StateSaver implements CGConsumer {
             created.append(persistentLocalPointerKey.generateSaveString()).append('\n');
             created.append("},\n");
         }
-        created.replace(created.length() - 2, created.length(), "");
+        if (created.lastIndexOf("[") != created.length() - 1) {
+            created.replace(created.length() - 2, created.length(), "");
+        }
         created.append("],\n");
 
         created.append("\"disjunctPointsTo\" : [");
@@ -125,11 +129,15 @@ public class StateSaver implements CGConsumer {
             l.forEach((t) -> {
                 created.append(t.getId()).append(", ");
             });
-            created.replace(created.length() - 2, created.length(), "");
+            if (created.lastIndexOf("[") != created.length() - 1) {
+                created.replace(created.length() - 2, created.length(), "");
+            }
             created.append("]\n");
             created.append("},\n");
         });
-        created.replace(created.length() - 2, created.length(), "");
+        if (created.lastIndexOf("[") != created.length() - 1) {
+            created.replace(created.length() - 2, created.length(), "");
+        }
         created.append("]\n");
 
         return created.toString();
@@ -152,6 +160,11 @@ public class StateSaver implements CGConsumer {
         for (PointerKey pk : pointerAnalyis.getPointerKeys()) {
             if (pk instanceof LocalPointerKey) {
                 LocalPointerKey localPointerKey = (LocalPointerKey) pk;
+
+                if (!localPointerKey.isParameter()) {
+                    continue;
+                }
+
                 CGNode corresCgNode = localPointerKey.getNode();
                 localPointerKeys.add(localPointerKey);
 
@@ -243,7 +256,7 @@ public class StateSaver implements CGConsumer {
     public List<PersistentLocalPointerKey> getPersistentLocalPointerKeys(PersistentCGNode cGNode) {
         List<PersistentLocalPointerKey> created = new ArrayList<>();
         for (PersistentLocalPointerKey persistentLocalPointerKey : persistentLocalPointerKeys) {
-            if (persistentLocalPointerKey.getNode().equals(cGNode) && persistentLocalPointerKey.isParameter()) {
+            if (persistentLocalPointerKey.getNode().equals(cGNode)) {
                 created.add(persistentLocalPointerKey);
             }
         }
