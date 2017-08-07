@@ -66,8 +66,14 @@ public class ViolationsWrapper {
             line = buf.readLine();
         }
         buf.close();
-
         prepareNextSummaryEdges();
+    }
+    
+    
+    public String generateSaveString() {
+        StringBuilder created = new StringBuilder();
+        
+        return created.toString();
     }
 
     private void prepareNextSummaryEdges() {
@@ -97,7 +103,7 @@ public class ViolationsWrapper {
     }
 
     private Collection<IViolation<SecurityNode>> getNextViolationsToHandle() {
-        int amt_viols = 1;
+        int amt_viols = 10;
         List<IViolation<SecurityNode>> created = new ArrayList<>();
         int i = 0;
         for (IViolation<SecurityNode> v : uncheckedViolations) {
