@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="1" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.persistence.DisprovingProjectTest" skipped="0" tests="1" time="0.0" timestamp="2017-08-07T15:49:06">
+<testsuite errors="1" failures="0" hostname="holger-ThinkPad-T430s" name="joanakeyrefactoring.ViolationChopTest" skipped="0" tests="1" time="0.0" timestamp="2017-08-07T16:18:07">
   <properties>
     <property name="netbeans.autoupdate.country" value="DE" />
     <property name="javac.test.classpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
-    <property name="javac.includes" value="joanakeyrefactoring/persistence/DisprovingProjectTest.java" />
+    <property name="javac.includes" value="joanakeyrefactoring/ViolationChopTest.java" />
     <property name="ant.core.lib" value="/home/holger/netbeans-8.2/extide/ant/lib/ant.jar" />
     <property name="javadoc.windowtitle" value="" />
     <property name="user.dir" value="/home/holger" />
@@ -29,7 +29,7 @@
     <property name="libs.hamcrest.classpath" value="/home/holger/netbeans-8.2/platform/modules/ext/hamcrest-core-1.3.jar" />
     <property name="libs.javac-api.javadoc" value="" />
     <property name="os.name" value="Linux" />
-    <property name="test.class" value="joanakeyrefactoring.persistence.DisprovingProjectTest" />
+    <property name="test.class" value="joanakeyrefactoring.ViolationChopTest" />
     <property name="libs.beans-binding.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/beansbinding-1.2.1.jar" />
     <property name="ap.proc.none.internal" value="" />
     <property name="libs.JWSAntTasks.maven-pom" value="" />
@@ -60,7 +60,7 @@
     <property name="netbeans.home" value="/home/holger/netbeans-8.2/platform" />
     <property name="build.compiler.emacs" value="true" />
     <property name="java.endorsed.dirs" value="/home/holger/jdk1.8.0_141/jre/lib/endorsed" />
-    <property name="test.includes" value="joanakeyrefactoring/persistence/DisprovingProjectTest.java" />
+    <property name="test.includes" value="joanakeyrefactoring/ViolationChopTest.java" />
     <property name="netbeans.dynamic.classpath" value="/home/holger/netbeans-8.2/platform/core/org-openide-filesystems-compat8.jar:/home/holger/netbeans-8.2/platform/core/org-openide-filesystems.jar:/home/holger/netbeans-8.2/platform/core/core.jar:/home/holger/netbeans-8.2/platform/core/core-base.jar:/home/holger/netbeans-8.2/platform/core/org-netbeans-libs-asm.jar:/home/holger/netbeans-8.2/platform/core/asm-all-5.0.1.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems_zh_CN.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems_ru.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_ja.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_pt_BR.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_ru.jar:/home/holger/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_ja.jar:/home/holger/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_ru.jar:/home/holger/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_pt_BR.jar:/home/holger/netbeans-8.2/platform/core/locale/core-base_pt_BR.jar:/home/holger/netbeans-8.2/platform/core/locale/core-base_ru.jar:/home/holger/netbeans-8.2/platform/core/locale/core_zh_CN.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems_pt_BR.jar:/home/holger/netbeans-8.2/platform/core/locale/org-netbeans-libs-asm_zh_CN.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems_ja.jar:/home/holger/netbeans-8.2/platform/core/locale/org-openide-filesystems-compat8_zh_CN.jar:/home/holger/netbeans-8.2/platform/core/locale/core_ru.jar:/home/holger/netbeans-8.2/platform/core/locale/core-base_zh_CN.jar:/home/holger/netbeans-8.2/platform/core/locale/core_ja.jar:/home/holger/netbeans-8.2/platform/core/locale/core_pt_BR.jar:/home/holger/netbeans-8.2/platform/core/locale/core-base_ja.jar:/home/holger/netbeans-8.2/nb/core/org-netbeans-upgrader.jar:/home/holger/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_ru.jar:/home/holger/netbeans-8.2/nb/core/locale/core_nb_zh_CN.jar:/home/holger/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_ja.jar:/home/holger/netbeans-8.2/nb/core/locale/core_nb_ru.jar:/home/holger/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_zh_CN.jar:/home/holger/netbeans-8.2/nb/core/locale/core_nb.jar:/home/holger/netbeans-8.2/nb/core/locale/core_nb_pt_BR.jar:/home/holger/netbeans-8.2/nb/core/locale/core_nb_ja.jar:/home/holger/netbeans-8.2/nb/core/locale/org-netbeans-upgrader_pt_BR.jar" />
     <property name="java.vm.specification.version" value="1.8" />
     <property name="libs.hibernate4-support.src" value="" />
@@ -75,7 +75,7 @@
     <property name="javac.debug" value="true" />
     <property name="javadoc.splitindex" value="true" />
     <property name="file.separator" value="/" />
-    <property name="javac.includesfile.binary" value="/home/holger/Code/joana-key-refactoring/null1654650944" />
+    <property name="javac.includesfile.binary" value="/home/holger/Code/joana-key-refactoring/null610371711" />
     <property name="libs.junit_4.maven-pom" value="" />
     <property name="mkdist.disabled" value="false" />
     <property name="javac.test.processorpath" value="dep\antlr-runtime-4.5.3.jar:dep\joana.api.jar:dep\KeY.jar:json.jar:dep/javacg-0.1-SNAPSHOT-static.jar:dep/commons-io-2.5/commons-io-2.5.jar:build/classes" />
@@ -86,7 +86,8 @@
     <property name="sun.java.launcher" value="SUN_STANDARD" />
     <property name="libs.hibernate4-persistencemodelgen.javadoc" value="" />
     <property name="libs.jaxb.javadoc" value="/home/holger/netbeans-8.2/ide/docs/jaxb-api-doc.zip" />
-    <property name="javac.includes.binary" value="/home/holger/Code/joana-key-refactoring/build/test/classes/joanakeyrefactoring/persistence/DisprovingProjectTest.class" />
+    <property name="org.openide.awt.SwingBrowserImpl.do-not-block-awt" value="false" />
+    <property name="javac.includes.binary" value="/home/holger/Code/joana-key-refactoring/build/test/classes/joanakeyrefactoring/ViolationChopTest.class" />
     <property name="ant.home" value="/home/holger/netbeans-8.2/extide/ant" />
     <property name="libs.junit_4.src" value="/home/holger/netbeans-8.2/platform/docs/junit-4.12-sources.jar" />
     <property name="file.reference.joana.api.jar-1" value="dep\joana.api.jar" />
@@ -129,7 +130,7 @@
     <property name="https.nonProxyHosts" value="localhost|127.0.0.1|holger-ThinkPad-T430s" />
     <property name="libs.PostgreSQLDriver.maven-pom" value="" />
     <property name="java.class.version" value="52.0" />
-    <property name="jpda.address" value="localhost:37965" />
+    <property name="jpda.address" value="localhost:35984" />
     <property name="libs.hibernate4-persistencemodelgen.maven-pom" value="" />
     <property name="libs.eclipselink.javadoc" value="/home/holger/netbeans-8.2/java/modules/ext/docs/javax.persistence-2.1.0-doc.zip" />
     <property name="user.properties.file" value="/home/holger/.netbeans/8.2/build.properties" />
@@ -298,18 +299,18 @@
     <property name="libs.JAXB-ENDORSED.classpath" value="/home/holger/netbeans-8.2/ide/modules/ext/jaxb/api/jaxb-api.jar" />
     <property name="nb.internal.action.name" value="debug.test.single" />
     <property name="libs.eclipselink.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/eclipselink/eclipselink.jar:/home/holger/netbeans-8.2/java/modules/ext/eclipselink/javax.persistence_2.1.0.v201304241213.jar:/home/holger/netbeans-8.2/java/modules/ext/eclipselink/org.eclipse.persistence.jpa.jpql_2.5.2.v20140319-9ad6abd.jar" />
-    <property name="file.reference.javacg-0.1-SNAPSHOT-static.jar" value="dep/javacg-0.1-SNAPSHOT-static.jar" />
     <property name="libs.beans-binding.javadoc" value="/home/holger/netbeans-8.2/java/docs/beansbinding-1.2.1-doc.zip" />
     <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment" />
-    <property name="java.vm.vendor" value="Oracle Corporation" />
+    <property name="file.reference.javacg-0.1-SNAPSHOT-static.jar" value="dep/javacg-0.1-SNAPSHOT-static.jar" />
     <property name="file.reference.json.jar" value="json.jar" />
+    <property name="java.vm.vendor" value="Oracle Corporation" />
     <property name="libs.CopyLibs.classpath" value="/home/holger/netbeans-8.2/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar" />
     <property name="libs.spring-framework300.classpath" value="/home/holger/netbeans-8.2/ide/modules/org-apache-commons-logging.jar:/home/holger/netbeans-8.2/java/modules/ext/cglib-2.2.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-aop-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-aspects-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-beans-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-build-src-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-context-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-context-support-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-core-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-expression-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-framework-bom-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-instrument-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-instrument-tomcat-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-jdbc-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-jms-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-orm-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-oxm-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-struts-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-test-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-tx-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-web-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-webmvc-3.2.7.RELEASE.jar:/home/holger/netbeans-8.2/java/modules/ext/spring-3.0/spring-webmvc-portlet-3.2.7.RELEASE.jar" />
     <property name="libs.hamcrest.src" value="" />
     <property name="run.jvmargs" value="" />
     <property name="libs.hibernate4-persistence.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/hibernate4/antlr-2.7.7.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/c3p0-0.9.2.1.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-c3p0-4.3.1.Final.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/mchange-commons-java-0.2.3.4.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/dom4j-1.6.1.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/ehcache-core-2.4.3.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-ehcache-4.3.1.Final.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-core-4.3.1.Final.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/jboss-logging-3.1.3.GA.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-commons-annotations-4.0.4.Final.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-entitymanager-4.3.1.Final.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/javassist-3.18.1-GA.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/jboss-transaction-api_1.2_spec-1.0.0.Final.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/slf4j-api-1.6.1.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/slf4j-simple-1.6.1.jar:/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-jpa-2.1-api-1.0.0.Final.jar" />
-    <property name="dist.archive.excludes" value="" />
     <property name="libs.JAXB-ENDORSED.src" value="" />
+    <property name="dist.archive.excludes" value="" />
     <property name="libs.testng.javadoc" value="/home/holger/netbeans-8.2/platform/docs/testng-6.8.1-javadoc.zip" />
     <property name="libs.PostgreSQLDriver.classpath" value="/home/holger/netbeans-8.2/ide/modules/ext/postgresql-9.4.1209.jar" />
     <property name="libs.hibernate4-persistencemodelgen.classpath" value="/home/holger/netbeans-8.2/java/modules/ext/hibernate4/hibernate-jpamodelgen-4.3.1.Final.jar" />
@@ -325,7 +326,7 @@
     <property name="platform.active" value="default_platform" />
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit" />
   </properties>
-  <testcase classname="joanakeyrefactoring.persistence.DisprovingProjectTest" name="testLoadJzip" time="0.001">
+  <testcase classname="joanakeyrefactoring.ViolationChopTest" name="testLoad" time="0.0">
     <error message="Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit." type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: Forked Java VM exited abnormally. Please note the time in the report does not reflect the time until the VM exit.
 	at org.netbeans.core.execution.RunClassThread.run(RunClassThread.java:153)
 </error>

@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import joanakeyrefactoring.staticCG.JCallGraph;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -70,6 +72,147 @@ public class ViolationsWrapper {
         prepareNextSummaryEdges();
     }
 
+    public String generateSaveString() {
+        StringBuilder created = new StringBuilder();
+        created.append("{").append(System.lineSeparator());
+        created.append("\"chops\" : [").append(System.lineSeparator());
+        int lengthOfLineSep = System.lineSeparator().length();
+        for (ViolationChop vc : violationChops) {
+            created.append(vc.generateSaveString())
+                    .append(",")
+                    .append(System.lineSeparator());
+        }
+        if (created.lastIndexOf("[") != created.length() - 1) {
+            created.replace(created.length() - lengthOfLineSep - 1, created.length(), "");
+        }
+        created.append("],").append(System.lineSeparator());
+
+        created.append("\"summary_edges_sorted\" : [").append(System.lineSeparator());
+        for (SDGEdge e : sortedEdgesToCheck) {
+            created.append("{");
+            created.append("\"src\" : ").append(e.getSource().getId());
+            created.append(", \"sink\" : ").append(e.getTarget().getId());
+            created.append("},").append(System.lineSeparator());
+        }
+        if (created.lastIndexOf("[") != created.length() - 1) {
+            created.replace(created.length() - lengthOfLineSep - 1, created.length(), "");
+        }
+        created.append("],").append(System.lineSeparator());
+
+        created.append("\"summary_edges_methods\": [").append(System.lineSeparator());
+        for (Map.Entry<SDGEdge, StaticCGJavaMethod> entry : summaryEdgesAndCorresJavaMethods.entrySet()) {
+            int edgeId = sortedEdgesToCheck.indexOf(entry.getKey());
+            created.append("{");
+            created.append("\"id\" :").append(edgeId);
+            created.append(", \"class_name\" : ")
+                    .append("\"").append(entry.getValue().getContainingClass().getId())
+                    .append("\"");
+            created.append(", \"method_name\" : ")
+                    .append("\"").append(entry.getValue().getId()).append("\"");
+            created.append(", \"arg_string\" : ")
+                        .append("\"").append(entry.getValue().getParameterWithoutPackage())
+                    .append("\"");
+            created.append("},").append(System.lineSeparator());
+        }
+        if (created.lastIndexOf("[") != created.length() - 1) {
+            created.replace(created.length() - lengthOfLineSep - 1, created.length(), "");
+        }
+        created.append("],");
+
+        created.append("\"summary_edges_chops\" : [").append(System.lineSeparator());
+        for (Map.Entry<SDGEdge, ArrayList<ViolationChop>> entry : summaryEdgesAndContainingChops.entrySet()) {
+            int edgeId = sortedEdgesToCheck.indexOf(entry.getKey());
+            created.append("{");
+            created.append("\"pos\" :").append(edgeId);
+            created.append(", \"chops\" : [").append(System.lineSeparator());
+            for (ViolationChop vc : entry.getValue()) {
+                created.append("{");
+                created.append("\"src\" : ").append(vc.getViolationSource().getId());
+                created.append(", \"sink\" : ").append(vc.getViolationSink().getId());
+                created.append("},").append(System.lineSeparator());
+            }
+            if (created.lastIndexOf("[") != created.length() - 1) {
+                created.replace(created.length() - lengthOfLineSep - 1, created.length(), "");
+            }
+            created.append("]");
+
+            created.append("},").append(System.lineSeparator());
+        }
+        if (created.lastIndexOf("[") != created.length() - 1) {
+            created.replace(created.length() - lengthOfLineSep - 1, created.length(), "");
+        }
+        created.append("]").append(System.lineSeparator());
+        created.append("}");
+        return created.toString();
+    }
+
+    private ViolationsWrapper() {
+    }
+
+    public static ViolationsWrapper generateFromSaveString(
+            String s, SDG sdg, JCallGraph callGraph) {
+        JSONObject jSONObject = new JSONObject(s);
+        ViolationsWrapper created = new ViolationsWrapper();
+        JSONArray chopArr = jSONObject.getJSONArray("chops");
+        for (int i = 0; i < chopArr.length(); ++i) {
+            created.violationChops.add(ViolationChop.generateFromJsonObj(
+                    chopArr.getJSONObject(i), sdg));
+        }
+
+        JSONArray summaryEdgesSortedArr = jSONObject.getJSONArray("summary_edges_sorted");
+
+        for (int i = 0; i < summaryEdgesSortedArr.length(); ++i) {
+            int srcId = summaryEdgesSortedArr.getJSONObject(i).getInt("src");
+            int sinkId = summaryEdgesSortedArr.getJSONObject(i).getInt("sink");
+            created.sortedEdgesToCheck.add(sdg.getEdge(
+                    sdg.getNode(srcId), sdg.getNode(sinkId)));
+        }
+
+        JSONArray edgesToMethodsArr = jSONObject.getJSONArray("summary_edges_methods");
+
+        for (int i = 0; i < edgesToMethodsArr.length(); ++i) {
+            JSONObject currentJsonObj = edgesToMethodsArr.getJSONObject(i);
+            int posInSorted = currentJsonObj.getInt("id");
+            String classname = currentJsonObj.getString("class_name");
+            String methodName = currentJsonObj.getString("method_name");
+            String args = currentJsonObj.getString("arg_string");
+            StaticCGJavaMethod method = callGraph.getMethodFor(classname, methodName, args);
+            created.summaryEdgesAndCorresJavaMethods.put(
+                    created.sortedEdgesToCheck.get(posInSorted),
+                    method
+            );
+        }
+
+        JSONArray jsonChopArr = jSONObject.getJSONArray("summary_edges_chops");
+
+        for (int i = 0; i < jsonChopArr.length(); ++i) {
+            JSONObject currentJsonObj = jsonChopArr.getJSONObject(i);
+            int posInSorted = currentJsonObj.getInt("pos");
+            JSONArray currentChopJsonArr = currentJsonObj.getJSONArray("chops");
+            ArrayList<ViolationChop> chopList = new ArrayList<>();
+            for (int j = 0; j < currentChopJsonArr.length(); ++j) {
+                int sourceId = currentChopJsonArr.getJSONObject(j).getInt("src");
+                int sinkId = currentChopJsonArr.getJSONObject(j).getInt("sink");
+                SDGNode sourceNode = sdg.getNode(sourceId);
+                SDGNode sinkNode = sdg.getNode(sinkId);
+                for (ViolationChop vc : created.violationChops) {
+                    if (vc.getViolationSource().equals(sourceNode)
+                            && vc.getViolationSink().equals(sinkNode)) {
+                        chopList.add(vc);
+                        break;
+                    }
+                }
+            }
+            created.summaryEdgesAndContainingChops.put(
+                    created.sortedEdgesToCheck.get(posInSorted), chopList);
+        }
+        return created;
+    }
+
+    public ViolationChop getChop() {
+        return violationChops.iterator().next();
+    }
+
     private void prepareNextSummaryEdges() {
         Collection<? extends IViolation<SecurityNode>> nextViolationsToHandle = getNextViolationsToHandle();
         nextViolationsToHandle.forEach((v) -> {
@@ -85,7 +228,6 @@ public class ViolationsWrapper {
         }
         sortedEdgesToCheck.sort(new SummaryEdgeComparator(this));
     }
-    
 
     private void putEdgesInSet() {
         for (ViolationChop vc : violationChops) {

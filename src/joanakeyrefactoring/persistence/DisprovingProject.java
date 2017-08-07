@@ -47,5 +47,14 @@ public class DisprovingProject {
     public ViolationsWrapper generateViolWrapper() throws IOException {
         return new ViolationsWrapper(classifiedViolations, sdg, ana, callGraph);
     }
+
+    public SDG getSdg() {
+        return sdg;
+    }
+
+    public JCallGraph getCallGraph() {
+        return callGraph;
+    }
+    
     
 }
