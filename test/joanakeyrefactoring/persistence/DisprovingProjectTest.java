@@ -67,7 +67,7 @@ public class DisprovingProjectTest {
     @Test
     public void testLoadJzip() throws IOException, ClassHierarchyException, GraphIntegrity.UnsoundGraphException, CancelException {
         DisprovingProject disprovingProject = new DisprovingProject(
-                "data/jzip.pdg", "data/jzip_stateSaver.txt", "data/jzip_viols.txt", "JZipWithException", "JZipWithException.jar");
+                "data/jzip.pdg", "data/jzip_stateSaver.txt", "data/jzip_viols.txt", "JZipWithException", "JZipWithException.jar", "data/jzip_violWrapper");
         ViolationsWrapper violWrapper = disprovingProject.generateViolWrapper();
     }
 

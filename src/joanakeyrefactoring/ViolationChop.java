@@ -55,12 +55,13 @@ public class ViolationChop {
         if (created.lastIndexOf("[") != created.length() - 1) {
             created.replace(created.length() - lengthOfLineSep - 1, created.length(), "");
         }
-        created.append("]").append(System.lineSeparator());;
+        created.append("]").append(System.lineSeparator());
         created.append("}");
         return created.toString();
     }
 
     public static ViolationChop generateFromJsonObj(JSONObject jSONObject, SDG sdg) {
+
         int srcId = jSONObject.getInt("src");
         int sinkId = jSONObject.getInt("sink");
         ViolationChop created = new ViolationChop();
@@ -99,7 +100,6 @@ public class ViolationChop {
     public void findSummaryEdges(SDG sdg) {
         this.chopper = new RepsRosayChopper(sdg);
         nodesInChop = chopper.chop(violationSource, violationSink);
-        
         if (nodesInChop.isEmpty()) {
             return;
         }

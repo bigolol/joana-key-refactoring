@@ -68,7 +68,6 @@ public class ViolationsWrapper {
             line = buf.readLine();
         }
         buf.close();
-
         prepareNextSummaryEdges();
     }
 
@@ -110,7 +109,7 @@ public class ViolationsWrapper {
             created.append(", \"method_name\" : ")
                     .append("\"").append(entry.getValue().getId()).append("\"");
             created.append(", \"arg_string\" : ")
-                        .append("\"").append(entry.getValue().getParameterWithoutPackage())
+                    .append("\"").append(entry.getValue().getParameterWithoutPackage())
                     .append("\"");
             created.append("},").append(System.lineSeparator());
         }
@@ -239,7 +238,7 @@ public class ViolationsWrapper {
     }
 
     private Collection<IViolation<SecurityNode>> getNextViolationsToHandle() {
-        int amt_viols = 1;
+        int amt_viols = 10;
         List<IViolation<SecurityNode>> created = new ArrayList<>();
         int i = 0;
         for (IViolation<SecurityNode> v : uncheckedViolations) {
