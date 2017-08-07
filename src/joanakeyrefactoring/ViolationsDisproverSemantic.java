@@ -30,7 +30,7 @@ public class ViolationsDisproverSemantic {
     private ViolationsWrapper violationsWrapper;
     private JavaForKeyCreator javaForKeyCreator;
     private JCallGraph callGraph = new JCallGraph();
-
+    private String pathToJavaSource;
     public ViolationsDisproverSemantic(
             AutomationHelper automationHelper,
             JoanaAndKeyCheckData checkData) throws IOException {
@@ -39,6 +39,7 @@ public class ViolationsDisproverSemantic {
         this.stateSaver = checkData.getStateSaver();
         this.fullyAutomatic = checkData.isFullyAutomatic();
         this.pathToKeyJar = checkData.getPathKeY();
+        this.pathToJavaSource = checkData.getPathToJavaFile();
         javaForKeyCreator = new JavaForKeyCreator(
                 checkData.getPathToJavaFile(),
                 callGraph, checkData.getAnalysis().getProgram().getSDG(),
@@ -50,16 +51,17 @@ public class ViolationsDisproverSemantic {
     public void disproveViaKey(IFCAnalysis analysis, Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg) throws IOException {
         violationsWrapper = new ViolationsWrapper(
-                violations, sdg, automationHelper, pathToJar, analysis, callGraph);
+                violations, sdg, automationHelper, pathToJar, analysis, callGraph, stateSaver, pathToJavaSource);
 
-        while (!violationsWrapper.allCheckedOrDisproved()) {
-            SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
-            if (canDisproveSummaryEdge(nextSummaryEdge, sdg)) {
-                violationsWrapper.removeEdge(nextSummaryEdge);
-            } else {
-                violationsWrapper.checkedEdge(nextSummaryEdge);
-            }
-        }
+//        while (!violationsWrapper.allCheckedOrDisproved()) {
+//            SDGEdge nextSummaryEdge = violationsWrapper.nextSummaryEdge();
+//            if (canDisproveSummaryEdge(nextSummaryEdge, sdg)) {
+//                violationsWrapper.removeEdge(nextSummaryEdge);
+//            } else {
+//                violationsWrapper.checkedEdge(nextSummaryEdge);
+//            }
+//        }
+//        System.out.println("Successfully verified");
     }
 
     private boolean canDisproveSummaryEdge(SDGEdge se, SDG sdg) throws IOException {

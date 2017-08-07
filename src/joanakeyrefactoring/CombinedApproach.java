@@ -42,7 +42,7 @@ public class CombinedApproach {
 
     public static void main(String[] args) {
         try {
-            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("testdata/jzip.joak");
+            JoanaAndKeyCheckData parsedCheckData = CombinedApproach.parseInputFile("/home/mihai/workspace/JoanaKeYExamples/joak/plusminus.joak");
             CombinedApproach.runTestFromCheckData(parsedCheckData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -191,7 +191,7 @@ public class CombinedApproach {
         config.setPointsToPrecision(PointsToPrecision.INSTANCE_BASED);
         config.setExceptionAnalysis(ExceptionAnalysis.INTERPROC);
         config.setFieldPropagation(FieldPropagation.OBJ_GRAPH_NO_MERGE_AT_ALL);
-
+        
         // save intermediate results of SDG generation points to call graph
         config.setCGConsumer(stateSaver);
         // Schneidet beim SDG application edges raus, so besser sichtbar mit dem graphviewer

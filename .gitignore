@@ -6,3 +6,7 @@
 /test/multipleClassesFalsePos/MultipleClassesFalsePos/build/
 /test/multipleClassesFalsePos/MultipleClassesFalsePos/dist/
 /test/multipleClassesFalsePos/MultipleClassesFalsePos/nbproject/private/
+/bin/
+/build/
+/nbproject/private/
+.classpath

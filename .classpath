@@ -2,6 +2,23 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="dep/commons-io-2.5/commons-io-2.5-javadoc.jar"/>
+	<classpathentry kind="lib" path="dep/commons-io-2.5/commons-io-2.5.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.core.example.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.core.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.core.proof_references.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.core.symbolic_execution.example.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.core.symbolic_execution.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.core.testgen.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.removegenerics.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.ui.jar"/>
+	<classpathentry kind="lib" path="dep/components/key.util.jar"/>
+	<classpathentry kind="lib" path="dep/libs/antlr.jar"/>
+	<classpathentry kind="lib" path="dep/libs/recoderKey.jar"/>
+	<classpathentry kind="lib" path="dep/antlr-runtime-4.5.3.jar"/>
+	<classpathentry kind="lib" path="dep/javacg-0.1-SNAPSHOT-static.jar"/>
+	<classpathentry kind="lib" path="dep/joana.api.jar" sourcepath="/joana.ifc.sdg.util/src"/>
+	<classpathentry kind="lib" path="dep/KeY.jar"/>
+	<classpathentry kind="lib" path="json.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

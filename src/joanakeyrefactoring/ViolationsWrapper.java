@@ -6,7 +6,9 @@
 package joanakeyrefactoring;
 
 import edu.kit.joana.api.IFCAnalysis;
+import edu.kit.joana.api.sdg.SDGInstruction;
 import edu.kit.joana.api.sdg.SDGMethod;
+import edu.kit.joana.api.sdg.SDGProgram;
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.ClassifiedViolation;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
@@ -44,22 +46,47 @@ public class ViolationsWrapper {
     private List<SDGEdge> sortedEdgesToCheck = new ArrayList<>();
     private JCallGraph callGraph = new JCallGraph();
     private IFCAnalysis ana;
+    private StateSaver saver;
+    private String pathToJavaSource;
 
     public ViolationsWrapper(Collection<? extends IViolation<SecurityNode>> violations,
             SDG sdg, AutomationHelper automationHelper,
-            String pathToJar, IFCAnalysis ana, JCallGraph callGraph) throws IOException {
+            String pathToJar, IFCAnalysis ana, JCallGraph callGraph, StateSaver stateSaver, String pathToJavaSource) throws IOException {
         this.uncheckedViolations = violations;
         this.sdg = sdg;
         this.callGraph = callGraph;
         this.ana = ana;
-
+        this.saver  = stateSaver;
+        this.pathToJavaSource = pathToJavaSource;
         prepareNextSummaryEdges();
     }
 
     private void prepareNextSummaryEdges() {
         Collection<? extends IViolation<SecurityNode>> nextViolationsToHandle = getNextViolationsToHandle();
         nextViolationsToHandle.forEach((v) -> {
-            violationChops.add(createViolationChop(v, sdg));
+        	ViolationChop chop = createViolationChop(v, sdg, ana.getProgram());
+        	
+        	ViolationPath path = getViolationPath(v);
+        	
+        	
+        	
+//        	for(SDGMethod method : ana.getProgram().getAllMethods()){
+//        		
+//        		System.out.println("Method: \n"+method);
+//        		for(SDGInstruction instr :  method.getInstructions()){
+//        			System.out.println(instr);
+//        		}
+//        		
+//        		
+//        	}
+        	
+//       	System.out.println("Violation chop:" + v.getClass().getName());
+//        	System.out.println("Source: "+chop.getViolationSource() + "-> Sink: "+chop.getViolationSink());
+//        	
+//        	for(SDGNode node : chop.getViolationChop()){
+//        		System.out.println(node + " "+node.getBytecodeName()+" "+node.getBytecodeMethod());
+//        	}
+            violationChops.add(chop);
         });
         putEdgesAndChopsInMap();
         findCGMethodsForSummaryEdges(sdg, ana, callGraph);
@@ -132,12 +159,12 @@ public class ViolationsWrapper {
         });
     }
 
-    private ViolationChop createViolationChop(IViolation<SecurityNode> violationNode, SDG sdg) {
+    private ViolationChop createViolationChop(IViolation<SecurityNode> violationNode, SDG sdg, SDGProgram program) {
         ViolationPath violationPath = getViolationPath(violationNode);
         LinkedList<SecurityNode> violationPathList = violationPath.getPathList();
         SDGNode violationSource = violationPathList.get(0);
         SDGNode violationSink = violationPathList.get(1);
-        return new ViolationChop(violationSource, violationSink, sdg);
+        return new ViolationChop(violationSource, violationSink, sdg,program, saver, pathToJavaSource);
     }
 
     private ViolationPath getViolationPath(IViolation<SecurityNode> v) {
