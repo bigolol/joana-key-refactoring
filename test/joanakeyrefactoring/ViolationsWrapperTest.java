@@ -55,29 +55,24 @@ public class ViolationsWrapperTest {
     @Test
     public void testGenerateSaveString() throws IOException, ClassHierarchyException, GraphIntegrity.UnsoundGraphException, CancelException {
 //        DisprovingProject disprovingProject = new DisprovingProject(
-//                "data/jzip.pdg", "data/jzip_stateSaver.txt", "data/jzip_viols.txt", "JZipWithException", "JZipWithException.jar");
-//        ViolationsWrapper violWrapper = disprovingProject.generateViolWrapper();
-//        String saveStr = violWrapper.generateSaveString();
-//        PrintWriter printWriter = new PrintWriter("data/jzip_violWrapper.txt");
-//        printWriter.write(saveStr);
+//                "data/jzip.pdg", "data/jzip_stateSaver.txt",
+//                "data/jzip_viols.txt", "JZipWithException",
+//                "JZipWithException.jar", "data/jzip_violWrapper.txt");
+//        ViolationsWrapper generateNewViolWrapper = disprovingProject.generateNewViolWrapper();
+//        String saveString = generateNewViolWrapper.generateSaveString();
+//        PrintWriter printWriter = new PrintWriter("data/jzip_violWrapper_allchops.txt");
+//        printWriter.write(saveString);
 //        printWriter.close();
     }
 
     @Test
     public void testLoadFromSaveString() throws FileNotFoundException, IOException {
-        BufferedReader br = new BufferedReader(new FileReader("data/jzip_violWrapper.txt"));
-        StringBuilder completeString = new StringBuilder();
-        for (String line = br.readLine(); line != null; line = br.readLine()) {
-            if (line.trim().startsWith("//")) {
-                continue;
-            }
-            completeString.append(line + '\n');
-        }
         DisprovingProject disprovingProject = new DisprovingProject(
-                "data/jzip.pdg", "data/jzip_stateSaver.txt", "data/jzip_viols.txt", "JZipWithException", "JZipWithException.jar");
-
-        ViolationsWrapper.generateFromSaveString(completeString.toString(),
-                disprovingProject.getSdg(), disprovingProject.getCallGraph());
+                "data/jzip.pdg", "data/jzip_stateSaver.txt",
+                "data/jzip_viols.txt", "JZipWithException",
+                "JZipWithException.jar", "data/jzip_violWrapper.txt");
+        ViolationsWrapper violationsWrapper = disprovingProject.getViolationsWrapper();
+       
     }
 
 }

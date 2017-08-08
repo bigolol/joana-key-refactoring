@@ -67,6 +67,9 @@ public class DisprovingProject {
     public ViolationsWrapper getViolationsWrapper() {
         return violationsWrapper;
     }
+    public ViolationsWrapper generateNewViolWrapper() throws IOException {
+        return new ViolationsWrapper(classifiedViolations, sdg, ana, callGraph);
+    }
     
     
 

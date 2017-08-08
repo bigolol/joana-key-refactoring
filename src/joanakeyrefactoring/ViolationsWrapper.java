@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import joanakeyrefactoring.staticCG.JCallGraph;
 import joanakeyrefactoring.staticCG.javamodel.StaticCGJavaMethod;
@@ -89,8 +90,23 @@ public class ViolationsWrapper {
         created.append("\"summary_edges_sorted\" : [").append(System.lineSeparator());
         for (SDGEdge e : sortedEdgesToCheck) {
             created.append("{");
-            created.append("\"src\" : ").append(e.getSource().getId());
-            created.append(", \"sink\" : ").append(e.getTarget().getId());
+
+            int srcId = sdg.getEdgeSource(e).getId();
+            int sinkId = sdg.getEdgeTarget(e).getId();
+
+            if (srcId == 14724 && sinkId == 49581) {
+                SDGEdge foundEdge = sdg.getEdge(sdg.getNode(srcId), sdg.getNode(sinkId));
+                System.out.println("wuat");
+            }
+
+            SDGEdge foundEdge = sdg.getEdge(sdg.getNode(srcId), sdg.getNode(sinkId));
+
+            if (!e.equals(foundEdge)) {
+                System.out.println("edge doesnt equal found edge: " + e.toString());
+            }
+
+            created.append("\"src\" : ").append(srcId);
+            created.append(", \"sink\" : ").append(sinkId);
             created.append("},").append(System.lineSeparator());
         }
         if (created.lastIndexOf("[") != created.length() - 1) {
@@ -163,8 +179,18 @@ public class ViolationsWrapper {
         for (int i = 0; i < summaryEdgesSortedArr.length(); ++i) {
             int srcId = summaryEdgesSortedArr.getJSONObject(i).getInt("src");
             int sinkId = summaryEdgesSortedArr.getJSONObject(i).getInt("sink");
-            created.sortedEdgesToCheck.add(sdg.getEdge(
-                    sdg.getNode(srcId), sdg.getNode(sinkId)));
+
+            SDGEdge edge = sdg.getEdge(sdg.getNode(srcId), sdg.getNode(sinkId));
+            Set<SDGEdge> allEdges = sdg.getAllEdges(sdg.getNode(srcId), sdg.getNode(sinkId));
+            if (allEdges.size() == 0) {
+                System.out.println("missing sue : src " + srcId + " sink " + sinkId);
+            }
+            for (SDGEdge e : allEdges) {
+                if (e.getKind() == SDGEdge.Kind.SUMMARY) {
+                    created.sortedEdgesToCheck.add(e);
+                    break;
+                }
+            }
         }
 
         JSONArray edgesToMethodsArr = jSONObject.getJSONArray("summary_edges_methods");
@@ -205,6 +231,9 @@ public class ViolationsWrapper {
             created.summaryEdgesAndContainingChops.put(
                     created.sortedEdgesToCheck.get(posInSorted), chopList);
         }
+
+        created.sdg = sdg;
+        created.callGraph = callGraph;
         return created;
     }
 
@@ -238,7 +267,7 @@ public class ViolationsWrapper {
     }
 
     private Collection<IViolation<SecurityNode>> getNextViolationsToHandle() {
-        int amt_viols = 10;
+        int amt_viols = 1;
         List<IViolation<SecurityNode>> created = new ArrayList<>();
         int i = 0;
         for (IViolation<SecurityNode> v : uncheckedViolations) {
@@ -390,6 +419,37 @@ public class ViolationsWrapper {
         } catch (Exception e) {
             return false;
         }
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ViolationsWrapper other = (ViolationsWrapper) obj;
+        if (sortedEdgesToCheck.size() != other.sortedEdgesToCheck.size()) {
+            return false;
+        }
+        for (int i = 0; i < sortedEdgesToCheck.size(); ++i) {
+            if (!sortedEdgesToCheck.get(i).equals(other.sortedEdgesToCheck.get(i))) {
+                return false;
+            }
+        }
+        for (SDGEdge e : summaryEdgesAndCorresJavaMethods.keySet()) {
+            if (!summaryEdgesAndCorresJavaMethods.get(e).equals(
+                    other.summaryEdgesAndCorresJavaMethods.get(e))) {
+                return false;    
+            }
+
+        }
+
         return true;
     }
 
